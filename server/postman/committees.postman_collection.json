@@ -1,0 +1,187 @@
+{
+    "info": {
+        "name": "SAMS Committees + Auth",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [{
+            "name": "Auth - Login (Executive)",
+            "request": {
+                "method": "POST",
+                "header": [{
+                    "key": "Content-Type",
+                    "value": "application/json"
+                }],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"email\": \"executive@example.com\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": "{{baseUrl}}/auth/login"
+            },
+            "event": [{
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "const json = pm.response.json();",
+                        "if (json.accessToken) {",
+                        "  pm.environment.set('execToken', json.accessToken);",
+                        "}"
+                    ],
+                    "type": "text/javascript"
+                }
+            }]
+        },
+        {
+            "name": "Auth - Login (Director)",
+            "request": {
+                "method": "POST",
+                "header": [{
+                    "key": "Content-Type",
+                    "value": "application/json"
+                }],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"email\": \"director@example.com\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": "{{baseUrl}}/auth/login"
+            },
+            "event": [{
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "const json = pm.response.json();",
+                        "if (json.accessToken) {",
+                        "  pm.environment.set('directorToken', json.accessToken);",
+                        "}"
+                    ],
+                    "type": "text/javascript"
+                }
+            }]
+        },
+        {
+            "name": "Committees - Create (Executive)",
+            "request": {
+                "method": "POST",
+                "header": [{
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{execToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"Recruiting 2026\",\n  \"description\": \"Spring intake\",\n  \"isOpen\": true\n}"
+                },
+                "url": "{{baseUrl}}/executive/committees"
+            },
+            "event": [{
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "const json = pm.response.json();",
+                        "if (json.id) {",
+                        "  pm.environment.set('committeeId', json.id);",
+                        "}"
+                    ],
+                    "type": "text/javascript"
+                }
+            }]
+        },
+        {
+            "name": "Committees - List (Any Role)",
+            "request": {
+                "method": "GET",
+                "header": [{
+                    "key": "Authorization",
+                    "value": "Bearer {{execToken}}"
+                }],
+                "url": "{{baseUrl}}/committees"
+            }
+        },
+        {
+            "name": "Committees - Get By Id (Any Role)",
+            "request": {
+                "method": "GET",
+                "header": [{
+                    "key": "Authorization",
+                    "value": "Bearer {{execToken}}"
+                }],
+                "url": "{{baseUrl}}/committees/{{committeeId}}"
+            }
+        },
+        {
+            "name": "Committees - Update (Executive)",
+            "request": {
+                "method": "PATCH",
+                "header": [{
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{execToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"Recruiting 2026 Updated\",\n  \"isOpen\": false\n}"
+                },
+                "url": "{{baseUrl}}/executive/committees/{{committeeId}}"
+            }
+        },
+        {
+            "name": "Committees - Create For Director (Executive)",
+            "request": {
+                "method": "POST",
+                "header": [{
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{execToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"AI Committee\",\n  \"directorId\": \"22222222-2222-4222-8222-222222222222\"\n}"
+                },
+                "url": "{{baseUrl}}/executive/committees"
+            },
+            "event": [{
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "const json = pm.response.json();",
+                        "if (json.id) {",
+                        "  pm.environment.set('directorCommitteeId', json.id);",
+                        "}"
+                    ],
+                    "type": "text/javascript"
+                }
+            }]
+        },
+        {
+            "name": "Committees - Update Description (Director)",
+            "request": {
+                "method": "PATCH",
+                "header": [{
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{directorToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"description\": \"Updated by director\"\n}"
+                },
+                "url": "{{baseUrl}}/director/committees/{{directorCommitteeId}}/description"
+            }
+        }
+    ]
+}
