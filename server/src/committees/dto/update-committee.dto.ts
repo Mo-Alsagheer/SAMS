@@ -1,11 +1,14 @@
-import { Transform } from 'class-transformer';
 import {
-  IsBoolean,
+  IsArray,
+  IsEnum,
+  IsInt,
   IsOptional,
   IsString,
-  IsUUID,
+  IsUrl,
   MaxLength,
+  Min,
 } from 'class-validator';
+import { CommitteeType } from '../enums/committee-type.enum';
 
 export class UpdateCommitteeDto {
   @IsString()
@@ -18,12 +21,25 @@ export class UpdateCommitteeDto {
   @MaxLength(2000)
   description?: string;
 
-  @Transform(({ value }) => (value === '' ? undefined : value))
-  @IsUUID()
+  @IsEnum(CommitteeType)
   @IsOptional()
-  directorId?: string;
+  type?: CommitteeType;
 
-  @IsBoolean()
+  @IsString()
   @IsOptional()
-  isOpen?: boolean;
+  planID?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  directorIDs?: string[];
+
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  membersCount?: number;
+
+  @IsUrl()
+  @IsOptional()
+  whatsappGroupLink?: string;
 }

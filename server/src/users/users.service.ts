@@ -4,21 +4,21 @@ import { UserRecord } from './users.types';
 
 const USERS: UserRecord[] = [
   {
-    id: '11111111-1111-4111-8111-111111111111',
+    id: '01JMZP1USER000000000000001',
     name: 'Uma Applicant',
     email: 'user@example.com',
     password: 'password123',
     role: Role.USER,
   },
   {
-    id: '22222222-2222-4222-8222-222222222222',
+    id: '01JMZP1DIRE000000000000002',
     name: 'Derek Director',
     email: 'director@example.com',
     password: 'password123',
     role: Role.DIRECTOR,
   },
   {
-    id: '33333333-3333-4333-8333-333333333333',
+    id: '01JMZP1EXEC000000000000003',
     name: 'Erin Executive',
     email: 'executive@example.com',
     password: 'password123',
