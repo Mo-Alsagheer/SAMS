@@ -1,0 +1,6 @@
+export enum CommitteeType {
+  TECHNICAL = 'TECHNICAL',
+  NONTECHNICAL = 'NON-TECHNICAL',
+  ADMINSTRATIVE = 'EX-COMM',
+  MEDIA = 'MEDIA',
+}
