@@ -6,6 +6,8 @@ import { CommitteesModule } from './committees/committees.module';
 import { UsersModule } from './users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { RecruitmentModule } from './recruitment/recruitment.module';
+import { ApplicationsModule } from './applications/applications.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { AppService } from './app.service';
     AuthModule,
     UsersModule,
     CommitteesModule,
+    RecruitmentModule,
+    ApplicationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
