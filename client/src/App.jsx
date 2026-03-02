@@ -1,9 +1,14 @@
-import React from 'react'
-
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import Quiz from "./pages/public/Quiz";
+import QuizResult from "./pages/public/QuizResult";
 function App() {
   return (
-    <div className='bg-amber-500'>Hello</div>
-  )
+    <Routes>
+      <Route path="/quiz" element={<Quiz />} />
+      <Route path="/result" element={<QuizResult />} />
+    </Routes>
+  );
 }
 
-export default App
+export default App;
