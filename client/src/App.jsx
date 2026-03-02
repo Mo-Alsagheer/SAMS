@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import Quiz from "./public/quiz/pages/Quiz"
-import QuizResult from "./public/quiz/pages/QuizResult";
+import Quiz from "./user/quiz/pages/Quiz"
+import QuizResult from "./user/quiz/pages/QuizResult";
 function App() {
   return (
     <Routes>
