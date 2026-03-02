@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import QuizCard from "../../components/QuizCard";
+import QuizCard from "../components/QuizCard";
 import { useNavigate } from "react-router-dom";
-import { questions } from "../../data/questions";
-import { useQuiz } from "../../hooks/useQuiz";
+import { useQuiz } from "../../../hooks/useQuiz";
+import { questions } from "../../../data/questions";
 function Quiz() {
   const navigate = useNavigate();
   const {
