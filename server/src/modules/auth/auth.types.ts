@@ -1,4 +1,4 @@
-import { Role } from './role.enum';
+import { Role } from '../../common/constants/role.enum';
 
 export interface AuthUser {
   id: string;

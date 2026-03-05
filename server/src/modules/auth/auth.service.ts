@@ -14,7 +14,7 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<AuthUser | null> {
-    const user = this.usersService.findByEmail(email);
+    const user = await this.usersService.findByEmail(email);
     if (!user || user.password !== password) {
       return null;
     }
