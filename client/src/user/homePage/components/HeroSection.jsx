@@ -1,4 +1,4 @@
-import Button from "../../../components/layout/Button";
+import Button from "../../../components/shared/Button";
 import heroImage from "../../../assets/heroImage.jpg";
 const HeroSection = () => {
   return (
@@ -12,7 +12,7 @@ const HeroSection = () => {
               </div>
               <h1 className="text-4xl lg:text-6xl font-black text-white leading-tight">
                 Get Your Future <br />
-                <span className="text-cyan-300">This SAMS Solution</span>
+                <span className="text-cyan-300">This IEEE Solution</span>
               </h1>
               <p className="text-blue-100 text-lg max-w-xl opacity-90 leading-relaxed">
                 Unlock your leadership potential with our comprehensive

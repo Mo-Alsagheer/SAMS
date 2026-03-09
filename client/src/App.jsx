@@ -9,6 +9,7 @@ function App() {
       <Route path="/quiz" element={<Quiz />} />
       <Route path="/result" element={<QuizResult />} />
        <Route path="/" element={<HomePage />} />
+        <Route path="/home" element={<HomePage />} />
     </Routes>
   );
 }

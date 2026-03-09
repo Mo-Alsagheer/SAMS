@@ -11,10 +11,10 @@ const Footer = () => {
           <div className="flex items-center gap-3">
             <img
               src={logo}
-              alt="SAMS"
+              alt="IEEE"
               className="h-12 w-auto brightness-0 invert"
             />
-            <span className="text-3xl font-black tracking-tighter">SAMS</span>
+            <span className="text-3xl font-black tracking-tighter">IEEE</span>
           </div>
           <p className="text-blue-100/70 leading-relaxed text-sm">
             Leading the student activity in our university since 1992. Building
@@ -43,7 +43,7 @@ const Footer = () => {
             Community
           </h6>
           <a className="text-blue-100/70 hover:text-cyan-400 transition-colors cursor-pointer">
-            About SAMS
+            About IEEE
           </a>
           <a className="text-blue-100/70 hover:text-cyan-400 transition-colors cursor-pointer">
             Committees
@@ -76,7 +76,7 @@ const Footer = () => {
 
       <div className="bg-black/20 text-blue-100/50 text-xs md:text-sm">
         <div className="container mx-auto px-10 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p>© 2026 SAMS Student Activity. All rights reserved.</p>
+          <p>© 2026 IEEE Student Activity. All rights reserved.</p>
 
           <div className="flex flex-wrap justify-center gap-6">
             <a className="hover:text-white transition-colors cursor-pointer">
