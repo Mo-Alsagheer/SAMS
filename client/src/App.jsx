@@ -4,16 +4,16 @@ import Quiz from "./user/quiz/pages/Quiz";
 import QuizResult from "./user/quiz/pages/QuizResult";
 import DirectorLayout from "./director/layout/DirectorLayout";
 import DashBoard from "./director/pages/DashBoard";
+import Applications from "./director/pages/Applications";
 function App() {
   return (
     <Routes>
       <Route path="/quiz" element={<Quiz />} />
       <Route path="/result" element={<QuizResult />} />
+      {/* Director Routes */}
       <Route path="/director" element={<DirectorLayout />}>
         <Route index element={<DashBoard />} />
-        {/* <Route path="committee" element={<MyCommittee />} />
-        <Route path="tasks" element={<Quiz />} />
-        <Route path="blog" element={<Quiz />} /> */}
+        <Route path="applications" element={<Applications />} />
       </Route>
     </Routes>
   );
