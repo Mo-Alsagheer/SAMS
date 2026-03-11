@@ -73,9 +73,7 @@ function Cards() {
               <CardTitle className="line-clamp-1 text-xl font-bold">
                 {item.name || item.title}
               </CardTitle>
-              <CardDescription className="line-clamp-2 text-base text-gray-500">
-                {item.description || "A practical talk on component APIs, accessibility, and shipping faster."}
-              </CardDescription>
+             
             </CardHeader>
 
             <CardFooter >

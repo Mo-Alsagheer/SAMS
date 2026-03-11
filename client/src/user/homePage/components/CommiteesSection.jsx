@@ -1,12 +1,11 @@
 import React from "react";
-import Cards from "../../../components/shared/Cards";
+import Cards from "./Cards";
 import { Button } from "@/components/ui/Button";
 
 function CommitteesSection() {
   return (
     <section className="py-20 bg-slate-50/50">
       <div className="max-w-[1200px] mx-auto px-6">
-
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div className="text-left">
             <h2 className="text-4xl font-black text-slate-900 tracking-tight">
@@ -22,7 +21,6 @@ function CommitteesSection() {
           </Button>
         </div>
 
-  
         <Cards />
       </div>
     </section>

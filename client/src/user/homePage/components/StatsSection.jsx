@@ -20,7 +20,7 @@ function StatsSection() {
 
       <div className="relative z-10 container mx-auto px-6">
         <div className="text-center mb-16">
-          <span className="inline-block px-4 py-1 mb-4 text-sm font-bold tracking-widest text-blue-400 uppercase bg-blue-900/40 backdrop-blur-sm rounded-full border border-blue-400/30">
+          <span className="inline-block px-4 py-1 mb-4 text-base font-bold tracking-widest text-blue-400 uppercase bg-blue-900/40 backdrop-blur-sm rounded-full border border-blue-400/30">
             Our Impact
           </span>
           <h2 className="text-4xl md:text-5xl font-black text-white uppercase italic">
