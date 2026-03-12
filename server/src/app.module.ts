@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
-import { CommitteesModule } from './committees/committees.module';
-import { UsersModule } from './users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { CommitteesModule } from './modules/committees/committees.module';
+import { UsersModule } from './modules/users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { RecruitmentModule } from './recruitment/recruitment.module';
-import { ApplicationsModule } from './applications/applications.module';
+import { RecruitmentModule } from './modules/recruitment/recruitment.module';
+import { ApplicationsModule } from './modules/applications/applications.module';
+import { AiModule } from './modules/ai/ai.module';
+import { QuizModule } from './modules/quiz/quiz.module';
+import { DirectorModule } from './modules/director/director.module';
 
 @Module({
   imports: [
@@ -27,6 +30,9 @@ import { ApplicationsModule } from './applications/applications.module';
     CommitteesModule,
     RecruitmentModule,
     ApplicationsModule,
+    AiModule,
+    QuizModule,
+    DirectorModule,
   ],
   controllers: [AppController],
   providers: [AppService],
