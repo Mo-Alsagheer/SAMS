@@ -7,6 +7,7 @@ import DashBoard from "./director/pages/DashBoard";
 import Applications from "./director/pages/Applications";
 import Page from "./director/pages/Page";
 import WorkSpace from "./director/pages/WorkSpace";
+import HomePage from "./user/homePage/pages/HomePage";
 function App() {
   return (
     <Routes>
@@ -19,6 +20,8 @@ function App() {
         <Route path="applications" element={<Applications />} />
         <Route path="workspace" element={<WorkSpace />} />
       </Route>
+       
+        <Route path="/home" element={<HomePage />} />
     </Routes>
   );
 }

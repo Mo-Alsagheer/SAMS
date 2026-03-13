@@ -10,7 +10,7 @@ import { Application, ApplicationStatus } from './entities/application.entity';
 import {
   RecruitmentProcess,
   RecruitmentStatus,
-} from '../recruitment/entities/recruitment.entity';
+} from '../recruitment/entities/recruitment.entity';import { CreateApplicationDto } from './dto/create-application.dto';
 
 @Injectable()
 export class ApplicationsService {
@@ -21,10 +21,10 @@ export class ApplicationsService {
     private recruitmentProcessRepository: Repository<RecruitmentProcess>,
   ) {}
 
-  async createDraft(userId: string, committeeId: string) {
+  async createApplication(dto: CreateApplicationDto) {
     // Verify committee recruitment is OPEN
     const process = await this.recruitmentProcessRepository.findOne({
-      where: { committeeId },
+      where: { committeeId: dto.committeeId },
     });
     if (!process || process.status !== RecruitmentStatus.OPEN) {
       throw new BadRequestException(
@@ -32,49 +32,25 @@ export class ApplicationsService {
       );
     }
 
-    // Check if user already applied
+    // Check if user already applied by email
     const existing = await this.applicationRepository.findOne({
-      where: { userId, committeeId },
+      where: { email: dto.email, committeeId: dto.committeeId },
     });
     if (existing) {
-      throw new ConflictException('You have already applied to this committee');
+      throw new ConflictException('An application with this email has already been submitted to this committee');
     }
 
     const application = this.applicationRepository.create({
-      userId,
-      committeeId,
-      status: ApplicationStatus.DRAFT,
-      name: '', // Mock or extract from user profile later
-      email: '',
-      phone: '',
+      committeeId: dto.committeeId,
+      name: dto.name,
+      email: dto.email,
+      phone: dto.phone,
+      linkedinLink: dto.linkedinLink,
+      cvLink: dto.cvLink,
+      status: ApplicationStatus.SUBMITTED,
     });
 
     return this.applicationRepository.save(application);
-  }
-
-  async updateDraft(id: string, updateData: any) {
-    const application = await this.findOne(id);
-    if (application.status !== ApplicationStatus.DRAFT) {
-      throw new BadRequestException('Can only update DRAFT applications');
-    }
-
-    Object.assign(application, updateData);
-    return this.applicationRepository.save(application);
-  }
-
-  async submit(id: string) {
-    const application = await this.findOne(id);
-    if (application.status !== ApplicationStatus.DRAFT) {
-      throw new BadRequestException('Application is not in DRAFT status');
-    }
-
-    application.status = ApplicationStatus.SUBMITTED;
-    application.submittedAt = new Date();
-    return this.applicationRepository.save(application);
-  }
-
-  async findByUserId(userId: string) {
-    return this.applicationRepository.find({ where: { userId } });
   }
 
   async findOne(id: string) {

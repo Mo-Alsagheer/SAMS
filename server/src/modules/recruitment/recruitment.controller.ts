@@ -1,5 +1,5 @@
 import { Controller, Post, Param, UseGuards, Get } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RecruitmentService } from './recruitment.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -18,6 +18,10 @@ export class RecruitmentController {
   @Post(':committeeId/open')
   @Roles(Role.EXECUTIVE)
   @ApiOperation({ summary: 'Open recruitment process for a committee' })
+  @ApiParam({ name: 'committeeId', description: 'ULID of the committee', example: '01HRGZ...' })
+  @ApiResponse({ status: 201, description: 'Recruitment process successfully opened.' })
+  @ApiResponse({ status: 403, description: 'Forbidden. Requires Executive role.' })
+  @ApiResponse({ status: 404, description: 'Committee not found.' })
   openRecruitment(
     @Param('committeeId') committeeId: string,
     @Req() req: Request,
@@ -29,6 +33,9 @@ export class RecruitmentController {
   @Post(':committeeId/close')
   @Roles(Role.EXECUTIVE)
   @ApiOperation({ summary: 'Close recruitment process for a committee' })
+  @ApiParam({ name: 'committeeId', description: 'ULID of the committee', example: '01HRGZ...' })
+  @ApiResponse({ status: 201, description: 'Recruitment process successfully closed.' })
+  @ApiResponse({ status: 404, description: 'Committee or active recruitment process not found.' })
   closeRecruitment(@Param('committeeId') committeeId: string) {
     return this.recruitmentService.closeProcess(committeeId);
   }
@@ -36,6 +43,7 @@ export class RecruitmentController {
   @Get()
   @Roles(Role.EXECUTIVE)
   @ApiOperation({ summary: 'List all recruitment processes' })
+  @ApiResponse({ status: 200, description: 'List of all recruitment processes across committees.' })
   findAll() {
     return this.recruitmentService.findAll();
   }
