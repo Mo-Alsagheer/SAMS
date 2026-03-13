@@ -9,7 +9,6 @@ import {
 import { ulid } from 'ulid';
 
 export enum ApplicationStatus {
-  DRAFT = 'DRAFT',
   SUBMITTED = 'SUBMITTED',
   AI_REVIEWED = 'AI_REVIEWED',
   PHASE1_ACCEPTED = 'PHASE1_ACCEPTED',
@@ -32,9 +31,6 @@ export class Application {
   }
 
   @Column({ type: 'text' })
-  userId: string;
-
-  @Column({ type: 'text' })
   committeeId: string;
 
   @Column({ type: 'text' })
@@ -55,12 +51,9 @@ export class Application {
   @Column({
     type: 'enum',
     enum: ApplicationStatus,
-    default: ApplicationStatus.DRAFT,
+    default: ApplicationStatus.SUBMITTED,
   })
   status: ApplicationStatus;
-
-  @Column({ type: 'timestamp', nullable: true })
-  submittedAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;

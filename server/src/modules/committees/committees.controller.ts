@@ -13,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthUser } from '../auth/auth.types';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Role } from '../../common/constants/role.enum';
@@ -37,13 +37,17 @@ export class CommitteesController {
   @Get()
   @Roles(Role.USER, Role.DIRECTOR, Role.EXECUTIVE)
   @ApiOperation({ summary: 'List all committees' })
+  @ApiResponse({ status: 200, description: 'List of all available committees.' })
   listAll() {
     return this.committeesService.listAll();
   }
 
   @Get(':id')
   @Roles(Role.USER, Role.DIRECTOR, Role.EXECUTIVE)
-  @ApiOperation({ summary: 'Get committee by ID' })
+  @ApiOperation({ summary: 'Get a specific committee by ID' })
+  @ApiParam({ name: 'id', description: 'ULID of the committee', example: '01HRGZ...' })
+  @ApiResponse({ status: 200, description: 'The committee details.' })
+  @ApiResponse({ status: 404, description: 'Committee not found.' })
   getById(@Param('id', new ParseUlidPipe()) id: string) {
     return this.committeesService.getById(id);
   }
@@ -53,6 +57,8 @@ export class CommitteesController {
   @Post()
   @Roles(Role.EXECUTIVE)
   @ApiOperation({ summary: 'Create a new committee (Executive)' })
+  @ApiResponse({ status: 201, description: 'The committee has been successfully created.' })
+  @ApiResponse({ status: 403, description: 'Forbidden. Requires Executive role.' })
   create(@Body() dto: CreateCommitteeDto, @Req() req: Request) {
     const user = req.user as AuthUser;
     return this.committeesService.create(dto, user.id);
@@ -61,6 +67,9 @@ export class CommitteesController {
   @Patch(':id')
   @Roles(Role.EXECUTIVE)
   @ApiOperation({ summary: 'Update a committee (Executive)' })
+  @ApiParam({ name: 'id', description: 'ULID of the committee', example: '01HRGZ...' })
+  @ApiResponse({ status: 200, description: 'The committee has been successfully updated.' })
+  @ApiResponse({ status: 404, description: 'Committee not found.' })
   update(
     @Param('id', new ParseUlidPipe()) id: string,
     @Body() dto: UpdateCommitteeDto,
@@ -72,6 +81,9 @@ export class CommitteesController {
   @Roles(Role.EXECUTIVE)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a committee (Executive)' })
+  @ApiParam({ name: 'id', description: 'ULID of the committee to delete', example: '01HRGZ...' })
+  @ApiResponse({ status: 204, description: 'The committee has been successfully deleted.' })
+  @ApiResponse({ status: 404, description: 'Committee not found.' })
   delete(@Param('id', new ParseUlidPipe()) id: string) {
     return this.committeesService.delete(id);
   }
@@ -81,6 +93,10 @@ export class CommitteesController {
   @Patch(':id/description')
   @Roles(Role.DIRECTOR)
   @ApiOperation({ summary: 'Update committee description (Director)' })
+  @ApiParam({ name: 'id', description: 'ULID of the committee', example: '01HRGZ...' })
+  @ApiResponse({ status: 200, description: 'The description was updated.' })
+  @ApiResponse({ status: 403, description: 'Forbidden. Director not assigned to committee.' })
+  @ApiResponse({ status: 404, description: 'Committee not found.' })
   async updateDescription(
     @Param('id', new ParseUlidPipe()) id: string,
     @Body() dto: UpdateCommitteeDescriptionDto,
