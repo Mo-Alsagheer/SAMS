@@ -1,9 +1,18 @@
 import EditableTextArea from "@/components/shared/EditableTextArea";
+import { updateCommitteeDescription } from "../../features/committee";
 
 function CommitteeInfo({ committee }) {
+  const token =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUtKWkRYR0o1RjdBMzMyWFdDOEEzVFJZVCIsImVtYWlsIjoiZGlyZWN0b3JAZXhhbXBsZS5jb20iLCJyb2xlIjoiRElSRUNUT1IiLCJuYW1lIjoiRGVyZWsgRGlyZWN0b3IiLCJpYXQiOjE3NzM0MTM4MjMsImV4cCI6MTc3MzQxNzQyM30.ZAoyohz-6uccI5jQwOEZDoTBo8oDCOXkBBNPE-GLluc";
 
-  const handleSaveDescription = (newText) => {
-    console.log("save to api", newText);
+  const handleSaveDescription = async (newText) => {
+    try {
+      await updateCommitteeDescription(committee.id, newText, token);
+
+      alert("Description updated");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (

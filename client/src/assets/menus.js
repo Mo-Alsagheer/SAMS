@@ -21,9 +21,5 @@ export const directormenu = [
     path: "tasks",
     name: "Tasks",
   },
-  {
-    icon: ListTodo,
-    path: "tasks",
-    name: "Tasks",
-  },
+
 ];
