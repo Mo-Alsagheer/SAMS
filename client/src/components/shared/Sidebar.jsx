@@ -15,17 +15,19 @@ function Sidebar({ title, menuitems, open, setOpen }) {
     <>
       {/* Mobile Menu Button */}
       <div className="md:hidden fixed top-4 left-4 z-50">
-        <FiMenu
-          className="text-sidebar text-3xl cursor-pointer"
-          onClick={() => setMobileOpen(true)}
-        />
+        <button>
+          <FiMenu
+            className="text-sidebar text-3xl cursor-pointer"
+            onClick={() => setMobileOpen(true)}
+          />
+        </button>
       </div>
 
       {/* Mobile overlay */}
       <div
         className={`fixed inset-0 bg-opacity-100 z-40 md:hidden transition-opacity duration-300 ${
           mobileOpen
-            ? "opacity-100 pointer-events-auto"
+            ? "bg-black/40 pointer-events-auto"
             : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setMobileOpen(false)}
@@ -63,7 +65,7 @@ function Sidebar({ title, menuitems, open, setOpen }) {
 
           return (
             <Link
-              key={index}
+              key={item.path}
               to={item.path}
               className={`
                 flex items-center gap-3 text-lg font-light mb-6 px-2 py-2 rounded-lg transition-all duration-200

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import { LayoutDashboardIcon } from "lucide-react";
-import { VscRequestChanges } from "react-icons/vsc";
 import Sidebar from "../../components/shared/Sidebar";
+import { directormenu } from "../../assets/menus";
 
 function DirectorLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(() => {
@@ -10,25 +9,13 @@ function DirectorLayout() {
     return saved === null ? true : JSON.parse(saved);
   });
 
-  const directormenu = [
-    {
-      icon: LayoutDashboardIcon,
-      path: "",
-      name: "Dashboard",
-    },
-    {
-      icon: VscRequestChanges,
-      path: "applications",
-      name: "Applications",
-    },
-  ];
 
   useEffect(() => {
     localStorage.setItem("directorSidebarOpen", JSON.stringify(sidebarOpen));
   }, [sidebarOpen]);
 
   return (
-    <div className="flex bg-gray-50">
+    <div className="flex bg-gray-50 min-h-screen">
       {/* Sidebar */}
       <Sidebar
         title="Director"
@@ -40,7 +27,7 @@ function DirectorLayout() {
       {/* Main Content */}
       <main
         className={`
-          flex-1 p-5 pt-8 transition-all duration-300
+          flex-1 p-5 pt-8 transition-all duration-300 
           ${sidebarOpen ? "md:ml-72" : "md:ml-20"}
           ml-0
         `}
