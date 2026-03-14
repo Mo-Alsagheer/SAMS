@@ -8,21 +8,28 @@ import Applications from "./director/pages/Applications";
 import Page from "./director/pages/Page";
 import WorkSpace from "./director/pages/WorkSpace";
 import HomePage from "./user/homePage/pages/HomePage";
+import Login from "./auth/Login";
+import { Toaster } from "sonner";
+
 function App() {
   return (
-    <Routes>
-      <Route path="/test" element={<Page />} />
-      <Route path="/quiz" element={<Quiz />} />
-      <Route path="/result" element={<QuizResult />} />
-      {/* Director Routes */}
-      <Route path="/director" element={<DirectorLayout />}>
-        <Route index element={<DashBoard />} />
-        <Route path="applications" element={<Applications />} />
-        <Route path="workspace" element={<WorkSpace />} />
-      </Route>
-       
+    <>
+      <Toaster />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/test" element={<Page />} />
+        <Route path="/quiz" element={<Quiz />} />
+        <Route path="/result" element={<QuizResult />} />
+        {/* Director Routes */}
+        <Route path="/director" element={<DirectorLayout />}>
+          <Route index element={<DashBoard />} />
+          <Route path="applications" element={<Applications />} />
+          <Route path="workspace" element={<WorkSpace />} />
+        </Route>
+
         <Route path="/home" element={<HomePage />} />
-    </Routes>
+      </Routes>
+    </>
   );
 }
 
