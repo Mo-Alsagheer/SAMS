@@ -4,10 +4,10 @@ import { dashboardStats } from "../../data/committeeData";
 import CommitteeInfo from "../components/CommitteeInfo";
 import StatsSection from "../components/StatsSection";
 import { useEffect, useState } from "react";
-import { getCommittee } from "../../features/committee";
+import { getCommittee, updateCommitteeDescription } from "../../features/committee";
+import { toast } from "sonner";
 function DashBoard() {
   const [committee, setCommittee] = useState(null);
-
 
   const committeeId = "01KJZDXEV4YDQJ0JQP11GDRHW2";
 
@@ -20,12 +20,29 @@ function DashBoard() {
     fetchCommittee();
   }, []);
 
+  const handleUpdateDescription = async (newText) => {
+    try {
+      const updated = await updateCommitteeDescription(committee.id, newText);
+
+      setCommittee((prev) => ({
+        ...prev,
+        description: updated.description,
+      }));
+
+      toast("Description updated", { position: "top-center" });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   if (!committee) return <p>Loading...</p>;
 
   return (
-    <div className="space-y-6 ">
-      <CommitteeInfo committee={committee} />
-      {/* Stats Section */}
+    <div className="space-y-6">
+      <CommitteeInfo
+        committee={committee}
+        onSaveDescription={handleUpdateDescription}
+      />
 
       <StatsSection stats={dashboardStats} />
     </div>
