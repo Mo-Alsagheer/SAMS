@@ -7,6 +7,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/role.enum';
 import { Request } from 'express';
 import { Req } from '@nestjs/common';
+import { AuthUser } from '../auth/auth.types';
 
 @ApiTags('recruitment')
 @ApiBearerAuth()
@@ -26,8 +27,8 @@ export class RecruitmentController {
     @Param('committeeId') committeeId: string,
     @Req() req: Request,
   ) {
-    const userId = req.user['sub'];
-    return this.recruitmentService.openProcess(userId, committeeId);
+    const user = req.user as AuthUser;
+    return this.recruitmentService.openProcess(user.id, committeeId);
   }
 
   @Post(':committeeId/close')
