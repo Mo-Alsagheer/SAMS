@@ -4,7 +4,7 @@ import { dashboardStats } from "../../data/committeeData";
 import CommitteeInfo from "../components/CommitteeInfo";
 import StatsSection from "../components/StatsSection";
 import { useEffect, useState } from "react";
-import { getCommittee, updateCommitteeDescription } from "../../features/committee";
+import { getCommittee, updateCommitteeDescription } from "../../features/committee/committee";
 import { toast } from "sonner";
 function DashBoard() {
   const [committee, setCommittee] = useState(null);

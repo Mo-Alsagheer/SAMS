@@ -22,7 +22,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { login } from "@/features/auth";
+import { login } from "@/features/auth/auth";
 import { useNavigate } from "react-router-dom";
 
 const formSchema = z.object({

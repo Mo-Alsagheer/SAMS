@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "../api";
 
 export async function getCommittee(id) {
   const res = await api.get(`/committees/${id}`);
