@@ -10,6 +10,9 @@ import WorkSpace from "./director/pages/WorkSpace";
 import HomePage from "./user/homePage/pages/HomePage";
 import Login from "./auth/Login";
 import { Toaster } from "sonner";
+import ExecutiveLayout from "./executive/pages/ExecutiveLayout";
+import Dashboard from "./executive/pages/DashBoard";
+import Committees from "./executive/pages/Committees";
 
 function App() {
   return (
@@ -26,7 +29,10 @@ function App() {
           <Route path="applications" element={<Applications />} />
           <Route path="workspace" element={<WorkSpace />} />
         </Route>
-
+        <Route path="/executive" element={<ExecutiveLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="committees" element={<Committees />} />
+        </Route>
         <Route path="/home" element={<HomePage />} />
       </Routes>
     </>
