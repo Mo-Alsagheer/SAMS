@@ -12,7 +12,7 @@ import Login from "./auth/Login";
 import { Toaster } from "sonner";
 import ExecutiveLayout from "./executive/pages/ExecutiveLayout";
 import Dashboard from "./executive/pages/DashBoard";
-import Committees from "./executive/pages/Committees";
+import Recruitment from "./executive/pages/Recruitment";
 
 function App() {
   return (
@@ -31,7 +31,7 @@ function App() {
         </Route>
         <Route path="/executive" element={<ExecutiveLayout />}>
           <Route index element={<Dashboard />} />
-          <Route path="committees" element={<Committees />} />
+          <Route path="recruitment" element={<Recruitment />} />
         </Route>
         <Route path="/home" element={<HomePage />} />
       </Routes>

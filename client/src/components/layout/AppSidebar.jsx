@@ -22,9 +22,10 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   useSidebar,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 
-export default function AppSidebar({ role, navItems }) {
+export default function AppSidebar({ role, navItems, name }) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
@@ -80,6 +81,17 @@ export default function AppSidebar({ role, navItems }) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="p-3 border-t">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center text-xs">
+            {name
+              ?.split(" ")
+              .map((n) => n[0])
+              .join("")}
+          </div>
+          {!collapsed && <p className="text-sm font-medium">{name}</p>}
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }

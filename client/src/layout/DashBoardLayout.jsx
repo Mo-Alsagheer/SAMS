@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { directormenu, executive } from "@/assets/menus";
 import AppSidebar from "@/components/layout/AppSidebar";
+import ThemeToggle from "@/components/shared/theme-toggle";
 
-const DashboardLayout = ({ children, title, subtitle, userInitials, role }) => {
+const DashboardLayout = ({ children, title, subtitle, userInitials, role,name }) => {
     const roleNavs = {
         executive: executive,
         director: directormenu
@@ -15,20 +16,21 @@ const DashboardLayout = ({ children, title, subtitle, userInitials, role }) => {
     const navItems = roleNavs[role] || [];
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar role={role} navItems={navItems} />
+      <div className="min-h-screen flex bg-accent w-full">
+        <AppSidebar role={role} navItems={navItems} name={name}  />
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-16 flex items-center justify-between border-b bg-card px-4 lg:px-6">
             <div className="flex items-center gap-3">
               <SidebarTrigger />
               <div>
-                <h1 className="text-lg font-semibold font-display">{title}</h1>
+                <h1 className= " text-md md:text-lg font-medium md:font-semibold font-display">{title}</h1>
                 {subtitle && (
                   <p className="text-xs text-muted-foreground">{subtitle}</p>
                 )}
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <ThemeToggle/>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]">

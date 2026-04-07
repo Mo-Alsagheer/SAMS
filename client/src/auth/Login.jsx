@@ -57,6 +57,8 @@ export default function Login() {
         navigate("/director");
       } else if (role === "USER") {
         navigate("/home");
+      } else if (role === "EXECUTIVE") {
+        navigate("/executive");
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
@@ -121,7 +123,11 @@ export default function Login() {
           <Button type="button" variant="outline" onClick={() => form.reset()}>
             Reset
           </Button>
-          <Button className={'bg-sidebar-primary hover:bg-sidebar-accent'} type="submit" form="form-rhf-demo">
+          <Button
+            className={"bg-sidebar-primary hover:bg-sidebar-accent"}
+            type="submit"
+            form="form-rhf-demo"
+          >
             Submit
           </Button>
         </Field>

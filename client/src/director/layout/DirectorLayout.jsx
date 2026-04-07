@@ -1,40 +1,30 @@
-import React, { useState, useEffect } from "react";
+import DashboardLayout from "@/layout/DashBoardLayout";
 import { Outlet } from "react-router-dom";
-import Sidebar from "../../components/shared/Sidebar";
-import { directormenu } from "../../assets/menus";
-
+import { getInitials } from "@/utils/getInitials";
+import { useEffect, useState } from "react";
 function DirectorLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    const saved = localStorage.getItem("directorSidebarOpen");
-    return saved === null ? true : JSON.parse(saved);
-  });
-
-
+  const [initials, setInitials] = useState("EX");
+  const [name, setName] = useState("");
   useEffect(() => {
-    localStorage.setItem("directorSidebarOpen", JSON.stringify(sidebarOpen));
-  }, [sidebarOpen]);
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user?.name) {
+      setName(user.name);
+      setInitials(getInitials(user.name));
+    }
+  }, []);
 
   return (
-    <div className="flex bg-gray-50 min-h-screen">
-      {/* Sidebar */}
-      <Sidebar
-        title="Director"
-        menuitems={directormenu}
-        open={sidebarOpen}
-        setOpen={setSidebarOpen}
-      />
-
-      {/* Main Content */}
-      <main
-        className={`
-          flex-1 p-5 pt-8 transition-all duration-300 
-          ${sidebarOpen ? "md:ml-72" : "md:ml-20"}
-          ml-0
-        `}
-      >
+    <DashboardLayout
+      title={"Director Dashboard"}
+      subtitle={"manage all operations"}
+      userInitials={initials}
+      role={"director"}
+      name={name}
+    >
+      <main>
         <Outlet />
       </main>
-    </div>
+    </DashboardLayout>
   );
 }
 
