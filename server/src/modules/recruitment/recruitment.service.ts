@@ -20,7 +20,7 @@ export class RecruitmentService {
     private committeeRepository: Repository<Committee>,
   ) {}
 
-  async openProcess(executiveId: string, committeeId: string) {
+  async openProcess(executiveId: string, committeeId: string, targetMembers: number) {
     const committee = await this.committeeRepository.findOne({
       where: { id: committeeId },
     });
@@ -40,12 +40,14 @@ export class RecruitmentService {
       }
       process.status = RecruitmentStatus.OPEN;
       process.openedAt = new Date();
+      process.targetMembers = targetMembers;
     } else {
       process = this.recruitmentRepository.create({
         committeeId,
         createdBy: executiveId,
         status: RecruitmentStatus.OPEN,
         openedAt: new Date(),
+        targetMembers,
       });
     }
 

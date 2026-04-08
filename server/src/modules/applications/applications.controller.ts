@@ -14,6 +14,13 @@ import { CreateApplicationDto } from './dto/create-application.dto';
 export class ApplicationsController {
   constructor(private readonly applicationsService: ApplicationsService) {}
 
+  @Post('evaluate-all')
+  @ApiOperation({ summary: 'Evaluate all pending applications using AI without saving to DB' })
+  @ApiResponse({ status: 200, description: 'Evaluation results directly from the AI service.' })
+  evaluatePendingApplications() {
+    return this.applicationsService.evaluatePendingApplications();
+  }
+
   @Post('submit')
   @ApiOperation({ summary: 'Submit an application directly' })
   @ApiResponse({ status: 201, description: 'Application submitted successfully.' })

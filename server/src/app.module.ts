@@ -11,6 +11,7 @@ import { ApplicationsModule } from './modules/applications/applications.module';
 import { AiModule } from './modules/ai/ai.module';
 import { QuizModule } from './modules/quiz/quiz.module';
 import { DirectorModule } from './modules/director/director.module';
+import { ExecutiveModule } from './modules/executive/executive.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { DirectorModule } from './modules/director/director.module';
     AiModule,
     QuizModule,
     DirectorModule,
+    ExecutiveModule,
   ],
   controllers: [AppController],
   providers: [AppService],

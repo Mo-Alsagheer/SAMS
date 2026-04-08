@@ -62,4 +62,21 @@ export class AiService {
       throw error;
     }
   }
+
+  async evaluateBatchApplications(payload: any) {
+    try {
+      const response = await fetch(`${this.aiBaseUrl}/evaluate/batch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        throw new Error(`AI Service Batch Eval Error: ${response.statusText}`);
+      }
+      return await response.json();
+    } catch (error) {
+      this.logger.error('Failed to batch evaluate applications', error);
+      throw error;
+    }
+  }
 }
