@@ -39,7 +39,7 @@ async function bootstrap() {
     {
       name: 'Public Relations',
       description: 'Manages external communication and partnerships.',
-      type: CommitteeType.NONTECHNICAL,
+      type: CommitteeType.OPERATION,
       createdBy: 'exec-seed',
       directorIDs: [],
       membersCount: 0,
@@ -47,7 +47,7 @@ async function bootstrap() {
     {
       name: 'Human Resources',
       description: 'Responsible for recruitment and member evaluation.',
-      type: CommitteeType.ADMINSTRATIVE,
+      type: CommitteeType.OPERATION,
       createdBy: 'exec-seed',
       directorIDs: [],
       membersCount: 0,
@@ -97,7 +97,7 @@ async function bootstrap() {
       name: 'Uma Applicant',
       email: 'user@example.com',
       password: 'password123',
-      role: Role.USER,
+      role: Role.MEMBER,
       status: UserStatus.ACTIVE,
       committeeId: null, // Just an applicant/user without a committee yet
     },

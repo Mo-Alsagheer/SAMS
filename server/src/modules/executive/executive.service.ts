@@ -25,7 +25,7 @@ export class ExecutiveService {
     return this.userRepository.find({
       where: {
         committeeId: committeeId,
-        role: Role.USER,
+        role: Role.MEMBER,
       },
       select: ['id', 'name', 'email', 'phone', 'university', 'faculty', 'academicLevel', 'role', 'status']
     });

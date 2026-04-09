@@ -35,7 +35,7 @@ export class CommitteesController {
   // ── Shared ────────────────────────────────────────────────────────────────
 
   @Get()
-  @Roles(Role.USER, Role.DIRECTOR, Role.EXECUTIVE)
+  @Roles(Role.MEMBER, Role.DIRECTOR, Role.EXECUTIVE)
   @ApiOperation({ summary: 'List all committees' })
   @ApiResponse({ status: 200, description: 'List of all available committees.' })
   listAll() {
@@ -43,7 +43,7 @@ export class CommitteesController {
   }
 
   @Get(':id')
-  @Roles(Role.USER, Role.DIRECTOR, Role.EXECUTIVE)
+  @Roles(Role.MEMBER, Role.DIRECTOR, Role.EXECUTIVE)
   @ApiOperation({ summary: 'Get a specific committee by ID' })
   @ApiParam({ name: 'id', description: 'ULID of the committee', example: '01HRGZ...' })
   @ApiResponse({ status: 200, description: 'The committee details.' })
