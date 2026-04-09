@@ -5,10 +5,10 @@ import { PopupForm } from "@/components/shared/PopupForm";
 import api from "@/features/api";
 import { Button } from "@/components/ui/button";
 import {
-  addCommittee,
   updateCommittee,
   getCommittee,
 } from "@/features/committee/committee";
+import AddCommittee from "../components/AddCommittee";
 
 const committeeSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -74,29 +74,19 @@ function Committees() {
     }
   };
 
-  const handleAdd = () => {
-    setEditingCommittee(null);
-    setPopupOpen(true);
-  };
-
   const handleSubmit = async (data) => {
     try {
-      const processedData = {
-        ...data,
-      };
-      if (editingCommittee) {
-        await updateCommittee(editingCommittee.id, processedData);
-        setCommittees((prev) =>
-          prev.map((c) =>
-            c.id === editingCommittee.id ? { ...c, ...processedData } : c,
-          ),
-        );
-      } else {
-        const newCommittee = await addCommittee(processedData);
-        setCommittees((prev) => [...prev, newCommittee]);
-      }
+      await updateCommittee(editingCommittee.id, data);
+
+      setCommittees((prev) =>
+        prev.map((c) =>
+          c.id === editingCommittee.id ? { ...c, ...data } : c
+        )
+      );
+
+      setPopupOpen(false);
     } catch (error) {
-      console.error("Submit failed:", error);
+      console.error("Update failed:", error);
     }
   };
 
@@ -128,31 +118,22 @@ function Committees() {
 
   return (
     <>
-      <div className="mb-4">
-        <Button onClick={handleAdd}>Add Committee</Button>
+      <div className="mb-4 w-1/4">
+        <AddCommittee />
       </div>
 
       <Table columns={columns} data={committees} />
 
       <PopupForm
-        key={editingCommittee?.id || "new"}
+        key={editingCommittee?.id}
         open={popupOpen}
         onClose={() => setPopupOpen(false)}
         schema={committeeSchema}
-        defaultValues={
-          editingCommittee || {
-            name: "",
-            type: "TECHNICAL",
-            description: "",
-            planID: "",
-            membersCount: 0,
-            whatsappGroupLink: "",
-          }
-        }
+        defaultValues={editingCommittee}
         fields={fields}
         onSubmit={handleSubmit}
-        title={editingCommittee ? "Edit Committee" : "Add Committee"}
-        submitLabel={editingCommittee ? "Update" : "Add"}
+        title="Edit Committee"
+        submitLabel="Update"
       />
     </>
   );
