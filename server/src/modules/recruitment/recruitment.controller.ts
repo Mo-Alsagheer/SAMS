@@ -1,5 +1,5 @@
-import { Controller, Post, Param, UseGuards, Get } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Post, Param, UseGuards, Get, Body, ParseIntPipe } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
 import { RecruitmentService } from './recruitment.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -23,12 +23,21 @@ export class RecruitmentController {
   @ApiResponse({ status: 201, description: 'Recruitment process successfully opened.' })
   @ApiResponse({ status: 403, description: 'Forbidden. Requires Executive role.' })
   @ApiResponse({ status: 404, description: 'Committee not found.' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        targetMembers: { type: 'number', example: 10 }
+      }
+    }
+  })
   openRecruitment(
     @Param('committeeId') committeeId: string,
+    @Body('targetMembers', ParseIntPipe) targetMembers: number,
     @Req() req: Request,
   ) {
     const user = req.user as AuthUser;
-    return this.recruitmentService.openProcess(user.id, committeeId);
+    return this.recruitmentService.openProcess(user.id, committeeId, targetMembers);
   }
 
   @Post(':committeeId/close')

@@ -28,6 +28,9 @@ export class RecruitmentProcess {
   @Column({ type: 'text' })
   committeeId: string;
 
+  @Column({ type: 'int', default: 0 })
+  targetMembers: number;
+
   @Column({
     type: 'enum',
     enum: RecruitmentStatus,
