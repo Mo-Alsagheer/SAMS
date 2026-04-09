@@ -12,6 +12,12 @@ export async function updateCommitteeDescription(id, description) {
 
   return res.data;
 }
+
+export async function updateCommittee(id, data) {
+  const res = await api.patch(`/committees/${id}`, data);
+  return res.data;
+}
+
 export async function addCommittee(data) {
   const res = await api.post(`/committees`, data);
   return res.data;

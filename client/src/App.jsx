@@ -13,6 +13,7 @@ import { Toaster } from "sonner";
 import ExecutiveLayout from "./executive/pages/ExecutiveLayout";
 import Dashboard from "./executive/pages/DashBoard";
 import Recruitment from "./executive/pages/Recruitment";
+import Committees from "./executive/pages/Committees";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/executive" element={<ExecutiveLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="recruitment" element={<Recruitment />} />
+          <Route path="committees" element={<Committees />} />
         </Route>
         <Route path="/home" element={<HomePage />} />
       </Routes>
