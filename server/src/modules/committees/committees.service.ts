@@ -1,15 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCommitteeDto } from './dto/create-committee.dto';
 import { UpdateCommitteeDto } from './dto/update-committee.dto';
 import { Committee } from './entities/committee.entity';
+import { RecruitmentProcess, RecruitmentStatus } from '../recruitment/entities/recruitment.entity';
 
 @Injectable()
 export class CommitteesService {
   constructor(
     @InjectRepository(Committee)
     private readonly committeesRepo: Repository<Committee>,
+    @InjectRepository(RecruitmentProcess)
+    private readonly recruitmentRepo: Repository<RecruitmentProcess>,
   ) {}
 
   listAll(): Promise<Committee[]> {
@@ -62,6 +65,18 @@ export class CommitteesService {
 
   async delete(id: string): Promise<void> {
     const committee = await this.getById(id);
+
+    const openRecruitment = await this.recruitmentRepo.findOne({
+      where: {
+        committeeId: id,
+        status: RecruitmentStatus.OPEN,
+      },
+    });
+
+    if (openRecruitment) {
+      throw new BadRequestException('Cannot delete committee with an open recruitment process');
+    }
+
     await this.committeesRepo.remove(committee);
   }
 }
