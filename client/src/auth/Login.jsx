@@ -85,7 +85,7 @@ export default function Login() {
                     id="form-rhf-demo-email"
                     aria-invalid={fieldState.invalid}
                     placeholder="enter your email"
-                    autoComplete="off"
+                    autoComplete="on"
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -107,7 +107,7 @@ export default function Login() {
                     type="password"
                     aria-invalid={fieldState.invalid}
                     placeholder="enter your password"
-                    autoComplete="off"
+                    autoComplete="on"
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />

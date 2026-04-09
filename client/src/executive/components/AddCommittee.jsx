@@ -112,7 +112,7 @@ const committeeFields = [
   },
   {
     name: "directorIDs",
-    label: "Director IDs (comma separated)",
+    label: "Director IDs",
     type: "text",
   },
   {

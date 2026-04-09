@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Table from "@/components/shared/Table"; 
+import Table from "@/components/shared/Table";
 import api from "@/features/api";
 import { getCommittee } from "@/features/committee/committee";
 import { toast } from "sonner";
@@ -14,7 +14,6 @@ function Recruitment() {
 
       const recruitments = res.data;
 
-    
       const fullData = await Promise.all(
         recruitments.map(async (item) => {
           try {
@@ -30,7 +29,7 @@ function Recruitment() {
               committeeName: "Unknown",
             };
           }
-        })
+        }),
       );
 
       setData(fullData);
@@ -45,53 +44,41 @@ function Recruitment() {
     fetchData();
   }, []);
 
-  
-const toggleStatus = async (row) => {
-  const updatedStatus = row.status === "OPEN" ? "CLOSED" : "OPEN";
+  const toggleStatus = async (row) => {
+    const updatedStatus = row.status === "OPEN" ? "CLOSED" : "OPEN";
 
-  // optimistic UI
-  setData((prev) =>
-    prev.map((item) =>
-      item.id === row.id
-        ? { ...item, status: updatedStatus }
-        : item
-    )
-  );
-
-  const action = row.status === "OPEN" ? "closed" : "opened";
-
-  try {
-    if (row.status === "OPEN") {
-      await api.post(
-        `/executive/recruitment/${row.committeeId}/close`
-      );
-    } else {
-      await api.post(
-        `/executive/recruitment/${row.committeeId}/open`
-      );
-    }
-
-    // ✅ success toast
-    toast.success(`Committee successfully ${action} `);
-  } catch (err) {
-    console.error(err);
-
-    // rollback
+    // optimistic UI
     setData((prev) =>
       prev.map((item) =>
-        item.id === row.id
-          ? { ...item, status: row.status }
-          : item
-      )
+        item.id === row.id ? { ...item, status: updatedStatus } : item,
+      ),
     );
 
-    // ❌ error toast
-    toast.error(
-      err?.response?.data?.message ||
-        "Something went wrong "
-    );
-  }
-};
+    const action = row.status === "OPEN" ? "closed" : "opened";
+
+    try {
+      if (row.status === "OPEN") {
+        await api.post(`/executive/recruitment/${row.committeeId}/close`);
+      } else {
+        await api.post(`/executive/recruitment/${row.committeeId}/open`);
+      }
+
+      // ✅ success toast
+      toast.success(`Committee successfully ${action} `);
+    } catch (err) {
+      console.error(err);
+
+      // rollback
+      setData((prev) =>
+        prev.map((item) =>
+          item.id === row.id ? { ...item, status: row.status } : item,
+        ),
+      );
+
+      // ❌ error toast
+      toast.error(err?.response?.data?.message || "Something went wrong ");
+    }
+  };
 
   const columns = [
     {
@@ -116,15 +103,13 @@ const toggleStatus = async (row) => {
     {
       header: "Opened At",
       accessor: "openedAt",
-      render: (row) => new Date(row.openedAt).toLocaleString(),
+      render: (row) => new Date(row.openedAt).toLocaleDateString("en-GB"),
     },
     {
       header: "Closed At",
       accessor: "closedAt",
       render: (row) =>
-        row.closedAt
-          ? new Date(row.closedAt).toLocaleString()
-          : "-",
+        row.closedAt ? new Date(row.closedAt).toLocaleDateString("en-GB") : "-",
     },
     {
       header: "Actions",
@@ -147,9 +132,7 @@ const toggleStatus = async (row) => {
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-semibold mb-4">
-        Recruitment Management
-      </h1>
+      <h1 className="text-xl font-semibold mb-4">Recruitment Management</h1>
 
       <Table columns={columns} data={data} />
     </div>
