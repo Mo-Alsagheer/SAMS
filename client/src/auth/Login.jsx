@@ -124,7 +124,7 @@ export default function Login() {
             Reset
           </Button>
           <Button
-            className={"bg-sidebar-primary hover:bg-sidebar-accent"}
+            className={"bg-primary hover:bg-primary/90"}
             type="submit"
             form="form-rhf-demo"
           >
