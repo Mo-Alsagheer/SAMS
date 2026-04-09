@@ -12,7 +12,7 @@ import {
 
 const committeeSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  type: z.enum(["TECHNICAL", "NON-TECHNICAL", "EX-COMM", "MEDIA"]),
+  type: z.enum(["TECHNICAL", "OPERATION", "MEDIA"]),
   description: z.string().optional(),
   planID: z.string().optional(),
   membersCount: z.number().optional(),
@@ -25,7 +25,7 @@ const fields = [
     name: "type",
     label: "Type",
     type: "select",
-    options: ["TECHNICAL", "NON-TECHNICAL", "EX-COMM", "MEDIA"],
+    options: ["TECHNICAL", "OPERATION", "MEDIA"],
   },
   { name: "description", label: "Description", type: "textarea" },
   { name: "planID", label: "Plan ID", type: "text" },
@@ -88,8 +88,8 @@ function Committees() {
         await updateCommittee(editingCommittee.id, processedData);
         setCommittees((prev) =>
           prev.map((c) =>
-            c.id === editingCommittee.id ? { ...c, ...processedData } : c
-          )
+            c.id === editingCommittee.id ? { ...c, ...processedData } : c,
+          ),
         );
       } else {
         const newCommittee = await addCommittee(processedData);
@@ -108,10 +108,7 @@ function Committees() {
       header: "Actions",
       render: (row) => (
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            onClick={() => handleEdit(row)}
-          >
+          <Button size="sm" onClick={() => handleEdit(row)}>
             Edit
           </Button>
 
@@ -132,9 +129,7 @@ function Committees() {
   return (
     <>
       <div className="mb-4">
-        <Button onClick={handleAdd}>
-          Add Committee
-        </Button>
+        <Button onClick={handleAdd}>Add Committee</Button>
       </div>
 
       <Table columns={columns} data={committees} />

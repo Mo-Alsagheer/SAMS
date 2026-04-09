@@ -87,8 +87,8 @@ export function PopupForm({
 
         <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
           {fields.map((field) => (
-            <div key={field.name}>
-              <Label>{field.label}</Label>
+            <div className="space-y-2"  key={field.name}>
+              <Label >{field.label}</Label>
 
               {renderField(field)}
 

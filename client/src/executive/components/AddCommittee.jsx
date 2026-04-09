@@ -9,9 +9,8 @@ import { toast } from "sonner";
 const committeeSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   description: z.string(),
-  type: z.enum(["TECHNICAL", "NON-TECHNICAL", "EX-COMM", "MEDIA"]),
+  type: z.enum(["TECHNICAL", "OPERATION", "MEDIA"]),
   planID: z.string(),
-  directorIDs: z.string().min(1, "At least one director ID"),
   membersCount: z.number().optional(),
   whatsappGroupLink: z.string().url().optional(),
 });
@@ -26,13 +25,9 @@ const committeeFields = [
     name: "type",
     label: "Committee Type",
     type: "select",
-    options: ["TECHNICAL", "NON-TECHNICAL", "EX-COMM", "MEDIA"],
+    options: ["TECHNICAL", "OPERATION", "MEDIA"],
   },
-  {
-    name: "directorIDs",
-    label: "Director IDs",
-    type: "text",
-  },
+
   {
     name: "whatsappGroupLink",
     label: "WhatsApp Group Link",
@@ -46,10 +41,9 @@ export default function AddCommittee() {
 
   // 4. Form submission handler
   const handleAddCommittee = useCallback(async (values) => {
-    const { directorIDs, ...rest } = values;
+    const {  ...rest } = values;
     const data = {
-      ...rest,
-      directorIDs: directorIDs.split(",").map((id) => id.trim()),
+      ...rest
     };
 
     setLoading(true);
@@ -85,7 +79,6 @@ export default function AddCommittee() {
           description: "",
           type: "TECHNICAL",
           planID: "",
-          directorIDs: "",
           membersCount: undefined,
           whatsappGroupLink: "",
         }}
