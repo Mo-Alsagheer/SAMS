@@ -10,7 +10,9 @@ import { Application, ApplicationStatus } from './entities/application.entity';
 import {
   RecruitmentProcess,
   RecruitmentStatus,
-} from '../recruitment/entities/recruitment.entity';import { CreateApplicationDto } from './dto/create-application.dto';
+} from '../recruitment/entities/recruitment.entity';
+import { CreateApplicationDto } from './dto/create-application.dto';
+import { AiService } from '../ai/ai.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -19,6 +21,7 @@ export class ApplicationsService {
     private applicationRepository: Repository<Application>,
     @InjectRepository(RecruitmentProcess)
     private recruitmentProcessRepository: Repository<RecruitmentProcess>,
+    private aiService: AiService,
   ) {}
 
   async createApplication(dto: CreateApplicationDto) {
@@ -61,5 +64,25 @@ export class ApplicationsService {
       throw new NotFoundException('Application not found');
     }
     return application;
+  }
+
+  async evaluatePendingApplications() {
+    const applications = await this.applicationRepository.find({
+      where: { status: ApplicationStatus.SUBMITTED },
+    });
+    
+    const cvsToEvaluate = applications
+      .filter(app => app.cvLink)
+      .map(app => ({
+        id: app.id,
+        type: 'gdrive',
+        link: app.cvLink,
+      }));
+
+    if (cvsToEvaluate.length === 0) {
+      return { message: 'No applications pending evaluation with a valid CV link.', results: [] };
+    }
+
+    return this.aiService.evaluateBatchApplications({ cvs: cvsToEvaluate });
   }
 }
