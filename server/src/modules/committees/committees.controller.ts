@@ -83,6 +83,7 @@ export class CommitteesController {
   @ApiOperation({ summary: 'Delete a committee (Executive)' })
   @ApiParam({ name: 'id', description: 'ULID of the committee to delete', example: '01HRGZ...' })
   @ApiResponse({ status: 204, description: 'The committee has been successfully deleted.' })
+  @ApiResponse({ status: 400, description: 'Cannot delete committee with an open recruitment process.' })
   @ApiResponse({ status: 404, description: 'Committee not found.' })
   delete(@Param('id', new ParseUlidPipe()) id: string) {
     return this.committeesService.delete(id);
