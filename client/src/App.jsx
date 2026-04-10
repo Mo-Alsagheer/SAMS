@@ -14,6 +14,7 @@ import ExecutiveLayout from "./executive/pages/ExecutiveLayout";
 import Dashboard from "./executive/pages/DashBoard";
 import Recruitment from "./executive/pages/Recruitment";
 import Committees from "./executive/pages/Committees";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function App() {
   return (
@@ -24,18 +25,24 @@ function App() {
         <Route path="/test" element={<Page />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/result" element={<QuizResult />} />
-        {/* Director Routes */}
-        <Route path="/director" element={<DirectorLayout />}>
-          <Route index element={<DashBoard />} />
-          <Route path="applications" element={<Applications />} />
-          <Route path="workspace" element={<WorkSpace />} />
-        </Route>
-        <Route path="/executive" element={<ExecutiveLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="recruitment" element={<Recruitment />} />
-          <Route path="committees" element={<Committees />} />
-        </Route>
         <Route path="/home" element={<HomePage />} />
+
+        <Route element={<ProtectedRoute allowedRoles={["DIRECTOR"]} />}>
+          <Route path="/director" element={<DirectorLayout />}>
+            <Route index element={<DashBoard />} />
+            <Route path="applications" element={<Applications />} />
+            <Route path="workspace" element={<WorkSpace />} />
+          </Route>
+        </Route>
+
+        <Route element={<ProtectedRoute allowedRoles={["EXECUTIVE"]} />}>
+          <Route path="/executive" element={<ExecutiveLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="recruitment" element={<Recruitment />} />
+            <Route path="committees" element={<Committees />} />
+          </Route>
+          
+        </Route>
       </Routes>
     </>
   );

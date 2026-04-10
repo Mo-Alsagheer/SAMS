@@ -24,6 +24,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { login } from "@/features/auth/auth";
 import { useNavigate } from "react-router-dom";
+import {
+  getAuthUser,
+  getHomeRouteForRole,
+  setAuthSession,
+} from "@/features/auth/session";
 
 const formSchema = z.object({
   email: z.string().email("Enter a valid email").nonempty("Enter Your Email"),
@@ -42,24 +47,24 @@ export default function Login() {
     },
   });
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const user = getAuthUser();
+
+    if (user) {
+      navigate(getHomeRouteForRole(user.role), { replace: true });
+    }
+  }, [navigate]);
+
   async function onSubmit(data) {
     try {
       const result = await login(data);
 
-      localStorage.setItem("token", result.accessToken);
-      localStorage.setItem("user", JSON.stringify(result.user));
+      setAuthSession({ token: result.accessToken, user: result.user });
 
       toast.success("Login successful");
 
-      const role = result.user.role;
-
-      if (role === "DIRECTOR") {
-        navigate("/director");
-      } else if (role === "USER") {
-        navigate("/home");
-      } else if (role === "EXECUTIVE") {
-        navigate("/executive");
-      }
+      navigate(getHomeRouteForRole(result.user.role), { replace: true });
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
     }
