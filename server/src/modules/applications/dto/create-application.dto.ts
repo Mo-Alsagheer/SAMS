@@ -1,20 +1,22 @@
 import {
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUrl,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Role } from '../../../common/constants/role.enum';
 
 export class CreateApplicationDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: '01HRGZ...',
-    description: 'The ULID of the committee you are applying to',
+    description: 'The ULID of the committee you are applying to (omit for globally available roles like EXECUTIVE)',
   })
   @IsString()
-  @IsNotEmpty()
-  committeeId: string;
+  @IsOptional()
+  committeeId?: string;
 
   @ApiProperty({
     example: 'User Name',
@@ -52,4 +54,13 @@ export class CreateApplicationDto {
   })
   @IsUrl()
   cvLink: string;
+
+  @ApiProperty({
+    example: Role.MEMBER,
+    description: 'The role the applicant is applying for (MEMBER or DIRECTOR)',
+    enum: Role,
+  })
+  @IsEnum(Role)
+  @IsNotEmpty()
+  targetRole: Role;
 }

@@ -5,7 +5,8 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
+import { Role } from '../../common/constants/role.enum';
 import { Application, ApplicationStatus } from './entities/application.entity';
 import {
   RecruitmentProcess,
@@ -25,32 +26,45 @@ export class ApplicationsService {
   ) {}
 
   async createApplication(dto: CreateApplicationDto) {
+    if (dto.targetRole === Role.EXECUTIVE) {
+      if (dto.committeeId) {
+        throw new BadRequestException('Executive applications cannot target a specific committee');
+      }
+    } else {
+      if (!dto.committeeId) {
+        throw new BadRequestException('Committee ID is required for this role');
+      }
+    }
+
+    const committeeIdCondition = dto.committeeId ? dto.committeeId : IsNull();
+
     // Verify committee recruitment is OPEN
     const process = await this.recruitmentProcessRepository.findOne({
-      where: { committeeId: dto.committeeId },
+      where: { committeeId: committeeIdCondition, role: dto.targetRole },
     });
     if (!process || process.status !== RecruitmentStatus.OPEN) {
       throw new BadRequestException(
-        'Recruitment process for this committee is not OPEN',
+        'Recruitment process for this role (and committee) is not OPEN',
       );
     }
 
     // Check if user already applied by email
     const existing = await this.applicationRepository.findOne({
-      where: { email: dto.email, committeeId: dto.committeeId },
+      where: { email: dto.email, committeeId: committeeIdCondition, targetRole: dto.targetRole },
     });
     if (existing) {
-      throw new ConflictException('An application with this email has already been submitted to this committee');
+      throw new ConflictException('An application with this email has already been submitted for the specified role');
     }
 
     const application = this.applicationRepository.create({
-      committeeId: dto.committeeId,
+      committeeId: dto.committeeId || null,
       name: dto.name,
       email: dto.email,
       phone: dto.phone,
       linkedinLink: dto.linkedinLink,
       cvLink: dto.cvLink,
       status: ApplicationStatus.SUBMITTED,
+      targetRole: dto.targetRole,
     });
 
     return this.applicationRepository.save(application);

@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ulid } from 'ulid';
+import { Role } from '../../../common/constants/role.enum';
 
 export enum ApplicationStatus {
   SUBMITTED = 'SUBMITTED',
@@ -30,8 +31,8 @@ export class Application {
     }
   }
 
-  @Column({ type: 'text' })
-  committeeId: string;
+  @Column({ type: 'text', nullable: true })
+  committeeId: string | null;
 
   @Column({ type: 'text' })
   name: string;
@@ -47,6 +48,9 @@ export class Application {
 
   @Column({ type: 'text', nullable: true })
   cvLink: string | null;
+
+  @Column({ type: 'enum', enum: Role, default: Role.MEMBER })
+  targetRole: Role;
 
   @Column({
     type: 'enum',

@@ -8,6 +8,7 @@ import { Role } from '../../common/constants/role.enum';
 import { Request } from 'express';
 import { Req } from '@nestjs/common';
 import { AuthUser } from '../auth/auth.types';
+import { OpenRecruitmentDto } from './dto/open-recruitment.dto';
 
 @ApiTags('recruitment')
 @ApiBearerAuth()
@@ -23,31 +24,38 @@ export class RecruitmentController {
   @ApiResponse({ status: 201, description: 'Recruitment process successfully opened.' })
   @ApiResponse({ status: 403, description: 'Forbidden. Requires Executive role.' })
   @ApiResponse({ status: 404, description: 'Committee not found.' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        targetMembers: { type: 'number', example: 10 }
-      }
-    }
-  })
+  @ApiBody({ type: OpenRecruitmentDto })
   openRecruitment(
     @Param('committeeId') committeeId: string,
-    @Body('targetMembers', ParseIntPipe) targetMembers: number,
+    @Body() dto: OpenRecruitmentDto,
     @Req() req: Request,
   ) {
     const user = req.user as AuthUser;
-    return this.recruitmentService.openProcess(user.id, committeeId, targetMembers);
+    return this.recruitmentService.openProcess(user.id, committeeId, dto);
   }
 
-  @Post(':committeeId/close')
+  @Post('global/open')
   @Roles(Role.EXECUTIVE)
-  @ApiOperation({ summary: 'Close recruitment process for a committee' })
-  @ApiParam({ name: 'committeeId', description: 'ULID of the committee', example: '01HRGZ...' })
+  @ApiOperation({ summary: 'Open a global recruitment process (e.g. for executives)' })
+  @ApiResponse({ status: 201, description: 'Global recruitment process successfully opened.' })
+  @ApiResponse({ status: 403, description: 'Forbidden. Requires Executive role.' })
+  @ApiBody({ type: OpenRecruitmentDto })
+  openGlobalRecruitment(
+    @Body() dto: OpenRecruitmentDto,
+    @Req() req: Request,
+  ) {
+    const user = req.user as AuthUser;
+    return this.recruitmentService.openGlobalProcess(user.id, dto);
+  }
+
+  @Post(':id/close')
+  @Roles(Role.EXECUTIVE)
+  @ApiOperation({ summary: 'Close a specific recruitment process' })
+  @ApiParam({ name: 'id', description: 'ULID of the recruitment process', example: '01HRGZ...' })
   @ApiResponse({ status: 201, description: 'Recruitment process successfully closed.' })
-  @ApiResponse({ status: 404, description: 'Committee or active recruitment process not found.' })
-  closeRecruitment(@Param('committeeId') committeeId: string) {
-    return this.recruitmentService.closeProcess(committeeId);
+  @ApiResponse({ status: 404, description: 'Active recruitment process not found.' })
+  closeRecruitment(@Param('id') id: string) {
+    return this.recruitmentService.closeProcess(id);
   }
 
   @Get()
