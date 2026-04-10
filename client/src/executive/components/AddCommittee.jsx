@@ -35,7 +35,7 @@ const committeeFields = [
   },
 ];
 
-export default function AddCommittee() {
+export default function AddCommittee({ onAdded }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -50,6 +50,7 @@ export default function AddCommittee() {
     try {
       await addCommittee(data);
       toast.success("Committee added successfully");
+      onAdded?.();
       setOpen(false);
     } catch (error) {
       console.error(error);

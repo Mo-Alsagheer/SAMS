@@ -1,6 +1,7 @@
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -26,11 +27,16 @@ export function PopupForm({
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues,
   });
+
+  useEffect(() => {
+    reset(defaultValues);
+  }, [defaultValues, reset]);
 
   const submitHandler = async (data) => {
     await onSubmit(data);
@@ -87,8 +93,8 @@ export function PopupForm({
 
         <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
           {fields.map((field) => (
-            <div className="space-y-2"  key={field.name}>
-              <Label >{field.label}</Label>
+            <div className="space-y-2" key={field.name}>
+              <Label>{field.label}</Label>
 
               {renderField(field)}
 

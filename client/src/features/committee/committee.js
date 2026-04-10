@@ -4,7 +4,15 @@ export async function getCommittee(id) {
   const res = await api.get(`/committees/${id}`);
   return res.data;
 }
+export async function getCommittees() {
+  const res = await api.get(`/committees`);
+  return res.data;
+}
 
+export async function deleteCommittee(id) {
+  const res = await api.delete(`/committees/${id}`);
+  return res.data;
+}
 export async function updateCommitteeDescription(id, description) {
   const res = await api.patch(`/committees/${id}/description`, {
     description,

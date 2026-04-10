@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { z } from "zod";
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import Table from "@/components/shared/Table";
 import { PopupForm } from "@/components/shared/PopupForm";
-import api from "@/features/api";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   updateCommittee,
   getCommittee,
+  getCommittees,
+  deleteCommittee,
 } from "@/features/committee/committee";
 import AddCommittee from "../components/AddCommittee";
 
@@ -38,31 +41,34 @@ function Committees() {
   const [loading, setLoading] = useState(true);
   const [popupOpen, setPopupOpen] = useState(false);
   const [editingCommittee, setEditingCommittee] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
-  useEffect(() => {
-    async function fetchCommittees() {
-      try {
-        const res = await api.get("/committees");
-        setCommittees(res.data);
-      } catch (error) {
-        console.error("Failed to fetch committees:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchCommittees();
-  }, []);
+  const openDeletePopup = (id) => {
+    setSelectedId(id);
+    setDeleteOpen(true);
+  };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this committee?"))
-      return;
+  const confirmDelete = async () => {
+    if (!selectedId) return;
+
     try {
-      await api.delete(`/committees/${id}`);
-      setCommittees((prev) => prev.filter((c) => c.id !== id));
+      setActionLoading(true);
+      await deleteCommittee(selectedId);
+
+      setCommittees((prev) => prev.filter((c) => c.id !== selectedId));
+
+      toast.success("Committee deleted");
     } catch (error) {
-      console.error("Delete failed:", error);
+      toast.error("Delete failed");
+    } finally {
+      setActionLoading(false);
+      setDeleteOpen(false);
+      setSelectedId(null);
     }
   };
+
 
   const handleEdit = async (committee) => {
     try {
@@ -70,56 +76,76 @@ function Committees() {
       setEditingCommittee(fullCommittee);
       setPopupOpen(true);
     } catch (error) {
-      console.error("Failed to fetch committee:", error);
+      toast.error("Failed to fetch committee:", error);
     }
   };
 
   const handleSubmit = async (data) => {
+    if (!editingCommittee) return;
+
     try {
       await updateCommittee(editingCommittee.id, data);
 
       setCommittees((prev) =>
-        prev.map((c) =>
-          c.id === editingCommittee.id ? { ...c, ...data } : c
-        )
+        prev.map((c) => (c.id === editingCommittee.id ? { ...c, ...data } : c)),
       );
 
+      toast.success("Committee updated");
       setPopupOpen(false);
+      setEditingCommittee(null);
     } catch (error) {
-      console.error("Update failed:", error);
+      toast.error("Update failed");
     }
   };
 
-  const columns = [
-    { header: "Name", accessor: "name" },
-    { header: "Type", accessor: "type" },
-    { header: "Members", accessor: "membersCount" },
-    {
-      header: "Actions",
-      render: (row) => (
-        <div className="flex gap-2">
-          <Button size="sm" onClick={() => handleEdit(row)}>
-            Edit
-          </Button>
+  const fetchCommittees = async () => {
+    try {
+      const data = await getCommittees();
+      setCommittees(data);
+    } catch (error) {
+      toast.error("Failed to fetch committees");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => handleDelete(row.id)}
-          >
-            Delete
-          </Button>
-        </div>
-      ),
-    },
-  ];
+  useEffect(() => {
+    fetchCommittees();
+  }, []);
+  const columns = React.useMemo(
+    () => [
+      { header: "Name", accessor: "name" },
+      { header: "Type", accessor: "type" },
+      { header: "Members", accessor: "membersCount" },
+      {
+        header: "Actions",
+        render: (row) => (
+          <div className="flex gap-2">
+            <Button size="sm" onClick={() => handleEdit(row)}>
+              Edit
+            </Button>
+
+            <Button
+              size="sm"
+              variant="destructive"
+              disabled={actionLoading}
+              onClick={() => openDeletePopup(row.id)}
+            >
+              Delete
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    [actionLoading, handleEdit, openDeletePopup],
+  );
 
   if (loading) return <div>Loading committees...</div>;
 
   return (
     <>
       <div className="mb-4 w-1/4">
-        <AddCommittee />
+        <AddCommittee onAdded={fetchCommittees} />
       </div>
 
       <Table columns={columns} data={committees} />
@@ -127,13 +153,26 @@ function Committees() {
       <PopupForm
         key={editingCommittee?.id}
         open={popupOpen}
-        onClose={() => setPopupOpen(false)}
+        onClose={() => {
+          setPopupOpen(false);
+          setEditingCommittee(null);
+        }}
         schema={committeeSchema}
         defaultValues={editingCommittee}
         fields={fields}
         onSubmit={handleSubmit}
         title="Edit Committee"
         submitLabel="Update"
+      />
+      <ConfirmDialog
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={confirmDelete}
+        title="Delete Committee"
+        description="Are you sure you want to delete this committee?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        loading={actionLoading}
       />
     </>
   );
