@@ -61,14 +61,15 @@ function Committees() {
 
       toast.success("Committee deleted");
     } catch (error) {
-      toast.error("Delete failed");
+      const message =
+        error?.response?.data?.message || "Failed to delete committee";
+      toast.error(message);
     } finally {
       setActionLoading(false);
       setDeleteOpen(false);
       setSelectedId(null);
     }
   };
-
 
   const handleEdit = async (committee) => {
     try {
