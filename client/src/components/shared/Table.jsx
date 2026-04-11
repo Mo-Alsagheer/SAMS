@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import { ArrowUpDown } from "lucide-react";
 function Table({ columns, data }) {
   const [sortConfig, setSortConfig] = useState(null);
   const [page, setPage] = useState(1);
@@ -52,7 +52,12 @@ function Table({ columns, data }) {
                     col.accessor ? "cursor-pointer" : ""
                   }`}
                 >
-                  {col.header} {col.accessor && "↕"}
+                  <div className="flex items-center gap-1">
+                    {col.header}
+                    {col.accessor && (
+                      <ArrowUpDown size={14} className="text-gray-400" />
+                    )}
+                  </div>
                 </th>
               ))}
             </tr>

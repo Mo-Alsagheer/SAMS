@@ -78,7 +78,14 @@ export function PopupForm({
             className="h-4 w-4"
           />
         );
-
+      case "readonly":
+        return (
+          <Input
+            {...register(field.name)}
+            readOnly
+            className="bg-gray-100 cursor-not-allowed"
+          />
+        );
       default:
         return <Input type="text" {...register(field.name)} />;
     }
