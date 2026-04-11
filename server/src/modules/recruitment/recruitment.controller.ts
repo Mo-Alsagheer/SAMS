@@ -17,6 +17,20 @@ import { OpenRecruitmentDto } from './dto/open-recruitment.dto';
 export class RecruitmentController {
   constructor(private readonly recruitmentService: RecruitmentService) {}
 
+  @Post('global/open')
+  @Roles(Role.EXECUTIVE)
+  @ApiOperation({ summary: 'Open a global recruitment process (e.g. for executives)' })
+  @ApiResponse({ status: 201, description: 'Global recruitment process successfully opened.' })
+  @ApiResponse({ status: 403, description: 'Forbidden. Requires Executive role.' })
+  @ApiBody({ type: OpenRecruitmentDto })
+  openGlobalRecruitment(
+    @Body() dto: OpenRecruitmentDto,
+    @Req() req: Request,
+  ) {
+    const user = req.user as AuthUser;
+    return this.recruitmentService.openGlobalProcess(user.id, dto);
+  }
+
   @Post(':committeeId/open')
   @Roles(Role.EXECUTIVE)
   @ApiOperation({ summary: 'Open recruitment process for a committee' })
@@ -32,20 +46,6 @@ export class RecruitmentController {
   ) {
     const user = req.user as AuthUser;
     return this.recruitmentService.openProcess(user.id, committeeId, dto);
-  }
-
-  @Post('global/open')
-  @Roles(Role.EXECUTIVE)
-  @ApiOperation({ summary: 'Open a global recruitment process (e.g. for executives)' })
-  @ApiResponse({ status: 201, description: 'Global recruitment process successfully opened.' })
-  @ApiResponse({ status: 403, description: 'Forbidden. Requires Executive role.' })
-  @ApiBody({ type: OpenRecruitmentDto })
-  openGlobalRecruitment(
-    @Body() dto: OpenRecruitmentDto,
-    @Req() req: Request,
-  ) {
-    const user = req.user as AuthUser;
-    return this.recruitmentService.openGlobalProcess(user.id, dto);
   }
 
   @Post(':id/close')
