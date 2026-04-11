@@ -39,58 +39,56 @@ function Table({ columns, data }) {
 
   return (
     <div className="bg-white shadow rounded-xl overflow-hidden">
-      <table className="min-w-full">
-
-        <thead className="border-b text-gray-500 text-sm">
-          <tr>
-            {columns.map((col, index) => (
-              <th
-                key={col.header + index}
-                onClick={() => col.accessor && requestSort(col.accessor)}
-                className={`p-4 text-left ${
-                  col.accessor ? "cursor-pointer" : ""
-                }`}
-              >
-                {col.header} {col.accessor && "↕"}
-              </th>
-            ))}
-          </tr>
-        </thead>
-
-        <tbody>
-
-          {data.length === 0 ? (
+      {/* ✅ responsive wrapper */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full">
+          <thead className="border-b text-gray-500 text-sm">
             <tr>
-              <td
-                colSpan={columns.length}
-                className="text-center p-6 text-gray-400"
-              >
-                No data found
-              </td>
+              {columns.map((col, index) => (
+                <th
+                  key={col.header + index}
+                  onClick={() => col.accessor && requestSort(col.accessor)}
+                  className={`p-2 sm:p-4 text-left ${
+                    col.accessor ? "cursor-pointer" : ""
+                  }`}
+                >
+                  {col.header} {col.accessor && "↕"}
+                </th>
+              ))}
             </tr>
-          ) : (
-            paginatedData.map((row, index) => (
-              <tr
-                key={index}
-                className="border-b hover:bg-gray-50 transition"
-              >
-                {columns.map((col, i) => (
-                  <td key={col.header + i} className="p-4">
-                    {col.render ? col.render(row) : row[col.accessor]}
-                  </td>
-                ))}
+          </thead>
+
+          <tbody>
+            {data.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  className="text-center p-6 text-gray-400"
+                >
+                  No data found
+                </td>
               </tr>
-            ))
-          )}
-
-        </tbody>
-
-      </table>
+            ) : (
+              paginatedData.map((row, index) => (
+                <tr
+                  key={index}
+                  className="border-b hover:bg-gray-50 transition"
+                >
+                  {columns.map((col, i) => (
+                    <td key={col.header + i} className="p-2 sm:p-4 break-words">
+                      {col.render ? col.render(row) : row[col.accessor]}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* Pagination */}
       {data.length > rowsPerPage && (
-        <div className="flex justify-between items-center p-4 text-sm">
-
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 p-4 text-sm">
           <button
             onClick={() => setPage((p) => Math.max(p - 1, 1))}
             className="px-3 py-1 border rounded"
@@ -104,18 +102,14 @@ function Table({ columns, data }) {
 
           <button
             onClick={() =>
-              setPage((p) =>
-                start + rowsPerPage < data.length ? p + 1 : p
-              )
+              setPage((p) => (start + rowsPerPage < data.length ? p + 1 : p))
             }
             className="px-3 py-1 border rounded"
           >
             Next
           </button>
-
         </div>
       )}
-
     </div>
   );
 }

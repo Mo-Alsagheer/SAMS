@@ -3,7 +3,8 @@ import { Outlet } from "react-router-dom";
 import { getInitials } from "@/utils/getInitials";
 import { useEffect, useState } from "react";
 import { getAuthUser } from "@/features/auth/session";
-function DirectorLayout() {
+
+function ExecutiveLayout() {
   const [initials, setInitials] = useState("EX");
   const [name, setName] = useState("");
   useEffect(() => {
@@ -16,10 +17,10 @@ function DirectorLayout() {
 
   return (
     <DashboardLayout
-      title={"Director Dashboard"}
+      title={"Executive Dashboard"}
       subtitle={"manage all operations"}
       userInitials={initials}
-      role={"director"}
+      role={"executive"}
       name={name}
     >
       <main>
@@ -29,4 +30,4 @@ function DirectorLayout() {
   );
 }
 
-export default DirectorLayout;
+export default ExecutiveLayout;
