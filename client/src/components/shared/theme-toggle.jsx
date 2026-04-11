@@ -23,9 +23,9 @@ export default function ThemeToggle() {
       onClick={() =>
         setTheme(theme === "dark" ? "light" : "dark")
       }
-      className="bg-primary text-primary-foreground px-4 py-2 rounded-md transition"
+      className="bg-primary text-primary-foreground md:px-4 md:py-2 rounded-md transition"
     >
-      {theme === "dark" ? "Light Mode ☀️" : "Dark Mode 🌙"}
+      {theme === "dark" ? "Light Mode " : "Dark Mode "}
     </button>
   )
 }
