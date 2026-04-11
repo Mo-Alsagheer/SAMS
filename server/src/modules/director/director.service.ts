@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Application, ApplicationStatus } from '../applications/entities/application.entity';
+import { Role } from '../../common/constants/role.enum';
 
 @Injectable()
 export class DirectorService {
@@ -12,7 +13,8 @@ export class DirectorService {
 
   async getApplications(committeeId: string, status?: string) {
     const query = this.applicationRepository.createQueryBuilder('application')
-      .where('application.committeeId = :committeeId', { committeeId });
+      .where('application.committeeId = :committeeId', { committeeId })
+      .andWhere('application.targetRole = :targetRole', { targetRole: Role.MEMBER });
 
     if (status) {
       query.andWhere('application.status = :status', { status });
@@ -22,7 +24,7 @@ export class DirectorService {
   }
 
   async acceptPhase1(applicationId: string) {
-    const application = await this.applicationRepository.findOne({ where: { id: applicationId } });
+    const application = await this.applicationRepository.findOne({ where: { id: applicationId, targetRole: Role.MEMBER } });
     if (!application) {
       throw new NotFoundException('Application not found');
     }
@@ -31,7 +33,7 @@ export class DirectorService {
   }
 
   async rejectPhase1(applicationId: string) {
-    const application = await this.applicationRepository.findOne({ where: { id: applicationId } });
+    const application = await this.applicationRepository.findOne({ where: { id: applicationId, targetRole: Role.MEMBER } });
     if (!application) {
       throw new NotFoundException('Application not found');
     }
@@ -40,7 +42,7 @@ export class DirectorService {
   }
 
   async scheduleInterview(applicationId: string, payload: any) {
-    const application = await this.applicationRepository.findOne({ where: { id: applicationId } });
+    const application = await this.applicationRepository.findOne({ where: { id: applicationId, targetRole: Role.MEMBER } });
     if (!application) {
       throw new NotFoundException('Application not found');
     }
@@ -50,7 +52,7 @@ export class DirectorService {
   }
 
   async acceptPhase2(applicationId: string) {
-    const application = await this.applicationRepository.findOne({ where: { id: applicationId } });
+    const application = await this.applicationRepository.findOne({ where: { id: applicationId, targetRole: Role.MEMBER } });
     if (!application) {
       throw new NotFoundException('Application not found');
     }
@@ -59,7 +61,7 @@ export class DirectorService {
   }
 
   async rejectPhase2(applicationId: string) {
-    const application = await this.applicationRepository.findOne({ where: { id: applicationId } });
+    const application = await this.applicationRepository.findOne({ where: { id: applicationId, targetRole: Role.MEMBER } });
     if (!application) {
       throw new NotFoundException('Application not found');
     }
