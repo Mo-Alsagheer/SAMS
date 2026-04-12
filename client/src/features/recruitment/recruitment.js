@@ -1,0 +1,29 @@
+import api from "@/features/api";
+
+export async function getRecruitments() {
+  const res = await api.get("/executive/recruitment");
+  return res.data;
+}
+
+export async function openExecutiveRecruitment(data) {
+  const res = await api.post(
+    "/executive/recruitment/global/open",
+    data
+  );
+  return res.data;
+}
+
+export async function openCommitteeRecruitment(committeeId, data) {
+  const res = await api.post(
+    `/executive/recruitment/${committeeId}/open`,
+    data
+  );
+  return res.data;
+}
+
+export async function closeRecruitmentApi(id) {
+  const res = await api.post(
+    `/executive/recruitment/${id}/close`
+  );
+  return res.data;
+}

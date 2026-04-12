@@ -4,7 +4,12 @@ import logoScroll from "../../assets/logoScroll.png";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 
 function Navbar() {
-  const navLinks = ["Home", "About", "Committees"];
+  const navLinks = [
+    { name: "Home", id: "home" },
+    { name: "About", id: "about" },
+    { name: "Committees", id: "committees" },
+  ];
+
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -12,6 +17,7 @@ function Navbar() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -25,6 +31,8 @@ function Navbar() {
       }`}
     >
       <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
+        
+        {/* Logo */}
         <div className="flex items-center gap-2 md:gap-3">
           <img
             src={isScrolled ? logoScroll : logo}
@@ -40,25 +48,29 @@ function Navbar() {
           </span>
         </div>
 
+        {/* Mobile button */}
         <button
-          className={`lg:hidden text-3xl transition-colors ${isScrolled ? "text-blue-900" : "text-white"}`}
+          className={`lg:hidden text-3xl transition-colors ${
+            isScrolled ? "text-blue-900" : "text-white"
+          }`}
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? <HiX /> : <HiMenuAlt3 />}
         </button>
 
+        {/* Desktop links */}
         <div className="hidden lg:flex items-center gap-4">
           {navLinks.map((link) => (
             <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
+              key={link.id}
+              href={`#${link.id}`}
               className={`px-4 py-2 font-bold transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 ${
                 isScrolled
                   ? "text-slate-600 hover:text-blue-800"
                   : "text-white/80 hover:text-white"
               }`}
             >
-              {link}
+              {link.name}
             </a>
           ))}
 
