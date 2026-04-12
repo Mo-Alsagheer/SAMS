@@ -24,6 +24,11 @@ export class RecruitmentService {
   ) {}
 
   async openProcess(executiveId: string, committeeId: string, dto: OpenRecruitmentDto) {
+    if (dto.role === Role.EXECUTIVE) {
+      throw new BadRequestException(
+        'Committee recruitment processes can only be for MEMBER or DIRECTOR roles',
+      );
+    }
     const committee = await this.committeeRepository.findOne({
       where: { id: committeeId },
     });
