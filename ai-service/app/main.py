@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from quiz_generation import router as quiz_router
-from cv_filtration import router as cv_router
-from interview_agent import router as interview_router
-from llm_config import setup_backend
+from app.api.routes.quiz import router as quiz_router
+from app.api.routes.cv import router as cv_router
+from app.api.routes.interview import router as interview_router
+from app.providers.llm import setup_backend
 
 app = FastAPI(title="SAMS AI Services")
 
@@ -29,4 +29,4 @@ async def health():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
