@@ -15,6 +15,7 @@ import Dashboard from "./executive/pages/DashBoard";
 import Recruitment from "./executive/pages/Recruitment";
 import Committees from "./executive/pages/Committees";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import CommitteeDetails from "./executive/pages/CommitteeDetails";
 
 function App() {
   return (
@@ -40,8 +41,11 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="recruitment" element={<Recruitment />} />
             <Route path="committees" element={<Committees />} />
+            <Route
+              path="committees/:committeeId"
+              element={<CommitteeDetails />}
+            />
           </Route>
-          
         </Route>
       </Routes>
     </>

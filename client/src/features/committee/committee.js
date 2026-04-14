@@ -30,3 +30,18 @@ export async function addCommittee(data) {
   const res = await api.post(`/committees`, data);
   return res.data;
 }
+
+
+export async function getCommitteeDirectors(committeeId) {
+  const res = await api.get(
+    `/executive/committees/${committeeId}/directors`
+  );
+  return res.data;
+}
+
+export async function getCommitteeMembers(committeeId) {
+  const res = await api.get(
+    `/executive/committees/${committeeId}/members`
+  );
+  return res.data;
+}
