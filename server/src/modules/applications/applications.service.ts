@@ -5,12 +5,15 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
+import { Role } from '../../common/constants/role.enum';
 import { Application, ApplicationStatus } from './entities/application.entity';
 import {
   RecruitmentProcess,
   RecruitmentStatus,
 } from '../recruitment/entities/recruitment.entity';
+import { CreateApplicationDto } from './dto/create-application.dto';
+import { AiService } from '../ai/ai.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -19,62 +22,52 @@ export class ApplicationsService {
     private applicationRepository: Repository<Application>,
     @InjectRepository(RecruitmentProcess)
     private recruitmentProcessRepository: Repository<RecruitmentProcess>,
+    private aiService: AiService,
   ) {}
 
-  async createDraft(userId: string, committeeId: string) {
+  async createApplication(dto: CreateApplicationDto) {
+    if (dto.targetRole === Role.EXECUTIVE) {
+      if (dto.committeeId) {
+        throw new BadRequestException('Executive applications cannot target a specific committee');
+      }
+    } else {
+      if (!dto.committeeId) {
+        throw new BadRequestException('Committee ID is required for this role');
+      }
+    }
+
+    const committeeIdCondition = dto.committeeId ? dto.committeeId : IsNull();
+
     // Verify committee recruitment is OPEN
     const process = await this.recruitmentProcessRepository.findOne({
-      where: { committeeId },
+      where: { committeeId: committeeIdCondition, role: dto.targetRole },
     });
     if (!process || process.status !== RecruitmentStatus.OPEN) {
       throw new BadRequestException(
-        'Recruitment process for this committee is not OPEN',
+        'Recruitment process for this role (and committee) is not OPEN',
       );
     }
 
-    // Check if user already applied
+    // Check if user already applied by email
     const existing = await this.applicationRepository.findOne({
-      where: { userId, committeeId },
+      where: { email: dto.email, committeeId: committeeIdCondition, targetRole: dto.targetRole },
     });
     if (existing) {
-      throw new ConflictException('You have already applied to this committee');
+      throw new ConflictException('An application with this email has already been submitted for the specified role');
     }
 
     const application = this.applicationRepository.create({
-      userId,
-      committeeId,
-      status: ApplicationStatus.DRAFT,
-      name: '', // Mock or extract from user profile later
-      email: '',
-      phone: '',
+      committeeId: dto.committeeId || null,
+      name: dto.name,
+      email: dto.email,
+      phone: dto.phone,
+      linkedinLink: dto.linkedinLink,
+      cvLink: dto.cvLink,
+      status: ApplicationStatus.SUBMITTED,
+      targetRole: dto.targetRole,
     });
 
     return this.applicationRepository.save(application);
-  }
-
-  async updateDraft(id: string, updateData: any) {
-    const application = await this.findOne(id);
-    if (application.status !== ApplicationStatus.DRAFT) {
-      throw new BadRequestException('Can only update DRAFT applications');
-    }
-
-    Object.assign(application, updateData);
-    return this.applicationRepository.save(application);
-  }
-
-  async submit(id: string) {
-    const application = await this.findOne(id);
-    if (application.status !== ApplicationStatus.DRAFT) {
-      throw new BadRequestException('Application is not in DRAFT status');
-    }
-
-    application.status = ApplicationStatus.SUBMITTED;
-    application.submittedAt = new Date();
-    return this.applicationRepository.save(application);
-  }
-
-  async findByUserId(userId: string) {
-    return this.applicationRepository.find({ where: { userId } });
   }
 
   async findOne(id: string) {
@@ -85,5 +78,25 @@ export class ApplicationsService {
       throw new NotFoundException('Application not found');
     }
     return application;
+  }
+
+  async evaluatePendingApplications() {
+    const applications = await this.applicationRepository.find({
+      where: { status: ApplicationStatus.SUBMITTED },
+    });
+    
+    const cvsToEvaluate = applications
+      .filter(app => app.cvLink)
+      .map(app => ({
+        id: app.id,
+        type: 'gdrive',
+        link: app.cvLink,
+      }));
+
+    if (cvsToEvaluate.length === 0) {
+      return { message: 'No applications pending evaluation with a valid CV link.', results: [] };
+    }
+
+    return this.aiService.evaluateBatchApplications({ cvs: cvsToEvaluate });
   }
 }

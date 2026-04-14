@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ulid } from 'ulid';
+import { Role } from '../../../common/constants/role.enum';
 
 export enum RecruitmentStatus {
   OPEN = 'OPEN',
@@ -25,8 +26,14 @@ export class RecruitmentProcess {
     }
   }
 
-  @Column({ type: 'text' })
-  committeeId: string;
+  @Column({ type: 'text', nullable: true })
+  committeeId: string | null;
+
+  @Column({ type: 'enum', enum: Role, default: Role.MEMBER })
+  role: Role;
+
+  @Column({ type: 'int', default: 0 })
+  targetMembers: number;
 
   @Column({
     type: 'enum',
