@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import aboutImg from "@/assets/about.jpg";
 
@@ -6,7 +6,7 @@ function AboutUs() {
   const navigate = useNavigate();
 
   return (
-    <section className="max-w-[1200px] mx-auto px-6 py-16 lg:py-24 mt-12 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
+    <section id="about" className="max-w-[1200px] mx-auto px-6 py-16 lg:py-24 mt-12 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
       <div className="flex-1 text-center lg:text-left order-2 lg:order-1">
         <h1 className="text-4xl md:text-5xl font-black text-blue-900 mb-4 tracking-tight italic">
           About <span className="text-blue-600">IEEE</span>

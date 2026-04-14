@@ -1,6 +1,7 @@
 import React from "react";
 import Cards from "./Cards";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 function CommitteesSection() {
   return (
@@ -16,8 +17,11 @@ function CommitteesSection() {
             </p>
           </div>
 
-          <Button className="bg-blue-700 hover:bg-blue-800 text-white p-6 rounded-xl font-bold transition-all hover:scale-105 active:scale-95 shadow-md shadow-blue-200 text-lg">
-            View All Committees
+          <Button
+            asChild
+            className="bg-blue-700 hover:bg-blue-800 text-white p-7 rounded-xl font-bold transition-all hover:scale-105 active:scale-95 shadow-md shadow-blue-200 text-lg"
+          >
+            <Link to="/committees">View All Committees</Link>
           </Button>
         </div>
 

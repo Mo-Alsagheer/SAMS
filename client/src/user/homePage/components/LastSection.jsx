@@ -1,5 +1,5 @@
 import Button from "@/components/shared/Button";
-
+import { Link } from "react-router-dom";
 function LastSection() {
   return (
     <div className="px-6 py-12"> 
@@ -21,11 +21,11 @@ function LastSection() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button className="!bg-white !text-blue-900 hover:!bg-blue-50 px-10 py-4 !text-lg font-bold rounded-xl transition-all hover:scale-105 active:scale-95 ">
-              Get Started Now
+             <Link to="/committees">Explore</Link> 
             </Button>
             
             <Button className="!bg-transparent border-2 border-white/20 !text-white hover:!bg-white/10 px-10 py-4 !text-lg font-bold rounded-xl transition-all">
-              Contact Us
+             <Link to="#">Contact Us</Link> 
             </Button>
           </div>
         </div>

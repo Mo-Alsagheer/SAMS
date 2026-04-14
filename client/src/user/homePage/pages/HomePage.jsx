@@ -11,7 +11,7 @@ function HomePage() {
     <div>
       <Navbar />
       <HeroSection />
-      <AboutUs />
+      <AboutUs  />
       <StatsSection />
       <CommitteesSection />
       <LastSection />
