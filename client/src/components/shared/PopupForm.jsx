@@ -69,7 +69,12 @@ export function PopupForm({
             {...register(field.name, { valueAsNumber: true })}
           />
         );
-
+      case "datetime-local":
+        return(
+        <Input type="datetime-local"
+         {...register(field.name)}
+          />
+        );
       case "checkbox":
         return (
           <input
