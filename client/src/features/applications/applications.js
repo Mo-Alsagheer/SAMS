@@ -1,6 +1,6 @@
 import api from "@/features/api";
 
-export const getExecutiveApplications = async (committeeId, status) => {
+export const getDirectorApplications = async (committeeId, status) => {
   const params = {};
 
   if (committeeId) params.committeeId = committeeId;

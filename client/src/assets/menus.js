@@ -1,4 +1,4 @@
-import { File, LayoutDashboardIcon, ListTodo } from "lucide-react";
+import { BookCopyIcon, File, LayoutDashboardIcon, ListTodo } from "lucide-react";
 import {
   LayoutDashboard,
   Users,
@@ -38,7 +38,7 @@ export const directormenu = [
 export const executive = [
   { name: "Dashboard", path: "/executive", icon: LayoutDashboard },
   { name: "Committees", path: "/executive/committees", icon: BookOpen },
-  { name: "Applications", path: "/executive/applications", icon: BookOpen },
+  { name: "Applications", path: "/executive/applications", icon: BookCopyIcon },
   { name: "Recruitment", path: "/executive/recruitment", icon: ClipboardList },
   { name: "Events", path: "/executive/events", icon: Calendar },
   { name: "Settings", path: "/executive/settings", icon: Settings },

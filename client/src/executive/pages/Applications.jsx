@@ -6,32 +6,25 @@ import { z } from "zod";
 import Table from "@/components/shared/Table";
 import { PopupForm } from "@/components/shared/PopupForm";
 import { getInitials } from "@/utils/getInitials";
-import { useExecutiveApplications } from "@/executive/hooks/useExecutiveApplications";
+import { useDirectorApplications } from "@/executive/hooks/useDirectorApplications";
 
 /* ---------------- Schema ---------------- */
 
 const scheduleSchema = z.object({
   date: z.string().min(1, "Date is required"),
-  link: z.url("Enter valid meeting link"),
+  link: z.string().url("Enter valid meeting link"),
 });
 
 const scheduleFields = [
-  {
-    name: "date",
-    label: "Interview Date",
-    type: "datetime-local",
-  },
-  {
-    name: "link",
-    label: "Meeting Link",
-  },
+  { name: "date", label: "Interview Date", type: "datetime-local" },
+  { name: "link", label: "Meeting Link" },
 ];
 
 /* ---------------- Skeleton ---------------- */
 
-function Skeleton({ className }) {
-  return <div className={`animate-pulse bg-muted rounded ${className}`} />;
-}
+const Skeleton = ({ className }) => (
+  <div className={`animate-pulse bg-muted rounded ${className}`} />
+);
 
 /* ---------------- Page ---------------- */
 
@@ -40,22 +33,23 @@ function Applications() {
 
   const {
     committees,
-    selectedCommittee,
     applications,
-    loading,
+    selectedCommittee,
+    selectCommittee,
+    loadingCommittees,
+    loadingApplications,
     actionLoadingId,
 
-    scheduleOpen,
+    scheduleModalOpen,
     openSchedule,
     closeSchedule,
     scheduleInterview,
 
-    selectCommittee,
     acceptPhase1,
     rejectPhase1,
     acceptPhase2,
     rejectPhase2,
-  } = useExecutiveApplications();
+  } = useDirectorApplications();
 
   /* ---------------- Badges ---------------- */
 
@@ -71,9 +65,7 @@ function Applications() {
     };
 
     return (
-      <span
-        className={`px-2 py-1 text-xs rounded-full font-medium ${map[status] || "bg-muted"}`}
-      >
+      <span className={`px-2 py-1 text-xs rounded-full ${map[status] || ""}`}>
         {status}
       </span>
     );
@@ -86,80 +78,51 @@ function Applications() {
     };
 
     return (
-      <span
-        className={`px-2 py-1 text-xs rounded-full font-medium ${map[role] || "bg-muted"}`}
-      >
+      <span className={`px-2 py-1 text-xs rounded-full ${map[role] || ""}`}>
         {role}
       </span>
     );
   };
 
-  /* ---------------- Actions Renderer ---------------- */
+  /* ---------------- Actions ---------------- */
 
   const renderActions = (row) => {
     const isLoading = actionLoadingId === row.id;
+
+    const btn = (label, onClick, color) => (
+      <button
+        onClick={onClick}
+        disabled={isLoading}
+        className={`px-3 py-1 text-xs rounded-md text-white ${color}`}
+      >
+        {label}
+      </button>
+    );
 
     switch (row.status) {
       case "SUBMITTED":
       case "AI_REVIEWED":
         return (
           <>
-            <button
-              onClick={() => acceptPhase1(row.id)}
-              disabled={isLoading}
-              className="px-3 py-1 text-xs rounded-md bg-green-600 text-white"
-            >
-              Accept
-            </button>
-
-            <button
-              onClick={() => rejectPhase1(row.id)}
-              disabled={isLoading}
-              className="px-3 py-1 text-xs rounded-md bg-red-600 text-white"
-            >
-              Reject
-            </button>
+            {btn("Accept", () => acceptPhase1(row.id), "bg-green-600")}
+            {btn("Reject", () => rejectPhase1(row.id), "bg-red-600")}
           </>
         );
 
       case "PHASE1_ACCEPTED":
-        return (
-          <button
-            onClick={() => openSchedule(row.id)}
-            disabled={isLoading}
-            className="px-3 py-1 text-xs rounded-md bg-blue-600 text-white"
-          >
-            Schedule Interview
-          </button>
+        return btn(
+          "Schedule",
+          () => openSchedule(row.id),
+          "bg-blue-600",
         );
 
       case "INTERVIEW_SCHEDULED":
         return (
           <>
-            <button
-              onClick={() => acceptPhase2(row.id)}
-              disabled={isLoading}
-              className="px-3 py-1 text-xs rounded-md bg-green-600 text-white"
-            >
-              Final Accept
-            </button>
-
-            <button
-              onClick={() => rejectPhase2(row.id)}
-              disabled={isLoading}
-              className="px-3 py-1 text-xs rounded-md bg-red-600 text-white"
-            >
-              Final Reject
-            </button>
+            {btn("Final Accept", () => acceptPhase2(row.id), "bg-green-600")}
+            {btn("Final Reject", () => rejectPhase2(row.id), "bg-red-600")}
           </>
         );
-
-      case "PHASE2_ACCEPTED":
-        return <span className="text-green-600 text-xs">Completed</span>;
-
-      case "PHASE1_REJECTED":
-      case "PHASE2_REJECTED":
-        return <span className="text-red-600 text-xs">Rejected</span>;
 
       default:
         return null;
@@ -174,7 +137,7 @@ function Applications() {
         header: "Applicant",
         render: (row) => (
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
+            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold">
               {getInitials(row?.name || "")}
             </div>
             <div>
@@ -185,89 +148,57 @@ function Applications() {
         ),
       },
       { header: "Phone", accessor: "phone" },
-      {
-        header: "Target Role",
-        render: (row) => getRoleBadge(row?.targetRole),
-      },
-      {
-        header: "Status",
-        render: (row) => getStatusBadge(row?.status),
-      },
+      { header: "Role", render: (r) => getRoleBadge(r.targetRole) },
+      { header: "Status", render: (r) => getStatusBadge(r.status) },
       {
         header: "Links",
-        render: (row) => (
+        render: (r) => (
           <div className="flex gap-3 text-sm">
-            <a
-              href={row?.linkedinLink}
-              target="_blank"
-              rel="noreferrer"
-              className="text-primary hover:underline"
-            >
-              LinkedIn
-            </a>
-            <a
-              href={row?.cvLink}
-              target="_blank"
-              rel="noreferrer"
-              className="text-primary hover:underline"
-            >
-              CV
-            </a>
+            <a href={r.linkedinLink} target="_blank">LinkedIn</a>
+            <a href={r.cvLink} target="_blank">CV</a>
           </div>
         ),
       },
       {
         header: "Actions",
-        render: (row) => <div className="flex gap-2">{renderActions(row)}</div>,
+        render: (r) => <div className="flex gap-2">{renderActions(r)}</div>,
       },
     ],
-    [
-      actionLoadingId,
-      acceptPhase1,
-      rejectPhase1,
-      acceptPhase2,
-      rejectPhase2,
-      openSchedule,
-    ],
+    [actionLoadingId],
   );
 
-  /* ---------------- Loading ---------------- */
+  /* ---------------- UI ---------------- */
 
-  if (loading) {
+  if (loadingCommittees) {
     return (
-      <div className="p-6 space-y-6">
-        <Skeleton className="h-9 w-24" />
-        <div className="border rounded-xl p-4 space-y-3">
-          {Array(6)
-            .fill(0)
-            .map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
-            ))}
-        </div>
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-10 w-32" />
+        <Skeleton className="h-64 w-full" />
       </div>
     );
   }
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center gap-3">
+      {/* Header */}
+      <div className="flex flex-row gap-3">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-card hover:bg-muted text-sm"
+          className="flex cursor-pointer bg-white border p-2 rounded-full"
         >
           <ArrowLeft size={16} />
-          Back
         </button>
 
-        <h1 className="text-2xl font-semibold text-secondary">
-          Executive Applications
+        <h1 className="text-2xl font-semibold">
+          Director Applications
         </h1>
       </div>
 
+      {/* Committee */}
       <select
         value={selectedCommittee}
         onChange={(e) => selectCommittee(e.target.value)}
-        className="border rounded-lg px-3 py-2 bg-card text-sm"
+        className="border bg-white rounded-lg px-3 py-2"
       >
         <option value="">Select Committee</option>
         {committees.map((c) => (
@@ -277,16 +208,19 @@ function Applications() {
         ))}
       </select>
 
-      <div className="border rounded-xl bg-card">
-        <Table columns={columns} data={applications} />
-      </div>
+      {/* Table */}
+      <Table
+        columns={columns}
+        data={applications}
+        loading={loadingApplications}
+      />
 
+      {/* Modal */}
       <PopupForm
-        open={scheduleOpen}
+        open={scheduleModalOpen}
         onClose={closeSchedule}
         title="Schedule Interview"
         schema={scheduleSchema}
-        defaultValues={{ date: "", link: "" }}
         fields={scheduleFields}
         onSubmit={scheduleInterview}
         submitLabel="Schedule"
