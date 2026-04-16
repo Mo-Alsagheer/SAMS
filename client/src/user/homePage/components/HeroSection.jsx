@@ -1,5 +1,6 @@
 import Button from "../../../components/shared/Button";
 import heroImage from "../../../assets/heroImage.jpg";
+import { Link } from "react-router-dom";
 const HeroSection = () => {
   return (
     <div className="relative bg-white overflow-hidden">
@@ -21,10 +22,10 @@ const HeroSection = () => {
               </p>
               <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
                 <Button className="bg-white text-blue-800 hover:bg-cyan-50 shadow-blue-900/20">
-                  Join a Committee
+                   <Link to="/committees">Join a Committee</Link> 
                 </Button>
                 <Button className="bg-transparent border-2 border-white/40 text-white hover:bg-white/10 shadow-none">
-                  View Events
+                 <Link to="#">View Events</Link>  
                 </Button>
               </div>
             </div>
