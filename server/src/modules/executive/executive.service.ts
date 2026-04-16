@@ -1,10 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
 import { User } from '../users/entities/user.entity';
 import { Role } from '../../common/constants/role.enum';
-
 import { Application, ApplicationStatus } from '../applications/entities/application.entity';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class ExecutiveService {
@@ -13,6 +15,8 @@ export class ExecutiveService {
     private userRepository: Repository<User>,
     @InjectRepository(Application)
     private applicationRepository: Repository<Application>,
+    private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
   ) {}
 
   async getDirectorsByCommittee(committeeId: string): Promise<User[]> {
@@ -86,8 +90,39 @@ export class ExecutiveService {
     if (!application) {
       throw new NotFoundException('Application not found');
     }
+
     application.status = ApplicationStatus.PHASE2_ACCEPTED;
-    return this.applicationRepository.save(application);
+    await this.applicationRepository.save(application);
+
+    // Generate a random temporary password
+    const plainPassword = this.generatePassword();
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+    // Determine the role label for the email
+    const roleLabel = application.targetRole === Role.EXECUTIVE ? 'Executive' : 'Director';
+
+    // Create a User account for the accepted applicant
+    const user = this.userRepository.create({
+      name: application.name,
+      email: application.email,
+      phone: application.phone,
+      password: hashedPassword,
+      role: application.targetRole,
+      committeeId: application.committeeId ?? null,
+    });
+    await this.userRepository.save(user);
+
+    // Send welcome email with credentials
+    const loginUrl = this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:5173';
+    await this.emailService.sendWelcomeEmail({
+      to: application.email,
+      name: application.name,
+      role: roleLabel,
+      password: plainPassword,
+      loginUrl,
+    });
+
+    return application;
   }
 
   async rejectPhase2(applicationId: string) {
@@ -97,5 +132,14 @@ export class ExecutiveService {
     }
     application.status = ApplicationStatus.PHASE2_REJECTED;
     return this.applicationRepository.save(application);
+  }
+
+  private generatePassword(length = 12): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+    let password = '';
+    for (let i = 0; i < length; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
   }
 }
