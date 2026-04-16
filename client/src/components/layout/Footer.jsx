@@ -45,7 +45,7 @@ const Footer = () => {
           <Link to="/committees" className="text-blue-100/70 hover:text-cyan-400 transition-colors cursor-pointer">
             All Committees
           </Link>
-          <Link to="/login" className="text-blue-100/70 hover:text-cyan-400 transition-colors cursor-pointer">
+          <Link to="/application" className="text-blue-100/70 hover:text-cyan-400 transition-colors cursor-pointer">
             Join Us
           </Link>
         </div>
