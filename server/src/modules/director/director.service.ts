@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -7,6 +7,7 @@ import { Application, ApplicationStatus } from '../applications/entities/applica
 import { User } from '../users/entities/user.entity';
 import { Role } from '../../common/constants/role.enum';
 import { EmailService } from '../email/email.service';
+import { RecruitmentProcess, RecruitmentStatus } from '../recruitment/entities/recruitment.entity';
 
 @Injectable()
 export class DirectorService {
@@ -15,6 +16,8 @@ export class DirectorService {
     private applicationRepository: Repository<Application>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(RecruitmentProcess)
+    private recruitmentRepository: Repository<RecruitmentProcess>,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
   ) {}
@@ -63,6 +66,31 @@ export class DirectorService {
     const application = await this.applicationRepository.findOne({ where: { id: applicationId, targetRole: Role.MEMBER } });
     if (!application) {
       throw new NotFoundException('Application not found');
+    }
+
+    // --- Quota check ---
+    const recruitment = await this.recruitmentRepository.findOne({
+      where: {
+        committeeId: application.committeeId,
+        role: Role.MEMBER,
+        status: RecruitmentStatus.OPEN,
+      },
+    });
+
+    if (recruitment && recruitment.targetMembers > 0) {
+      const acceptedCount = await this.applicationRepository.count({
+        where: {
+          committeeId: application.committeeId,
+          targetRole: Role.MEMBER,
+          status: ApplicationStatus.PHASE2_ACCEPTED,
+        },
+      });
+
+      if (acceptedCount >= recruitment.targetMembers) {
+        throw new BadRequestException(
+          `Recruitment quota reached: this committee already has ${acceptedCount} accepted member(s) out of a target of ${recruitment.targetMembers}.`,
+        );
+      }
     }
 
     application.status = ApplicationStatus.PHASE2_ACCEPTED;

@@ -1,12 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, IsNull } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/entities/user.entity';
 import { Role } from '../../common/constants/role.enum';
 import { Application, ApplicationStatus } from '../applications/entities/application.entity';
 import { EmailService } from '../email/email.service';
+import { RecruitmentProcess, RecruitmentStatus } from '../recruitment/entities/recruitment.entity';
 
 @Injectable()
 export class ExecutiveService {
@@ -15,6 +16,8 @@ export class ExecutiveService {
     private userRepository: Repository<User>,
     @InjectRepository(Application)
     private applicationRepository: Repository<Application>,
+    @InjectRepository(RecruitmentProcess)
+    private recruitmentRepository: Repository<RecruitmentProcess>,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
   ) {}
@@ -89,6 +92,34 @@ export class ExecutiveService {
     const application = await this.applicationRepository.findOne({ where: { id: applicationId, targetRole: In([Role.DIRECTOR, Role.EXECUTIVE]) } });
     if (!application) {
       throw new NotFoundException('Application not found');
+    }
+
+    // --- Quota check ---
+    // For EXECUTIVE applications committeeId is null; for DIRECTOR it is set.
+    const recruitmentWhere =
+      application.targetRole === Role.EXECUTIVE
+        ? { role: Role.EXECUTIVE, committeeId: IsNull(), status: RecruitmentStatus.OPEN }
+        : { role: Role.DIRECTOR, committeeId: application.committeeId, status: RecruitmentStatus.OPEN };
+
+    const recruitment = await this.recruitmentRepository.findOne({ where: recruitmentWhere });
+
+    if (recruitment && recruitment.targetMembers > 0) {
+      const acceptedCount = await this.applicationRepository.count({
+        where: {
+          targetRole: application.targetRole,
+          status: ApplicationStatus.PHASE2_ACCEPTED,
+          ...(application.targetRole === Role.EXECUTIVE
+            ? { committeeId: null }
+            : { committeeId: application.committeeId }),
+        },
+      });
+
+      if (acceptedCount >= recruitment.targetMembers) {
+        const roleLabel = application.targetRole === Role.EXECUTIVE ? 'executive' : 'director';
+        throw new BadRequestException(
+          `Recruitment quota reached: this recruitment already has ${acceptedCount} accepted ${roleLabel}(s) out of a target of ${recruitment.targetMembers}.`,
+        );
+      }
     }
 
     application.status = ApplicationStatus.PHASE2_ACCEPTED;

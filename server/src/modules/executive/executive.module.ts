@@ -6,10 +6,11 @@ import { ExecutiveService } from './executive.service';
 import { User } from '../users/entities/user.entity';
 import { Application } from '../applications/entities/application.entity';
 import { EmailModule } from '../email/email.module';
+import { RecruitmentProcess } from '../recruitment/entities/recruitment.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Application]),
+    TypeOrmModule.forFeature([User, Application, RecruitmentProcess]),
     ConfigModule,
     EmailModule,
   ],
