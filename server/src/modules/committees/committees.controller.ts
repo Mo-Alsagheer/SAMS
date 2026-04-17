@@ -34,7 +34,6 @@ import { ParseUlidPipe } from '../../common/pipes/parse-ulid.pipe';
 import { CommitteesService } from './committees.service';
 import { CloudinaryService } from '../../integrations/cloudinary/cloudinary.service';
 import { CreateCommitteeDto } from './dto/create-committee.dto';
-import { UpdateCommitteeDescriptionDto } from './dto/update-committee-description.dto';
 import { UpdateCommitteeDto } from './dto/update-committee.dto';
 import { UpdateCommitteeByDirectorDto } from './dto/update-committee-by-director.dto';
 
@@ -125,12 +124,15 @@ export class CommitteesController {
   }
 
   @Patch(':id')
-  @Roles(Role.EXECUTIVE)
+  @Roles(Role.EXECUTIVE, Role.DIRECTOR)
   @UseInterceptors(
     FileInterceptor('image', { limits: { fileSize: 5 * 1024 * 1024 } }),
   )
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Update a committee (Executive)' })
+  @ApiOperation({
+    summary:
+      'Update a committee (Executive: all fields | Director: description, whatsappGroupLink, image)',
+  })
   @ApiParam({
     name: 'id',
     description: 'ULID of the committee',
@@ -140,12 +142,20 @@ export class CommitteesController {
     schema: {
       type: 'object',
       properties: {
-        name: { type: 'string' },
+        name: { type: 'string', description: 'Executive only' },
         description: { type: 'string' },
-        type: { type: 'string', enum: ['TECHNICAL', 'MEDIA', 'HR', 'EX-COMM'] },
-        planID: { type: 'string' },
-        directorIDs: { type: 'array', items: { type: 'string' } },
-        membersCount: { type: 'integer' },
+        type: {
+          type: 'string',
+          enum: ['TECHNICAL', 'MEDIA', 'OPERATION'],
+          description: 'Executive only',
+        },
+        planID: { type: 'string', description: 'Executive only' },
+        directorIDs: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Executive only',
+        },
+        membersCount: { type: 'integer', description: 'Executive only' },
         whatsappGroupLink: { type: 'string' },
         image: {
           type: 'string',
@@ -159,12 +169,36 @@ export class CommitteesController {
     status: 200,
     description: 'The committee has been successfully updated.',
   })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden. Director not assigned to this committee.',
+  })
   @ApiResponse({ status: 404, description: 'Committee not found.' })
   async update(
     @Param('id', new ParseUlidPipe()) id: string,
     @Body() dto: UpdateCommitteeDto,
+    @Req() req: Request,
     @UploadedFile() image?: Express.Multer.File,
   ) {
+    const user = req.user as AuthUser;
+
+    if (user.role === Role.DIRECTOR) {
+      const committee = await this.committeesService.getById(id);
+      if (!committee.directorIDs.includes(user.id)) {
+        throw new ForbiddenException('Director not assigned to this committee');
+      }
+      // Directors may only update these three fields
+      const directorDto: UpdateCommitteeByDirectorDto = {
+        description: dto.description,
+        whatsappGroupLink: dto.whatsappGroupLink,
+      };
+      const imageUrl = image
+        ? await this.cloudinaryService.uploadImage(image)
+        : undefined;
+      return this.committeesService.update(id, directorDto, imageUrl);
+    }
+
+    // Executive path — all fields allowed
     const imageUrl = image
       ? await this.cloudinaryService.uploadImage(image)
       : undefined;
@@ -191,86 +225,5 @@ export class CommitteesController {
   @ApiResponse({ status: 404, description: 'Committee not found.' })
   delete(@Param('id', new ParseUlidPipe()) id: string) {
     return this.committeesService.delete(id);
-  }
-
-  // ── Director ──────────────────────────────────────────────────────────────
-
-  @Patch(':id/description')
-  @Roles(Role.DIRECTOR)
-  @ApiOperation({ summary: 'Update committee description (Director)' })
-  @ApiParam({
-    name: 'id',
-    description: 'ULID of the committee',
-    example: '01HRGZ...',
-  })
-  @ApiResponse({ status: 200, description: 'The description was updated.' })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden. Director not assigned to committee.',
-  })
-  @ApiResponse({ status: 404, description: 'Committee not found.' })
-  async updateDescription(
-    @Param('id', new ParseUlidPipe()) id: string,
-    @Body() dto: UpdateCommitteeDescriptionDto,
-    @Req() req: Request,
-  ) {
-    const user = req.user as AuthUser;
-    const committee = await this.committeesService.getById(id);
-    if (!committee.directorIDs.includes(user.id)) {
-      throw new ForbiddenException('Director not assigned to committee');
-    }
-    return this.committeesService.updateDescription(id, dto.description);
-  }
-
-  @Patch(':id')
-  @Roles(Role.DIRECTOR)
-  @UseInterceptors(
-    FileInterceptor('image', { limits: { fileSize: 5 * 1024 * 1024 } }),
-  )
-  @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Update committee details (Director)' })
-  @ApiParam({
-    name: 'id',
-    description: 'ULID of the committee',
-    example: '01HRGZ...',
-  })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        description: { type: 'string' },
-        whatsappGroupLink: { type: 'string' },
-        image: {
-          type: 'string',
-          format: 'binary',
-          description: 'Committee image (max 5 MB)',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'The committee has been successfully updated.',
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden. Director not assigned to this committee.',
-  })
-  @ApiResponse({ status: 404, description: 'Committee not found.' })
-  async updateByDirector(
-    @Param('id', new ParseUlidPipe()) id: string,
-    @Body() dto: UpdateCommitteeByDirectorDto,
-    @Req() req: Request,
-    @UploadedFile() image?: Express.Multer.File,
-  ) {
-    const user = req.user as AuthUser;
-    const committee = await this.committeesService.getById(id);
-    if (!committee.directorIDs.includes(user.id)) {
-      throw new ForbiddenException('Director not assigned to this committee');
-    }
-    const imageUrl = image
-      ? await this.cloudinaryService.uploadImage(image)
-      : undefined;
-    return this.committeesService.update(id, dto, imageUrl);
   }
 }
