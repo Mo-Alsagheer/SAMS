@@ -1,7 +1,6 @@
 import { OpenRecruitmentDto } from './dto/open-recruitment.dto';
 import {
   Injectable,
-
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
@@ -23,7 +22,11 @@ export class RecruitmentService {
     private committeeRepository: Repository<Committee>,
   ) {}
 
-  async openProcess(executiveId: string, committeeId: string, dto: OpenRecruitmentDto) {
+  async openProcess(
+    executiveId: string,
+    committeeId: string,
+    dto: OpenRecruitmentDto,
+  ) {
     if (dto.role === Role.EXECUTIVE) {
       throw new BadRequestException(
         'Committee recruitment processes can only be for MEMBER or DIRECTOR roles',
@@ -65,7 +68,9 @@ export class RecruitmentService {
 
   async openGlobalProcess(executiveId: string, dto: OpenRecruitmentDto) {
     if (dto.role !== Role.EXECUTIVE) {
-      throw new BadRequestException('Global recruitment processes must be for the EXECUTIVE role');
+      throw new BadRequestException(
+        'Global recruitment processes must be for the EXECUTIVE role',
+      );
     }
 
     let process = await this.recruitmentRepository.findOne({
@@ -74,7 +79,9 @@ export class RecruitmentService {
 
     if (process) {
       if (process.status === RecruitmentStatus.OPEN) {
-        throw new BadRequestException('Recruitment process is already OPEN globally for this role');
+        throw new BadRequestException(
+          'Recruitment process is already OPEN globally for this role',
+        );
       }
       process.status = RecruitmentStatus.OPEN;
       process.openedAt = new Date();
@@ -98,9 +105,7 @@ export class RecruitmentService {
       where: { id },
     });
     if (!process) {
-      throw new NotFoundException(
-        'Recruitment process not found',
-      );
+      throw new NotFoundException('Recruitment process not found');
     }
 
     if (process.status === RecruitmentStatus.CLOSED) {
@@ -114,5 +119,51 @@ export class RecruitmentService {
 
   async findAll() {
     return this.recruitmentRepository.find();
+  }
+
+  async getStatusByCommittee(committeeId: string, role?: Role) {
+    const committee = await this.committeeRepository.findOne({
+      where: { id: committeeId },
+    });
+    if (!committee) {
+      throw new NotFoundException('Committee not found');
+    }
+
+    const whereClause: any = { committeeId };
+    if (role) {
+      whereClause.role = role;
+    }
+
+    const processes = await this.recruitmentRepository.find({
+      where: whereClause,
+      order: { openedAt: 'DESC' },
+    });
+
+    if (processes.length === 0) {
+      return {
+        committeeId,
+        committeeName: committee.name,
+        isOpen: false,
+        status: RecruitmentStatus.CLOSED,
+        processes: [],
+      };
+    }
+
+    const isOpen = processes.some((p) => p.status === RecruitmentStatus.OPEN);
+
+    return {
+      committeeId,
+      committeeName: committee.name,
+      isOpen,
+      status: isOpen ? RecruitmentStatus.OPEN : RecruitmentStatus.CLOSED,
+      processes: processes.map((p) => ({
+        id: p.id,
+        role: p.role,
+        status: p.status,
+        targetMembers: p.targetMembers,
+        openedAt: p.openedAt,
+        closedAt: p.closedAt,
+      })),
+    };
   }
 }

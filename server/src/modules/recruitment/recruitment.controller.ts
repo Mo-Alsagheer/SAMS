@@ -1,5 +1,21 @@
-import { Controller, Post, Param, UseGuards, Get, Body, ParseIntPipe } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Param,
+  UseGuards,
+  Get,
+  Body,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+  ApiBody,
+} from '@nestjs/swagger';
 import { RecruitmentService } from './recruitment.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -9,6 +25,7 @@ import { Request } from 'express';
 import { Req } from '@nestjs/common';
 import { AuthUser } from '../auth/auth.types';
 import { OpenRecruitmentDto } from './dto/open-recruitment.dto';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('recruitment')
 @ApiBearerAuth()
@@ -19,14 +36,19 @@ export class RecruitmentController {
 
   @Post('global/open')
   @Roles(Role.EXECUTIVE)
-  @ApiOperation({ summary: 'Open a global recruitment process (e.g. for executives)' })
-  @ApiResponse({ status: 201, description: 'Global recruitment process successfully opened.' })
-  @ApiResponse({ status: 403, description: 'Forbidden. Requires Executive role.' })
+  @ApiOperation({
+    summary: 'Open a global recruitment process (e.g. for executives)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Global recruitment process successfully opened.',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden. Requires Executive role.',
+  })
   @ApiBody({ type: OpenRecruitmentDto })
-  openGlobalRecruitment(
-    @Body() dto: OpenRecruitmentDto,
-    @Req() req: Request,
-  ) {
+  openGlobalRecruitment(@Body() dto: OpenRecruitmentDto, @Req() req: Request) {
     const user = req.user as AuthUser;
     return this.recruitmentService.openGlobalProcess(user.id, dto);
   }
@@ -34,9 +56,19 @@ export class RecruitmentController {
   @Post(':committeeId/open')
   @Roles(Role.EXECUTIVE)
   @ApiOperation({ summary: 'Open recruitment process for a committee' })
-  @ApiParam({ name: 'committeeId', description: 'ULID of the committee', example: '01HRGZ...' })
-  @ApiResponse({ status: 201, description: 'Recruitment process successfully opened.' })
-  @ApiResponse({ status: 403, description: 'Forbidden. Requires Executive role.' })
+  @ApiParam({
+    name: 'committeeId',
+    description: 'ULID of the committee',
+    example: '01HRGZ...',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Recruitment process successfully opened.',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden. Requires Executive role.',
+  })
   @ApiResponse({ status: 404, description: 'Committee not found.' })
   @ApiBody({ type: OpenRecruitmentDto })
   openRecruitment(
@@ -51,9 +83,19 @@ export class RecruitmentController {
   @Post(':id/close')
   @Roles(Role.EXECUTIVE)
   @ApiOperation({ summary: 'Close a specific recruitment process' })
-  @ApiParam({ name: 'id', description: 'ULID of the recruitment process', example: '01HRGZ...' })
-  @ApiResponse({ status: 201, description: 'Recruitment process successfully closed.' })
-  @ApiResponse({ status: 404, description: 'Active recruitment process not found.' })
+  @ApiParam({
+    name: 'id',
+    description: 'ULID of the recruitment process',
+    example: '01HRGZ...',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Recruitment process successfully closed.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Active recruitment process not found.',
+  })
   closeRecruitment(@Param('id') id: string) {
     return this.recruitmentService.closeProcess(id);
   }
@@ -61,8 +103,59 @@ export class RecruitmentController {
   @Get()
   @Roles(Role.EXECUTIVE)
   @ApiOperation({ summary: 'List all recruitment processes' })
-  @ApiResponse({ status: 200, description: 'List of all recruitment processes across committees.' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all recruitment processes across committees.',
+  })
   findAll() {
     return this.recruitmentService.findAll();
+  }
+
+  @Get(':committeeId/status')
+  @Public()
+  @ApiOperation({ summary: 'Get recruitment status for a specific committee' })
+  @ApiParam({
+    name: 'committeeId',
+    description: 'ULID of the committee',
+    example: '01HRGZ...',
+  })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    enum: ['MEMBER', 'DIRECTOR'],
+    description:
+      'Filter by role (MEMBER or DIRECTOR). Returns combined status if omitted.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recruitment status for the committee.',
+    schema: {
+      example: {
+        committeeId: '01HRGZ...',
+        committeeName: 'Tech Committee',
+        isOpen: true,
+        status: 'OPEN',
+        processes: [
+          {
+            id: '01HRGZ...',
+            role: 'MEMBER',
+            status: 'OPEN',
+            targetMembers: 10,
+            openedAt: '2026-04-17T00:00:00.000Z',
+            closedAt: null,
+          },
+        ],
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Committee not found.' })
+  getCommitteeStatus(
+    @Param('committeeId') committeeId: string,
+    @Query('role') role?: 'MEMBER' | 'DIRECTOR',
+  ) {
+    return this.recruitmentService.getStatusByCommittee(
+      committeeId,
+      role as any,
+    );
   }
 }
