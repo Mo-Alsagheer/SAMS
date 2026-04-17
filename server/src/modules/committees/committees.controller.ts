@@ -79,7 +79,9 @@ export class CommitteesController {
 
   @Post()
   @Roles(Role.EXECUTIVE)
-  @UseInterceptors(FileInterceptor('image', { limits: { fileSize: 5 * 1024 * 1024 } }))
+  @UseInterceptors(
+    FileInterceptor('image', { limits: { fileSize: 5 * 1024 * 1024 } }),
+  )
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Create a new committee (Executive)' })
   @ApiBody({
@@ -94,7 +96,11 @@ export class CommitteesController {
         directorIDs: { type: 'array', items: { type: 'string' } },
         membersCount: { type: 'integer' },
         whatsappGroupLink: { type: 'string' },
-        image: { type: 'string', format: 'binary', description: 'Committee image (max 5 MB)' },
+        image: {
+          type: 'string',
+          format: 'binary',
+          description: 'Committee image (max 5 MB)',
+        },
       },
     },
   })
@@ -120,7 +126,9 @@ export class CommitteesController {
 
   @Patch(':id')
   @Roles(Role.EXECUTIVE)
-  @UseInterceptors(FileInterceptor('image', { limits: { fileSize: 5 * 1024 * 1024 } }))
+  @UseInterceptors(
+    FileInterceptor('image', { limits: { fileSize: 5 * 1024 * 1024 } }),
+  )
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Update a committee (Executive)' })
   @ApiParam({
@@ -139,7 +147,11 @@ export class CommitteesController {
         directorIDs: { type: 'array', items: { type: 'string' } },
         membersCount: { type: 'integer' },
         whatsappGroupLink: { type: 'string' },
-        image: { type: 'string', format: 'binary', description: 'Committee image (max 5 MB)' },
+        image: {
+          type: 'string',
+          format: 'binary',
+          description: 'Committee image (max 5 MB)',
+        },
       },
     },
   })
@@ -212,7 +224,9 @@ export class CommitteesController {
 
   @Patch(':id')
   @Roles(Role.DIRECTOR)
-  @UseInterceptors(FileInterceptor('image', { limits: { fileSize: 5 * 1024 * 1024 } }))
+  @UseInterceptors(
+    FileInterceptor('image', { limits: { fileSize: 5 * 1024 * 1024 } }),
+  )
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Update committee details (Director)' })
   @ApiParam({
@@ -226,7 +240,11 @@ export class CommitteesController {
       properties: {
         description: { type: 'string' },
         whatsappGroupLink: { type: 'string' },
-        image: { type: 'string', format: 'binary', description: 'Committee image (max 5 MB)' },
+        image: {
+          type: 'string',
+          format: 'binary',
+          description: 'Committee image (max 5 MB)',
+        },
       },
     },
   })
