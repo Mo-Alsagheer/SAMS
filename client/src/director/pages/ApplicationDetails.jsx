@@ -189,7 +189,7 @@ const app = applicationsData.find(
   (item) => item.id === Number(id)
 );
   return (
-    <div className="bg-amber-200" >{app.name}
+    <div className="" >{app.name}
       <div className="space-y-5">
         {/* Back + Decision bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">

@@ -3,18 +3,19 @@ import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import { getCommittees } from "@/features/committee/committee";
-import { manageDirectorsApllications } from "@/features/applications/applications";
+import { getAuthUser } from "@/features/auth/session";
 
-export function useDirectorApplications() {
+export function useApplications(role, api) {
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const user = getAuthUser();
+  const isFixedCommittee = role === "director";
 
   const committeeIdFromUrl = searchParams.get("committeeId") || "";
   const statusFilter = searchParams.get("status") || "";
 
-  /* ---------------- API ---------------- */
-  const applicationsAPI = manageDirectorsApllications;
-
   /* ---------------- State ---------------- */
+
   const [committees, setCommittees] = useState([]);
   const [applications, setApplications] = useState([]);
 
@@ -22,13 +23,14 @@ export function useDirectorApplications() {
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState(null);
 
-  const [selectedCommittee, setSelectedCommittee] =
-    useState(committeeIdFromUrl);
+  const [selectedCommittee, setSelectedCommittee] = useState(
+    isFixedCommittee ? user?.committeeId || "" : committeeIdFromUrl,
+  );
 
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [selectedApplicationId, setSelectedApplicationId] = useState(null);
 
-  /* ---------------- Helpers ---------------- */
+  /* ---------------- URL sync ---------------- */
 
   const updateQueryParams = useCallback(
     (updates) => {
@@ -36,7 +38,7 @@ export function useDirectorApplications() {
 
       Object.entries(updates).forEach(([key, value]) => {
         if (!value) next.delete(key);
-        else next.set(String(key), String(value));
+        else next.set(key, String(value));
       });
 
       setSearchParams(next);
@@ -65,6 +67,8 @@ export function useDirectorApplications() {
   /* ---------------- Default committee ---------------- */
 
   useEffect(() => {
+    if (isFixedCommittee) return;
+
     if (committeeIdFromUrl || committees.length === 0) return;
 
     const first = committees[0]?.id;
@@ -72,53 +76,60 @@ export function useDirectorApplications() {
 
     setSelectedCommittee(first);
     updateQueryParams({ committeeId: first });
-  }, [committeeIdFromUrl, committees, updateQueryParams]);
+  }, [committeeIdFromUrl, committees, isFixedCommittee]);
 
-  /* ---------------- sync URL ---------------- */
+  /* ---------------- Sync URL ---------------- */
 
   useEffect(() => {
-    if (committeeIdFromUrl && committeeIdFromUrl !== selectedCommittee) {
+    if (isFixedCommittee) return;
+
+    if (
+      committeeIdFromUrl &&
+      committeeIdFromUrl !== selectedCommittee
+    ) {
       setSelectedCommittee(committeeIdFromUrl);
     }
-  }, [committeeIdFromUrl]);
+  }, [committeeIdFromUrl, isFixedCommittee]);
 
   /* ---------------- Applications ---------------- */
 
-  const loadApplications = useCallback(
-    async (committeeId) => {
-      if (!committeeId) return;
+  const loadApplications = useCallback(async () => {
+    const committeeId = isFixedCommittee
+      ? user?.committeeId
+      : selectedCommittee;
 
-      setLoadingApplications(true);
-      try {
-        const data = await applicationsAPI.list({
-          committeeId,
-          status: statusFilter,
-        });
+    if (!committeeId) return;
 
-        setApplications(data || []);
-      } catch {
-        toast.error("Failed to load applications");
-        setApplications([]);
-      } finally {
-        setLoadingApplications(false);
-      }
-    },
-    [statusFilter],
-  );
+    setLoadingApplications(true);
+    try {
+      const data = await api.list({
+        committeeId,
+        status: statusFilter,
+      });
+
+      setApplications(data || []);
+    } catch {
+      toast.error("Failed to load applications");
+      setApplications([]);
+    } finally {
+      setLoadingApplications(false);
+    }
+  }, [selectedCommittee, statusFilter, api, isFixedCommittee, user]);
 
   useEffect(() => {
-    if (!selectedCommittee) return;
-    loadApplications(selectedCommittee);
-  }, [selectedCommittee, loadApplications]);
+    loadApplications();
+  }, [loadApplications]);
 
   /* ---------------- Committee select ---------------- */
 
   const selectCommittee = useCallback(
     (id) => {
+      if (isFixedCommittee) return;
+
       setSelectedCommittee(id);
       updateQueryParams({ committeeId: id });
     },
-    [updateQueryParams],
+    [updateQueryParams, isFixedCommittee],
   );
 
   /* ---------------- Actions wrapper ---------------- */
@@ -127,55 +138,55 @@ export function useDirectorApplications() {
     setActionLoadingId(id);
     try {
       await action();
-      await loadApplications(selectedCommittee);
+      await loadApplications();
     } catch {
-      toast.error("Action failed");
+      toast.error(
+        "The required number of accepted applicants has been reached !",
+      );
     } finally {
       setActionLoadingId(null);
     }
   };
 
-  /* ---------------- Phase 1 ---------------- */
+  /* ---------------- Actions ---------------- */
 
   const acceptPhase1 = useCallback(
     (id) =>
       withActionLoading(id, async () => {
-        await applicationsAPI.acceptPhase1(id);
+        await api.acceptPhase1(id);
         toast.success("Phase 1 accepted");
       }),
-    [selectedCommittee, loadApplications],
+    [api, loadApplications],
   );
 
   const rejectPhase1 = useCallback(
     (id) =>
       withActionLoading(id, async () => {
-        await applicationsAPI.rejectPhase1(id);
+        await api.rejectPhase1(id);
         toast.success("Phase 1 rejected");
       }),
-    [selectedCommittee, loadApplications],
+    [api, loadApplications],
   );
-
-  /* ---------------- Phase 2 ---------------- */
 
   const acceptPhase2 = useCallback(
     (id) =>
       withActionLoading(id, async () => {
-        await applicationsAPI.acceptPhase2(id);
+        await api.acceptPhase2(id);
         toast.success("Final accepted");
       }),
-    [selectedCommittee, loadApplications],
+    [api, loadApplications],
   );
 
   const rejectPhase2 = useCallback(
     (id) =>
       withActionLoading(id, async () => {
-        await applicationsAPI.rejectPhase2(id);
+        await api.rejectPhase2(id);
         toast.success("Final rejected");
       }),
-    [selectedCommittee, loadApplications],
+    [api, loadApplications],
   );
 
-  /* ---------------- Schedule interview ---------------- */
+  /* ---------------- Schedule ---------------- */
 
   const openSchedule = useCallback((id) => {
     setSelectedApplicationId(id);
@@ -194,14 +205,13 @@ export function useDirectorApplications() {
       setActionLoadingId(selectedApplicationId);
 
       try {
-        await applicationsAPI.scheduleInterview(selectedApplicationId, {
+        await api.scheduleInterview(selectedApplicationId, {
           date: new Date(formData.date).toISOString(),
           link: formData.link,
         });
 
         toast.success("Interview scheduled");
-        await loadApplications(selectedCommittee);
-
+        await loadApplications();
         closeSchedule();
       } catch {
         toast.error("Failed to schedule interview");
@@ -209,7 +219,7 @@ export function useDirectorApplications() {
         setActionLoadingId(null);
       }
     },
-    [selectedApplicationId, selectedCommittee, loadApplications, closeSchedule],
+    [selectedApplicationId, api, loadApplications, closeSchedule],
   );
 
   /* ---------------- Return ---------------- */
@@ -223,7 +233,6 @@ export function useDirectorApplications() {
 
     loadingCommittees,
     loadingApplications,
-
     actionLoadingId,
 
     scheduleModalOpen,

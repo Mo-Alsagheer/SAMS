@@ -11,7 +11,7 @@ import WorkSpace from "./director/pages/WorkSpace";
 import HomePage from "./user/homePage/pages/HomePage";
 import Application from "./user/committees/components/Application";
 import ViewCommittee from "./user/committees/components/ViewCommittee";
-import CommitteeDetails from "./user/committees/components/CommitteeDetails";
+import UserCommitteeDetails from "./user/committees/components/CommitteeDetails";
 
 import Login from "./auth/Login";
 import { Toaster } from "sonner";
@@ -26,19 +26,17 @@ import ApplicationDetails from "./director/pages/ApplicationDetails";
 function App() {
   return (
     <>
-     <Toaster />
-    <Routes>
-      <Route path="/quiz" element={<Quiz />} />
-      <Route path="/result" element={<QuizResult />} />
-      <Route path="/" element={<HomePage />} />
-      <Route path="/home" element={<HomePage />} />
-  
-<Route path="/application/:id" element={<Application />} />
-      <Route path="/committees" element={<ViewCommittee />} />
-       <Route path="/committee/:id" element={<CommitteeDetails />} />
-    
-    
-      
+      <Toaster />
+      <Routes>
+        <Route path="/quiz" element={<Quiz />} />
+        <Route path="/result" element={<QuizResult />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/home" element={<HomePage />} />
+
+        <Route path="/application/:id" element={<Application />} />
+        <Route path="/committees" element={<ViewCommittee />} />
+        <Route path="/committee/:id" element={<UserCommitteeDetails />} />
+
         <Route path="/login" element={<Login />} />
         <Route path="/test" element={<Page />} />
         <Route path="/quiz" element={<Quiz />} />
@@ -68,8 +66,6 @@ function App() {
         </Route>
       </Routes>
     </>
-
-
   );
 }
 
