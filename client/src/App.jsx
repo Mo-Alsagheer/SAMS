@@ -17,6 +17,7 @@ import Recruitment from "./executive/pages/Recruitment";
 import Committees from "./executive/pages/Committees";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import CommitteeDetails from "./executive/pages/CommitteeDetails";
+import ApplicationDetails from "./director/pages/ApplicationDetails";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="/director" element={<DirectorLayout />}>
             <Route index element={<DashBoard />} />
             <Route path="applications" element={<MemberApplications />} />
+            <Route path="applications/:id" element={<ApplicationDetails />} />
             <Route path="workspace" element={<WorkSpace />} />
           </Route>
         </Route>
