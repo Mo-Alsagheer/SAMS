@@ -9,7 +9,6 @@ import Page from "./director/pages/Page";
 import WorkSpace from "./director/pages/WorkSpace";
 import HomePage from "./user/homePage/pages/HomePage";
 import Application from "./user/committees/components/Application";
-import SuccessPage from "./user/committees/components/SuccessPage";
 import ViewCommittee from "./user/committees/components/ViewCommittee";
 import CommitteeDetails from "./user/committees/components/CommitteeDetails";
 
@@ -30,8 +29,8 @@ function App() {
       <Route path="/result" element={<QuizResult />} />
       <Route path="/" element={<HomePage />} />
       <Route path="/home" element={<HomePage />} />
-      <Route path="/success" element={<SuccessPage />} />
-      <Route path="/application" element={<Application />} />
+  
+<Route path="/application/:id" element={<Application />} />
       <Route path="/committees" element={<ViewCommittee />} />
        <Route path="/committee/:id" element={<CommitteeDetails />} />
     

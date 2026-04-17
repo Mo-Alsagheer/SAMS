@@ -1,43 +1,63 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { Card, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { getCommittees } from "@/features/committee/committee";
 
 function Cards() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get("https://jsonplaceholder.typicode.com/photos?_limit=3")
-      .then((response) => {
-        const committeeData = response.data.map((item, index) => ({
-          ...item,
-          status: index % 2 === 0 ? "open" : "closed",
-          name: item.title,
+    const fetchCommittees = async () => {
+      try {
+        setLoading(true);
+        const result = await getCommittees();
+
+        
+        const committeesArray = Array.isArray(result) ? result : (result.data || []);
+
+        
+        const formattedData = committeesArray.slice(0, 3).map((item) => ({
+          id: item.id,
+          displayTitle: item.name, 
+  
+          status: item.status || "open", 
+          image: item.url || "https://avatar.vercel.sh/shadcn1",
         }));
-        setData(committeeData);
+
+        setData(formattedData);
+      } catch (err) {
+        console.error("Fetch Error:", err);
+        setError("Failed to load committees");
+      } finally {
         setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchCommittees();
   }, []);
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="text-center py-10 font-bold text-blue-800">
-        Loading Events...
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center py-10 font-bold text-blue-800 animate-pulse">
+          Loading Committees...
+        </div>
       </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-10 text-red-500 font-semibold">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 py-12 text-left" dir="ltr">
@@ -53,9 +73,9 @@ function Cards() {
             <div className="relative aspect-video overflow-hidden">
               <div className="absolute inset-0 z-30 bg-black/35 pointer-events-none" />
               <img
-                src={item.url || "https://avatar.vercel.sh/shadcn1"}
-                alt="Committee cover"
-                className="relative z-20 w-full h-full object-cover brightness-60 grayscale dark:brightness-40 transition-all duration-500 hover:grayscale-0 hover:brightness-90"
+                src={item.image}
+                alt={item.displayTitle}
+                className="relative z-20 w-full h-full object-cover brightness-60 grayscale transition-all duration-500 hover:grayscale-0 hover:brightness-90"
               />
             </div>
 
@@ -69,17 +89,21 @@ function Cards() {
                       : "bg-red-500/10 text-red-500 border-red-500/20 text-sm"
                   }
                 >
-                  {item.status === "open" ? "Open" : "Closed"}
+               
+                  {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
                 </Badge>
               </div>
               <CardTitle className="line-clamp-1 text-xl font-bold">
-                {item.name || item.title}
+                {item.displayTitle}
               </CardTitle>
             </CardHeader>
 
             <CardFooter>
-              <Button className="w-full p-5 bg-blue-800 hover:bg-blue-900 text-white text-lg transition-all duration-200 hover:scale-[0.96] active:scale-90 shadow-md">
-                View Committee
+              <Button
+                onClick={() => navigate(`/committee/${item.id}`)}
+                className="w-full p-5 bg-blue-800 hover:bg-blue-900 text-white text-lg transition-all duration-200 hover:scale-[0.96] active:scale-90 shadow-md"
+              >
+                View Details
               </Button>
             </CardFooter>
           </Card>
