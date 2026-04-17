@@ -1,11 +1,18 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCommitteeDto } from './dto/create-committee.dto';
 import { UpdateCommitteeDto } from './dto/update-committee.dto';
 import { UpdateCommitteeByDirectorDto } from './dto/update-committee-by-director.dto';
 import { Committee } from './entities/committee.entity';
-import { RecruitmentProcess, RecruitmentStatus } from '../recruitment/entities/recruitment.entity';
+import {
+  RecruitmentProcess,
+  RecruitmentStatus,
+} from '../recruitment/entities/recruitment.entity';
 
 @Injectable()
 export class CommitteesService {
@@ -57,9 +64,12 @@ export class CommitteesService {
       ...('name' in dto && dto.name !== undefined && { name: dto.name }),
       ...(dto.description !== undefined && { description: dto.description }),
       ...('type' in dto && dto.type !== undefined && { type: dto.type }),
-      ...('planID' in dto && dto.planID !== undefined && { planID: dto.planID }),
-      ...('directorIDs' in dto && dto.directorIDs !== undefined && { directorIDs: dto.directorIDs }),
-      ...('membersCount' in dto && dto.membersCount !== undefined && { membersCount: dto.membersCount }),
+      ...('planID' in dto &&
+        dto.planID !== undefined && { planID: dto.planID }),
+      ...('directorIDs' in dto &&
+        dto.directorIDs !== undefined && { directorIDs: dto.directorIDs }),
+      ...('membersCount' in dto &&
+        dto.membersCount !== undefined && { membersCount: dto.membersCount }),
       ...(dto.whatsappGroupLink !== undefined && {
         whatsappGroupLink: dto.whatsappGroupLink,
       }),
@@ -85,7 +95,9 @@ export class CommitteesService {
     });
 
     if (openRecruitment) {
-      throw new BadRequestException('Cannot delete committee with an open recruitment process');
+      throw new BadRequestException(
+        'Cannot delete committee with an open recruitment process',
+      );
     }
 
     await this.committeesRepo.remove(committee);
