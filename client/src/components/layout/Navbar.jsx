@@ -28,6 +28,7 @@ function Navbar() {
           </span>
         </Link>
 
+        {/* Mobile button */}
         <button
           className="lg:hidden text-3xl transition-colors text-blue-900"
           onClick={() => setIsOpen(!isOpen)}
@@ -35,6 +36,7 @@ function Navbar() {
           {isOpen ? <HiX /> : <HiMenuAlt3 />}
         </button>
 
+        {/* Desktop links */}
         <div className="hidden lg:flex items-center gap-4">
           {navLinks.map((link) => (
             <NavHashLink

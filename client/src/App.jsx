@@ -4,7 +4,8 @@ import Quiz from "./user/quiz/pages/Quiz";
 import QuizResult from "./user/quiz/pages/QuizResult";
 import DirectorLayout from "./director/layout/DirectorLayout";
 import DashBoard from "./director/pages/DashBoard";
-import Applications from "./director/pages/Applications";
+import MemberApplications from "./director/pages/Applications";
+import DirectorApplications from "./executive/pages/Applications";
 import Page from "./director/pages/Page";
 import WorkSpace from "./director/pages/WorkSpace";
 import HomePage from "./user/homePage/pages/HomePage";
@@ -19,6 +20,8 @@ import Dashboard from "./executive/pages/DashBoard";
 import Recruitment from "./executive/pages/Recruitment";
 import Committees from "./executive/pages/Committees";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import CommitteeDetails from "./executive/pages/CommitteeDetails";
+import ApplicationDetails from "./director/pages/ApplicationDetails";
 
 function App() {
   return (
@@ -45,7 +48,8 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={["DIRECTOR"]} />}>
           <Route path="/director" element={<DirectorLayout />}>
             <Route index element={<DashBoard />} />
-            <Route path="applications" element={<Applications />} />
+            <Route path="applications" element={<MemberApplications />} />
+            <Route path="applications/:id" element={<ApplicationDetails />} />
             <Route path="workspace" element={<WorkSpace />} />
           </Route>
         </Route>
@@ -54,9 +58,13 @@ function App() {
           <Route path="/executive" element={<ExecutiveLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="recruitment" element={<Recruitment />} />
+            <Route path="applications" element={<DirectorApplications />} />
             <Route path="committees" element={<Committees />} />
+            <Route
+              path="committees/:committeeId"
+              element={<CommitteeDetails />}
+            />
           </Route>
-          
         </Route>
       </Routes>
     </>
