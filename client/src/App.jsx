@@ -22,27 +22,27 @@ import Committees from "./executive/pages/Committees";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import CommitteeDetails from "./executive/pages/CommitteeDetails";
 import ApplicationDetails from "./director/pages/ApplicationDetails";
-
 function App() {
   return (
     <>
       <Toaster />
       <Routes>
-        <Route path="/quiz" element={<Quiz />} />
-        <Route path="/result" element={<QuizResult />} />
+        {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/home" element={<HomePage />} />
-
-        <Route path="/application/:id" element={<Application />} />
-        <Route path="/committees" element={<ViewCommittee />} />
-        <Route path="/committee/:id" element={<UserCommitteeDetails />} />
-
         <Route path="/login" element={<Login />} />
-        <Route path="/test" element={<Page />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/result" element={<QuizResult />} />
-        <Route path="/home" element={<HomePage />} />
+        
+        {/* Committees & Applications */}
+        <Route path="/committees" element={<ViewCommittee />} />
+        <Route path="/committee/:id" element={<UserCommitteeDetails />} />
+        <Route path="/application/:id" element={<Application />} />
 
+        {/* Test Route */}
+        <Route path="/test" element={<Page />} />
+
+        {/* Director Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={["DIRECTOR"]} />}>
           <Route path="/director" element={<DirectorLayout />}>
             <Route index element={<DashBoard />} />
@@ -52,6 +52,7 @@ function App() {
           </Route>
         </Route>
 
+        {/* Executive Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={["EXECUTIVE"]} />}>
           <Route path="/executive" element={<ExecutiveLayout />}>
             <Route index element={<Dashboard />} />
@@ -64,9 +65,11 @@ function App() {
             />
           </Route>
         </Route>
+
+        {/* Fallback route for 404 */}
+        <Route path="*" element={<div className="flex items-center justify-center h-screen">404 - Page Not Found</div>} />
       </Routes>
     </>
   );
 }
-
 export default App;

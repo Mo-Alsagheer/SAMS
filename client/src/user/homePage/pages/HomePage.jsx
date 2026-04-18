@@ -1,7 +1,7 @@
 import Footer from "../../../components/layout/Footer";
 import Navbar from "../../../components/layout/Navbar";
 import HeroSection from "../components/HeroSection";
-import CommitteesSection from "../components/CommiteesSection";
+import Cards from "../components/Cards";
 import StatsSection from "../components/StatsSection";
 import AboutUs from "../components/AboutUs";
 import LastSection from "../components/LastSection";
@@ -12,7 +12,7 @@ function HomePage() {
       <HeroSection />
       <AboutUs />
       <StatsSection />
-      <CommitteesSection />
+      <Cards />
       <LastSection />
       <Footer />
     </div>

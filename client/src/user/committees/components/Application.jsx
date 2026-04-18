@@ -7,7 +7,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { getCommittees } from "@/features/committee/committee";
-import { submitApplication } from "@/features/application/application";
+import { submitApplication } from "@/features/applications/applications";
 import { toast } from "sonner";
 import {
   Form,
@@ -35,7 +35,7 @@ const formSchema = z.object({
   phone: z.string().regex(/^01[0125]\d{8}$/, "Invalid Egyptian phone number"),
   linkedinLink: z.string().url("Please enter a valid LinkedIn URL"),
   cvLink: z.string().url("Please enter a valid CV link"),
-  targetRole: z.enum(["MEMBER", "DIRECTOR", "EXECUTIVE"]),
+  targetRole: z.string(),
 });
 
 const Application = () => {
@@ -67,7 +67,7 @@ const Application = () => {
 
         if (id && data.length > 0) {
           const selected = data.find(
-            (com) => String(com._id || com.id) === String(id),
+            (com) => String(com._id || com.id) === String(id)
           );
           if (selected) {
             form.setValue("committeeName", selected.name);
@@ -107,7 +107,7 @@ const Application = () => {
       const errorMessage =
         error.response?.data?.message || "Something went wrong";
       toast.error(
-        Array.isArray(errorMessage) ? errorMessage.join(", ") : errorMessage,
+        Array.isArray(errorMessage) ? errorMessage.join(", ") : errorMessage
       );
     } finally {
       setLoading(false);
@@ -169,7 +169,7 @@ const Application = () => {
                             onValueChange={(val) => {
                               field.onChange(val);
                               const selected = committees.find(
-                                (c) => c.name === val,
+                                (c) => c.name === val
                               );
                               setSelectedCommitteeData(selected);
                             }}
@@ -203,23 +203,12 @@ const Application = () => {
                           <FormLabel className="text-sm font-bold text-blue-50 ml-1">
                             Target Role
                           </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full h-10 bg-white border-none rounded-xl text-blue-900">
-                                <SelectValue placeholder="Role" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="bg-white border-blue-100 rounded-xl">
-                              <SelectItem value="MEMBER">Member</SelectItem>
-                              <SelectItem value="DIRECTOR">Director</SelectItem>
-                              <SelectItem value="EXECUTIVE">
-                                Executive
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              readOnly
+                             className="w-full h-10 bg-white/20 border border-white/30 rounded-xl text-white font-bold cursor-not-allowed placeholder:text-white/50" />
+                          </FormControl>
                           <FormMessage className="text-red-300 text-[10px]" />
                         </FormItem>
                       )}

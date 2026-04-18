@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getCommittee } from "@/features/committee/committee";
+import { getCommitteeRecruitmentStatus } from "@/features/recruitment/recruitment";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { toast } from "sonner";
@@ -18,22 +19,30 @@ export default function CommitteeDetails() {
       try {
         setLoading(true);
         const item = await getCommittee(id);
+        
+        let currentStatus = "CLOSED";
+        try {
+          const statusRes = await getCommitteeRecruitmentStatus(id);
+          if (statusRes?.status?.toUpperCase() === "OPEN" || statusRes?.isOpen === true) {
+            currentStatus = "OPEN";
+          }
+        } catch (statusErr) {
+          console.error(statusErr);
+        }
 
         setCommittee({
           id: item._id || item.id,
           name: item.name,
-          description:
-            item.description ||
-            "No description provided yet for this technical committee.",
+          description: item.description || "No description provided yet for this technical committee.",
           type: item.type,
           membersCount: item.membersCount || 0,
           whatsapp: item.whatsappGroupLink,
-          status: item.status || "OPEN",
-          image: item.url || "https://avatar.vercel.sh/shadcn1",
+          status: currentStatus,
+          image: item.imageUrl || "https://avatar.vercel.sh/shadcn1",
         });
       } catch (error) {
-        console.error("Error fetching committee details:", error);
-        toast.error("Could not load committee details. Please try again.");
+        console.error(error);
+        toast.error("Could not load committee details.");
       } finally {
         setLoading(false);
       }
@@ -84,7 +93,11 @@ export default function CommitteeDetails() {
             <div className="w-full lg:w-[55%] pt-6 lg:pt-10">
               <div className="flex items-center gap-3 mb-6 lg:mb-8">
                 <span
-                  className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${committee.status.toUpperCase() === "OPEN" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                    committee.status.toUpperCase() === "OPEN" 
+                      ? "bg-green-100 text-green-600" 
+                      : "bg-red-100 text-red-600"
+                  }`}
                 >
                   ● {committee.status}
                 </span>
@@ -110,7 +123,6 @@ export default function CommitteeDetails() {
               <div className="flex flex-wrap items-center gap-6">
                 <button
                   onClick={() => {
-                    toast.success(`Applying for ${committee.name}`);
                     navigate(`/application/${committee.id}`);
                   }}
                   className="bg-blue-700 text-white hover:bg-blue-800 shadow-lg shadow-blue-900/20 px-10 py-4 rounded-2xl font-bold transition-all active:scale-95 uppercase tracking-widest text-xs inline-block text-center"
