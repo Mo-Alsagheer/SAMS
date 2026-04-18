@@ -5,13 +5,12 @@ import CommitteesSection from "../components/CommiteesSection";
 import StatsSection from "../components/StatsSection";
 import AboutUs from "../components/AboutUs";
 import LastSection from "../components/LastSection";
-
 function HomePage() {
   return (
     <div>
       <Navbar />
       <HeroSection />
-      <AboutUs  />
+      <AboutUs />
       <StatsSection />
       <CommitteesSection />
       <LastSection />
@@ -19,5 +18,4 @@ function HomePage() {
     </div>
   );
 }
-
 export default HomePage;
