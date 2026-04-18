@@ -3,7 +3,14 @@ import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import { getCommittees } from "@/features/committee/committee";
-import { manageDirectorsApllications } from "@/features/applications/applications";
+import {
+  acceptExecutiveApplicationPhase1,
+  acceptExecutiveApplicationPhase2,
+  getDirectorApplications,
+  rejectExecutiveApplicationPhase1,
+  rejectExecutiveApplicationPhase2,
+  scheduleExecutiveApplicationInterview,
+} from "@/features/applications/applications";
 
 export function useDirectorApplications() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -11,10 +18,8 @@ export function useDirectorApplications() {
   const committeeIdFromUrl = searchParams.get("committeeId") || "";
   const statusFilter = searchParams.get("status") || "";
 
-  /* ---------------- API ---------------- */
-  const applicationsAPI = manageDirectorsApllications;
-
   /* ---------------- State ---------------- */
+
   const [committees, setCommittees] = useState([]);
   const [applications, setApplications] = useState([]);
 
@@ -36,7 +41,7 @@ export function useDirectorApplications() {
 
       Object.entries(updates).forEach(([key, value]) => {
         if (!value) next.delete(key);
-        else next.set(String(key), String(value));
+        else next.set(key, String(value));
       });
 
       setSearchParams(next);
@@ -44,7 +49,7 @@ export function useDirectorApplications() {
     [searchParams, setSearchParams],
   );
 
-  /* ---------------- Committees ---------------- */
+  /* ---------------- Load Committees ---------------- */
 
   useEffect(() => {
     const fetchCommittees = async () => {
@@ -62,7 +67,7 @@ export function useDirectorApplications() {
     fetchCommittees();
   }, []);
 
-  /* ---------------- Default committee ---------------- */
+  /* ---------------- Default Committee ---------------- */
 
   useEffect(() => {
     if (committeeIdFromUrl || committees.length === 0) return;
@@ -74,7 +79,7 @@ export function useDirectorApplications() {
     updateQueryParams({ committeeId: first });
   }, [committeeIdFromUrl, committees, updateQueryParams]);
 
-  /* ---------------- sync URL ---------------- */
+  /* ---------------- Sync URL → state ---------------- */
 
   useEffect(() => {
     if (committeeIdFromUrl && committeeIdFromUrl !== selectedCommittee) {
@@ -82,7 +87,7 @@ export function useDirectorApplications() {
     }
   }, [committeeIdFromUrl]);
 
-  /* ---------------- Applications ---------------- */
+  /* ---------------- Load Applications ---------------- */
 
   const loadApplications = useCallback(
     async (committeeId) => {
@@ -90,11 +95,10 @@ export function useDirectorApplications() {
 
       setLoadingApplications(true);
       try {
-        const data = await applicationsAPI.list({
+        const data = await getDirectorApplications(
           committeeId,
-          status: statusFilter,
-        });
-
+          statusFilter,
+        );
         setApplications(data || []);
       } catch {
         toast.error("Failed to load applications");
@@ -111,7 +115,7 @@ export function useDirectorApplications() {
     loadApplications(selectedCommittee);
   }, [selectedCommittee, loadApplications]);
 
-  /* ---------------- Committee select ---------------- */
+  /* ---------------- Committee Selection ---------------- */
 
   const selectCommittee = useCallback(
     (id) => {
@@ -121,7 +125,7 @@ export function useDirectorApplications() {
     [updateQueryParams],
   );
 
-  /* ---------------- Actions wrapper ---------------- */
+  /* ---------------- Actions ---------------- */
 
   const withActionLoading = async (id, action) => {
     setActionLoadingId(id);
@@ -135,47 +139,47 @@ export function useDirectorApplications() {
     }
   };
 
-  /* ---------------- Phase 1 ---------------- */
-
   const acceptPhase1 = useCallback(
     (id) =>
-      withActionLoading(id, async () => {
-        await applicationsAPI.acceptPhase1(id);
-        toast.success("Phase 1 accepted");
-      }),
+      withActionLoading(id, () =>
+        acceptExecutiveApplicationPhase1(id).then(() =>
+          toast.success("Phase 1 accepted"),
+        ),
+      ),
     [selectedCommittee, loadApplications],
   );
 
   const rejectPhase1 = useCallback(
     (id) =>
-      withActionLoading(id, async () => {
-        await applicationsAPI.rejectPhase1(id);
-        toast.success("Phase 1 rejected");
-      }),
+      withActionLoading(id, () =>
+        rejectExecutiveApplicationPhase1(id).then(() =>
+          toast.success("Phase 1 rejected"),
+        ),
+      ),
     [selectedCommittee, loadApplications],
   );
 
-  /* ---------------- Phase 2 ---------------- */
-
   const acceptPhase2 = useCallback(
     (id) =>
-      withActionLoading(id, async () => {
-        await applicationsAPI.acceptPhase2(id);
-        toast.success("Final accepted");
-      }),
+      withActionLoading(id, () =>
+        acceptExecutiveApplicationPhase2(id).then(() =>
+          toast.success("Final accepted"),
+        ),
+      ),
     [selectedCommittee, loadApplications],
   );
 
   const rejectPhase2 = useCallback(
     (id) =>
-      withActionLoading(id, async () => {
-        await applicationsAPI.rejectPhase2(id);
-        toast.success("Final rejected");
-      }),
+      withActionLoading(id, () =>
+        rejectExecutiveApplicationPhase2(id).then(() =>
+          toast.success("Final rejected"),
+        ),
+      ),
     [selectedCommittee, loadApplications],
   );
 
-  /* ---------------- Schedule interview ---------------- */
+  /* ---------------- Schedule ---------------- */
 
   const openSchedule = useCallback((id) => {
     setSelectedApplicationId(id);
@@ -194,10 +198,13 @@ export function useDirectorApplications() {
       setActionLoadingId(selectedApplicationId);
 
       try {
-        await applicationsAPI.scheduleInterview(selectedApplicationId, {
-          date: new Date(formData.date).toISOString(),
-          link: formData.link,
-        });
+        await scheduleExecutiveApplicationInterview(
+          selectedApplicationId,
+          {
+            date: new Date(formData.date).toISOString(),
+            link: formData.link,
+          },
+        );
 
         toast.success("Interview scheduled");
         await loadApplications(selectedCommittee);

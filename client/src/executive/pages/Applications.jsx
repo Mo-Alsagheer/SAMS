@@ -6,8 +6,7 @@ import { z } from "zod";
 import Table from "@/components/shared/Table";
 import { PopupForm } from "@/components/shared/PopupForm";
 import { getInitials } from "@/utils/getInitials";
-import { useApplications } from "@/hooks/applications/useApplications";
-import { manageDirectorsApllications } from "@/features/applications/applications";
+import { useDirectorApplications } from "@/executive/hooks/useDirectorApplications";
 
 /* ---------------- Schema ---------------- */
 
@@ -30,7 +29,6 @@ const Skeleton = ({ className }) => (
 /* ---------------- Page ---------------- */
 
 function Applications() {
-  
   const navigate = useNavigate();
 
   const {
@@ -51,8 +49,7 @@ function Applications() {
     rejectPhase1,
     acceptPhase2,
     rejectPhase2,
-  } = useApplications("executive", manageDirectorsApllications); 
-
+  } = useDirectorApplications();
 
   /* ---------------- Badges ---------------- */
 
@@ -113,7 +110,11 @@ function Applications() {
         );
 
       case "PHASE1_ACCEPTED":
-        return btn("Schedule", () => openSchedule(row.id), "bg-blue-600");
+        return btn(
+          "Schedule",
+          () => openSchedule(row.id),
+          "bg-blue-600",
+        );
 
       case "INTERVIEW_SCHEDULED":
         return (
@@ -153,12 +154,8 @@ function Applications() {
         header: "Links",
         render: (r) => (
           <div className="flex gap-3 text-sm">
-            <a href={r.linkedinLink} target="_blank">
-              LinkedIn
-            </a>
-            <a href={r.cvLink} target="_blank">
-              CV
-            </a>
+            <a href={r.linkedinLink} target="_blank">LinkedIn</a>
+            <a href={r.cvLink} target="_blank">CV</a>
           </div>
         ),
       },
@@ -192,7 +189,9 @@ function Applications() {
           <ArrowLeft size={16} />
         </button>
 
-        <h1 className="text-2xl font-semibold">Director Applications</h1>
+        <h1 className="text-2xl font-semibold">
+          Director Applications
+        </h1>
       </div>
 
       {/* Committee */}
