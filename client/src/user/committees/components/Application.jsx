@@ -8,6 +8,7 @@ import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { getCommittees } from "@/features/committee/committee";
 import { submitApplication } from "@/features/application/application";
+import { toast } from "sonner";
 import {
   Form,
   FormControl,
@@ -25,17 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Briefcase,
-  User,
-  Mail,
-  Phone,
-  Linkedin,
-  Link2,
-  CheckCircle2,
-} from "lucide-react";
+import { User, Mail, Phone, Linkedin, Link2, CheckCircle2 } from "lucide-react";
 
-// 1. الـ Schema لازم تطابق الحقول اللي بنجمعها
 const formSchema = z.object({
   committeeName: z.string().min(1, "Please select a committee"),
   fullName: z.string().min(5, "Full name must be at least 5 characters"),
@@ -67,7 +59,6 @@ const Application = () => {
     },
   });
 
-  // تحميل اللجان وتحديد اللجنة المختارة من الـ URL
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -85,6 +76,7 @@ const Application = () => {
         }
       } catch (error) {
         console.error("Error loading committees:", error);
+        toast.error("Failed to load committees list.");
       }
     };
     loadData();
@@ -93,11 +85,10 @@ const Application = () => {
   const onSubmit = async (values) => {
     setLoading(true);
     try {
-      // 2. تحويل البيانات لشكل الـ API (Mapping)
       const apiData = {
         committeeId:
           selectedCommitteeData?._id || selectedCommitteeData?.id || id,
-        name: values.fullName, // تحويل من fullName لـ name للسيرفر
+        name: values.fullName,
         email: values.email,
         phone: values.phone,
         linkedinLink: values.linkedinLink,
@@ -105,23 +96,18 @@ const Application = () => {
         targetRole: values.targetRole,
       };
 
-      console.log("Sending to API:", apiData);
-
       await submitApplication(apiData);
       setIsSubmitted(true);
+      toast.success("Application submitted successfully!");
 
       setTimeout(() => {
         navigate("/");
       }, 3000);
     } catch (error) {
-      // إظهار تفاصيل الخطأ بدقة
       const errorMessage =
         error.response?.data?.message || "Something went wrong";
-      alert(
-        "❌ Error: " +
-          (Array.isArray(errorMessage)
-            ? errorMessage.join(", ")
-            : errorMessage),
+      toast.error(
+        Array.isArray(errorMessage) ? errorMessage.join(", ") : errorMessage,
       );
     } finally {
       setLoading(false);
@@ -158,7 +144,7 @@ const Application = () => {
           <Card className="w-full max-w-md border-none shadow-2xl rounded-3xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-800 overflow-hidden">
             <CardHeader className="pt-6 pb-2 text-center">
               <CardTitle className="text-2xl font-black text-white">
-                Apply to <span className="text-blue-300">IEEE</span>
+                Apply to <span className="text-blue-300">SAMS</span>
               </CardTitle>
               <p className="text-sm text-blue-100/80 font-medium mt-1">
                 Join our community today
