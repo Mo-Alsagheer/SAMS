@@ -8,8 +8,14 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { CommitteeType } from '../enums/committee-type.enum';
+
+/** Converts an empty string (common in multipart/form-data) to undefined
+ * so that @IsOptional() correctly skips validation for omitted fields. */
+const emptyToUndefined = () =>
+  Transform(({ value }) => (value === '' ? undefined : value));
 
 export class UpdateCommitteeDto {
   @ApiPropertyOptional({
@@ -17,6 +23,7 @@ export class UpdateCommitteeDto {
     description: 'The name of the committee',
     maxLength: 200,
   })
+  @emptyToUndefined()
   @IsString()
   @IsOptional()
   @MaxLength(200)
@@ -27,6 +34,7 @@ export class UpdateCommitteeDto {
     description: 'A detailed description of the committee',
     maxLength: 2000,
   })
+  @emptyToUndefined()
   @IsString()
   @IsOptional()
   @MaxLength(2000)
@@ -37,6 +45,7 @@ export class UpdateCommitteeDto {
     example: CommitteeType.TECHNICAL,
     description: 'The type/category of the committee',
   })
+  @emptyToUndefined()
   @IsEnum(CommitteeType)
   @IsOptional()
   type?: CommitteeType;
@@ -45,6 +54,7 @@ export class UpdateCommitteeDto {
     example: '01HRGZ...',
     description: 'The ID of the plan associated with this committee',
   })
+  @emptyToUndefined()
   @IsString()
   @IsOptional()
   planID?: string;
@@ -53,6 +63,10 @@ export class UpdateCommitteeDto {
     type: [String],
     example: ['01HRGZ...'],
     description: 'List of director user IDs managing this committee',
+  })
+  @Transform(({ value }) => {
+    if (value === '' || value == null) return undefined;
+    return Array.isArray(value) ? value : [value];
   })
   @IsArray()
   @IsString({ each: true })
@@ -64,6 +78,7 @@ export class UpdateCommitteeDto {
     description: 'The target or current members count',
     minimum: 0,
   })
+  @Transform(({ value }) => (value === '' ? undefined : Number(value)))
   @IsInt()
   @Min(0)
   @IsOptional()
@@ -73,7 +88,8 @@ export class UpdateCommitteeDto {
     example: 'https://chat.whatsapp.com/new-invite-link',
     description: 'The WhatsApp group invite link for the committee',
   })
+  @emptyToUndefined()
   @IsUrl()
   @IsOptional()
-  whatsappGroupLink?: string;
+  whatsappGroupLink?: string | null;
 }

@@ -69,7 +69,12 @@ export function PopupForm({
             {...register(field.name, { valueAsNumber: true })}
           />
         );
-
+      case "datetime-local":
+        return(
+        <Input type="datetime-local"
+         {...register(field.name)}
+          />
+        );
       case "checkbox":
         return (
           <input
@@ -78,7 +83,14 @@ export function PopupForm({
             className="h-4 w-4"
           />
         );
-
+      case "readonly":
+        return (
+          <Input
+            {...register(field.name)}
+            readOnly
+            className="bg-gray-100 cursor-not-allowed"
+          />
+        );
       default:
         return <Input type="text" {...register(field.name)} />;
     }

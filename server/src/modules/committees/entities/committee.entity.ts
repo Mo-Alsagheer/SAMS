@@ -42,6 +42,9 @@ export class Committee {
   @Column({ type: 'text', nullable: true })
   whatsappGroupLink: string | null;
 
+  @Column({ type: 'text', nullable: true })
+  imageUrl: string | null;
+
   @Column({ type: 'text' })
   createdBy: string;
 
