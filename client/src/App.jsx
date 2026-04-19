@@ -22,6 +22,7 @@ import Committees from "./executive/pages/Committees";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import CommitteeDetails from "./executive/pages/CommitteeDetails";
 import ApplicationDetails from "./director/pages/ApplicationDetails";
+import MemberLayout from "./member/layout/MemberLayout";
 function App() {
   return (
     <>
@@ -29,11 +30,10 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
-        <Route path="/home" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/result" element={<QuizResult />} />
-        
+
         {/* Committees & Applications */}
         <Route path="/committees" element={<ViewCommittee />} />
         <Route path="/committee/:id" element={<UserCommitteeDetails />} />
@@ -51,6 +51,10 @@ function App() {
             <Route path="workspace" element={<WorkSpace />} />
           </Route>
         </Route>
+        {/* Member Protected Routes */}
+        <Route element={<ProtectedRoute allowedRoles={["MEMBER"]} />}>
+          <Route path="/member" element={<MemberLayout />}></Route>
+        </Route>
 
         {/* Executive Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={["EXECUTIVE"]} />}>
@@ -67,7 +71,14 @@ function App() {
         </Route>
 
         {/* Fallback route for 404 */}
-        <Route path="*" element={<div className="flex items-center justify-center h-screen">404 - Page Not Found</div>} />
+        <Route
+          path="*"
+          element={
+            <div className="flex items-center justify-center h-screen">
+              404 - Page Not Found
+            </div>
+          }
+        />
       </Routes>
     </>
   );

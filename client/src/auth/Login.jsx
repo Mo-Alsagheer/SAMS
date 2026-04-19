@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { login } from "@/features/auth/auth";
 import { useNavigate } from "react-router-dom";
 import {
+  getAuthToken,
   getAuthUser,
   getHomeRouteForRole,
   setAuthSession,
@@ -40,12 +41,15 @@ export default function Login() {
   });
   const navigate = useNavigate();
 
-  React.useEffect(() => {
-    const user = getAuthUser();
-    if (user && user.role) {
-      navigate(getHomeRouteForRole(user.role), { replace: true });
-    }
-  }, [navigate]);
+React.useEffect(() => {
+  const user = getAuthUser();
+  const token = getAuthToken();
+  
+  // Only redirect to dashboard if they are ACTUALLY logged in
+  if (token && user && user.role) {
+    navigate(getHomeRouteForRole(user.role), { replace: true });
+  }
+}, [navigate]);
 
   async function onSubmit(data) {
     try {
