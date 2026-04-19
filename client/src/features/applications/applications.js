@@ -1,4 +1,4 @@
-// import api from "@/features/api";
+import api from "@/features/api";
 
 export async function submitApplication(data) {
   const res = await api.post(`/applications/submit`, data);
@@ -61,7 +61,6 @@ const createApplicationActions = (role) => ({
 export const manageDirectorsApllications = createApplicationActions("executive");
 export const manageMembersApllications = createApplicationActions("director");
 
-import api from "@/features/api";
 
 export const getDirectorApplications = async (committeeId, status) => {
   const params = {};

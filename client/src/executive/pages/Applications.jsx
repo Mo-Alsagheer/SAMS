@@ -7,6 +7,7 @@ import Table from "@/components/shared/Table";
 import { PopupForm } from "@/components/shared/PopupForm";
 import { getInitials } from "@/utils/getInitials";
 import { useDirectorApplications } from "@/executive/hooks/useDirectorApplications";
+import { Button } from "@/components/ui/button";
 
 /* ---------------- Schema ---------------- */
 
@@ -90,13 +91,14 @@ function Applications() {
     const isLoading = actionLoadingId === row.id;
 
     const btn = (label, onClick, color) => (
-      <button
+      <Button
+      size="sm"
         onClick={onClick}
         disabled={isLoading}
-        className={`px-3 py-1 text-xs rounded-md text-white ${color}`}
+        className={` ${color}`}
       >
         {label}
-      </button>
+      </Button>
     );
 
     switch (row.status) {
@@ -111,7 +113,7 @@ function Applications() {
 
       case "PHASE1_ACCEPTED":
         return btn(
-          "Schedule",
+          "Schedule Interview",
           () => openSchedule(row.id),
           "bg-blue-600",
         );
@@ -119,7 +121,7 @@ function Applications() {
       case "INTERVIEW_SCHEDULED":
         return (
           <>
-            {btn("Final Accept", () => acceptPhase2(row.id), "bg-green-600")}
+            {btn("Final Accept", () => acceptPhase2(row.id), "bg-green-600 hover:bg-green-700")}
             {btn("Final Reject", () => rejectPhase2(row.id), "bg-red-600")}
           </>
         );
