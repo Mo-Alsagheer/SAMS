@@ -1,13 +1,23 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, IsNull } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/entities/user.entity';
 import { Role } from '../../common/constants/role.enum';
-import { Application, ApplicationStatus } from '../applications/entities/application.entity';
+import {
+  Application,
+  ApplicationStatus,
+} from '../applications/entities/application.entity';
 import { EmailService } from '../email/email.service';
-import { RecruitmentProcess, RecruitmentStatus } from '../recruitment/entities/recruitment.entity';
+import {
+  RecruitmentProcess,
+  RecruitmentStatus,
+} from '../recruitment/entities/recruitment.entity';
 
 @Injectable()
 export class ExecutiveService {
@@ -28,7 +38,17 @@ export class ExecutiveService {
         committeeId: committeeId,
         role: Role.DIRECTOR,
       },
-      select: ['id', 'name', 'email', 'phone', 'university', 'faculty', 'academicLevel', 'role', 'status']
+      select: [
+        'id',
+        'name',
+        'email',
+        'phone',
+        'university',
+        'faculty',
+        'academicLevel',
+        'role',
+        'status',
+      ],
     });
   }
 
@@ -38,7 +58,17 @@ export class ExecutiveService {
         committeeId: committeeId,
         role: Role.MEMBER,
       },
-      select: ['id', 'name', 'email', 'phone', 'university', 'faculty', 'academicLevel', 'role', 'status']
+      select: [
+        'id',
+        'name',
+        'email',
+        'phone',
+        'university',
+        'faculty',
+        'academicLevel',
+        'role',
+        'status',
+      ],
     });
   }
 
@@ -46,11 +76,17 @@ export class ExecutiveService {
     const query = this.applicationRepository.createQueryBuilder('application');
 
     if (committeeId) {
-      query.where('application.committeeId = :committeeId', { committeeId })
-           .andWhere('application.targetRole = :targetRole', { targetRole: Role.DIRECTOR });
+      query
+        .where('application.committeeId = :committeeId', { committeeId })
+        .andWhere('application.targetRole = :targetRole', {
+          targetRole: Role.DIRECTOR,
+        });
     } else {
-      query.where('application.committeeId IS NULL')
-           .andWhere('application.targetRole = :targetRole', { targetRole: Role.EXECUTIVE });
+      query
+        .where('application.committeeId IS NULL')
+        .andWhere('application.targetRole = :targetRole', {
+          targetRole: Role.EXECUTIVE,
+        });
     }
 
     if (status) {
@@ -61,7 +97,12 @@ export class ExecutiveService {
   }
 
   async acceptPhase1(applicationId: string) {
-    const application = await this.applicationRepository.findOne({ where: { id: applicationId, targetRole: In([Role.DIRECTOR, Role.EXECUTIVE]) } });
+    const application = await this.applicationRepository.findOne({
+      where: {
+        id: applicationId,
+        targetRole: In([Role.DIRECTOR, Role.EXECUTIVE]),
+      },
+    });
     if (!application) {
       throw new NotFoundException('Application not found');
     }
@@ -70,7 +111,12 @@ export class ExecutiveService {
   }
 
   async rejectPhase1(applicationId: string) {
-    const application = await this.applicationRepository.findOne({ where: { id: applicationId, targetRole: In([Role.DIRECTOR, Role.EXECUTIVE]) } });
+    const application = await this.applicationRepository.findOne({
+      where: {
+        id: applicationId,
+        targetRole: In([Role.DIRECTOR, Role.EXECUTIVE]),
+      },
+    });
     if (!application) {
       throw new NotFoundException('Application not found');
     }
@@ -79,7 +125,9 @@ export class ExecutiveService {
   }
 
   async scheduleInterview(applicationId: string, payload: any) {
-    const application = await this.applicationRepository.findOne({ where: { id: applicationId, targetRole: In([Role.DIRECTOR, Role.EXECUTIVE]) } });
+    const application = await this.applicationRepository.findOne({
+      where: { id: applicationId },
+    });
     if (!application) {
       throw new NotFoundException('Application not found');
     }
@@ -89,7 +137,11 @@ export class ExecutiveService {
   }
 
   async acceptPhase2(applicationId: string) {
-    const application = await this.applicationRepository.findOne({ where: { id: applicationId, targetRole: In([Role.DIRECTOR, Role.EXECUTIVE]) } });
+    const application = await this.applicationRepository.findOne({
+      where: {
+        id: applicationId,
+      },
+    });
     if (!application) {
       throw new NotFoundException('Application not found');
     }
@@ -98,10 +150,20 @@ export class ExecutiveService {
     // For EXECUTIVE applications committeeId is null; for DIRECTOR it is set.
     const recruitmentWhere =
       application.targetRole === Role.EXECUTIVE
-        ? { role: Role.EXECUTIVE, committeeId: IsNull(), status: RecruitmentStatus.OPEN }
-        : { role: Role.DIRECTOR, committeeId: application.committeeId, status: RecruitmentStatus.OPEN };
+        ? {
+            role: Role.EXECUTIVE,
+            committeeId: IsNull(),
+            status: RecruitmentStatus.OPEN,
+          }
+        : {
+            role: Role.DIRECTOR,
+            committeeId: application.committeeId,
+            status: RecruitmentStatus.OPEN,
+          };
 
-    const recruitment = await this.recruitmentRepository.findOne({ where: recruitmentWhere });
+    const recruitment = await this.recruitmentRepository.findOne({
+      where: recruitmentWhere,
+    });
 
     if (recruitment && recruitment.targetMembers > 0) {
       const acceptedCount = await this.applicationRepository.count({
@@ -115,7 +177,8 @@ export class ExecutiveService {
       });
 
       if (acceptedCount >= recruitment.targetMembers) {
-        const roleLabel = application.targetRole === Role.EXECUTIVE ? 'executive' : 'director';
+        const roleLabel =
+          application.targetRole === Role.EXECUTIVE ? 'executive' : 'director';
         throw new BadRequestException(
           `Recruitment quota reached: this recruitment already has ${acceptedCount} accepted ${roleLabel}(s) out of a target of ${recruitment.targetMembers}.`,
         );
@@ -130,21 +193,34 @@ export class ExecutiveService {
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
     // Determine the role label for the email
-    const roleLabel = application.targetRole === Role.EXECUTIVE ? 'Executive' : 'Director';
+    const roleLabel =
+      application.targetRole === Role.EXECUTIVE ? 'Executive' : 'Director';
 
-    // Create a User account for the accepted applicant
-    const user = this.userRepository.create({
-      name: application.name,
-      email: application.email,
-      phone: application.phone,
-      password: hashedPassword,
-      role: application.targetRole,
-      committeeId: application.committeeId ?? null,
+    // Check if a User account already exists
+    let user = await this.userRepository.findOne({
+      where: { email: application.email },
     });
+    if (user) {
+      user.name = application.name;
+      user.phone = application.phone;
+      user.password = hashedPassword;
+      user.role = application.targetRole;
+      user.committeeId = application.committeeId ?? null;
+    } else {
+      user = this.userRepository.create({
+        name: application.name,
+        email: application.email,
+        phone: application.phone,
+        password: hashedPassword,
+        role: application.targetRole,
+        committeeId: application.committeeId ?? null,
+      });
+    }
     await this.userRepository.save(user);
 
     // Send welcome email with credentials
-    const loginUrl = this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:5173';
+    const loginUrl =
+      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:5173';
     await this.emailService.sendWelcomeEmail({
       to: application.email,
       name: application.name,
@@ -157,7 +233,12 @@ export class ExecutiveService {
   }
 
   async rejectPhase2(applicationId: string) {
-    const application = await this.applicationRepository.findOne({ where: { id: applicationId, targetRole: In([Role.DIRECTOR, Role.EXECUTIVE]) } });
+    const application = await this.applicationRepository.findOne({
+      where: {
+        id: applicationId,
+        targetRole: In([Role.DIRECTOR, Role.EXECUTIVE]),
+      },
+    });
     if (!application) {
       throw new NotFoundException('Application not found');
     }
@@ -166,7 +247,8 @@ export class ExecutiveService {
   }
 
   private generatePassword(length = 12): string {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+    const chars =
+      'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
     let password = '';
     for (let i = 0; i < length; i++) {
       password += chars.charAt(Math.floor(Math.random() * chars.length));
