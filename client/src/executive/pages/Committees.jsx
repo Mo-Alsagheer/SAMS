@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import Table from "@/components/shared/Table";
@@ -44,6 +45,7 @@ function Committees() {
   const [actionLoading, setActionLoading] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const navigate = useNavigate();
 
   const openDeletePopup = (id) => {
     setSelectedId(id);
@@ -61,14 +63,15 @@ function Committees() {
 
       toast.success("Committee deleted");
     } catch (error) {
-      toast.error("Delete failed");
+      const message =
+        error?.response?.data?.message || "Failed to delete committee";
+      toast.error(message);
     } finally {
       setActionLoading(false);
       setDeleteOpen(false);
       setSelectedId(null);
     }
   };
-
 
   const handleEdit = async (committee) => {
     try {
@@ -121,10 +124,21 @@ function Committees() {
         header: "Actions",
         render: (row) => (
           <div className="flex gap-2">
+            {" "}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => navigate(`/executive/committees/${row.id}`)}
+            >
+              View
+            </Button>
+
+
             <Button size="sm" onClick={() => handleEdit(row)}>
               Edit
             </Button>
 
+            
             <Button
               size="sm"
               variant="destructive"

@@ -1,46 +1,93 @@
 import React, { useEffect, useState } from "react";
 import Table from "@/components/shared/Table";
-import api from "@/features/api";
-import { getCommittee } from "@/features/committee/committee";
+import {
+  getRecruitments,
+  openExecutiveRecruitment,
+  openCommitteeRecruitment,
+  closeRecruitmentApi,
+} from "@/features/recruitment/recruitment";
+import { getCommittees } from "@/features/committee/committee";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { z } from "zod";
+import { PopupForm } from "@/components/shared/PopupForm";
+import StatCard from "@/components/shared/StatCard";
+
+import { Building2, Users, CheckCircle, XCircle } from "lucide-react";
+
+const recruitmentSchema = z.object({
+  role: z.enum(["MEMBER", "DIRECTOR", "EXECUTIVE"]),
+  targetMembers: z.number().min(1),
+});
 
 function Recruitment() {
-  const [data, setData] = useState([]);
+  const [groupedData, setGroupedData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // new states
-  const [selectedCommittee, setSelectedCommittee] = useState(null);
-  const [directors, setDirectors] = useState([]);
-  const [members, setMembers] = useState([]);
+  const [formOpen, setFormOpen] = useState(false);
+  const [activeCommittee, setActiveCommittee] = useState(null);
 
+  // ================= FETCH =================
   const fetchData = async () => {
     try {
-      const res = await api.get("/executive/recruitment");
+      const [committees, recruitments] = await Promise.all([
+        getCommittees(),
+        getRecruitments(),
+      ]);
 
-      const recruitments = res.data;
-
-      const fullData = await Promise.all(
-        recruitments.map(async (item) => {
-          try {
-            const committee = await getCommittee(item.committeeId);
-
-            return {
-              ...item,
-              committeeName: committee.name,
-            };
-          } catch {
-            return {
-              ...item,
-              committeeName: "Unknown",
-            };
-          }
-        }),
+      // ===== GLOBAL EXECUTIVE =====
+      const executiveRecruitment = recruitments.find(
+        (r) => r.role === "EXECUTIVE" && !r.committeeId,
       );
 
-      setData(fullData);
+      const executiveSection = {
+        committeeId: "EXECUTIVE",
+        committeeName: "Executive",
+        recruitments: [
+          executiveRecruitment || {
+            id: null,
+            committeeId: null,
+            committeeName: "Executive",
+            role: "EXECUTIVE",
+            targetMembers: "-",
+            status: "NOT_EXIST",
+          },
+        ],
+      };
+
+      // ===== COMMITTEES =====
+      const grouped = committees.map((committee) => {
+        const committeeRecruitments = recruitments.filter(
+          (r) => r.committeeId === committee.id && r.role !== "EXECUTIVE",
+        );
+
+        const normalizedRecruitments = ["MEMBER", "DIRECTOR"].map((role) => {
+          const existing = committeeRecruitments.find((r) => r.role === role);
+
+          if (existing) return existing;
+
+          return {
+            id: null,
+            committeeId: committee.id,
+            committeeName: committee.name,
+            role,
+            targetMembers: "-",
+            status: "NOT_EXIST",
+          };
+        });
+
+        return {
+          committeeId: committee.id,
+          committeeName: committee.name,
+          recruitments: normalizedRecruitments,
+        };
+      });
+
+      setGroupedData([executiveSection, ...grouped]);
     } catch (err) {
-      console.error(err);
+      toast.error(
+        err?.response?.data?.message || "Failed to load recruitments",
+      );
     } finally {
       setLoading(false);
     }
@@ -50,82 +97,83 @@ function Recruitment() {
     fetchData();
   }, []);
 
-  // toggle open / close
-  const toggleStatus = async (row) => {
-    const updatedStatus = row.status === "OPEN" ? "CLOSED" : "OPEN";
+  // ================= OPEN FORM =================
+  const openRecruitmentForm = (row, role, existing = null) => {
+    setActiveCommittee({
+      committeeId: row.committeeId || null,
+      committeeName: row.committeeName,
+      selectedRole: role,
+      existing,
+    });
 
-    setData((prev) =>
-      prev.map((item) =>
-        item.id === row.id ? { ...item, status: updatedStatus } : item,
-      ),
-    );
+    setFormOpen(true);
+  };
 
-    const action = row.status === "OPEN" ? "closed" : "opened";
-
+  // ================= SUBMIT OPEN =================
+  const handleSubmitRecruitment = async (data) => {
     try {
-      if (row.status === "OPEN") {
-        await api.post(`/executive/recruitment/${row.committeeId}/close`);
+      let res;
+
+      if (activeCommittee.selectedRole === "EXECUTIVE") {
+        res = await openExecutiveRecruitment({
+          role: "EXECUTIVE",
+          targetMembers: data.targetMembers,
+        });
       } else {
-        await api.post(`/executive/recruitment/${row.committeeId}/open`);
+        res = await openCommitteeRecruitment(activeCommittee.committeeId, {
+          role: activeCommittee.selectedRole,
+          targetMembers: data.targetMembers,
+        });
       }
 
-      toast.success(`Committee successfully ${action}`);
+      toast.success(res?.message || "Recruitment opened successfully");
+
+      setFormOpen(false);
+      setActiveCommittee(null);
+
+      fetchData();
     } catch (err) {
-      console.error(err);
-
-      setData((prev) =>
-        prev.map((item) =>
-          item.id === row.id ? { ...item, status: row.status } : item,
-        ),
-      );
-
-      toast.error("Something went wrong");
+      toast.error(err?.response?.data?.message || "Failed to open recruitment");
     }
   };
 
-  // open details
-  const openDetails = async (row) => {
-    setSelectedCommittee(row);
-
+  // ================= CLOSE ONLY =================
+  const handleCloseRecruitment = async (row) => {
     try {
-      const [directorsRes, membersRes] = await Promise.all([
-        api.get(`/executive/committees/${row.committeeId}/directors`),
-        api.get(`/executive/committees/${row.committeeId}/members`),
-      ]);
+      const res = await closeRecruitmentApi(row.id);
 
-      setDirectors(directorsRes.data);
-      setMembers(membersRes.data);
+      toast.success(res?.message || "Closed successfully");
+      fetchData();
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to load committee users");
+      toast.error(err?.response?.data?.message || "Error closing recruitment");
     }
   };
 
-  // accept
-  const handleAccept = async (userId) => {
-    try {
-      await api.post(`/executive/users/${userId}/accept`);
-      toast.success("User accepted");
-    } catch {
-      toast.error("Error accepting user");
-    }
-  };
+  // ================= STATS =================
+  const totalCommittees = groupedData.length;
 
-  // reject
-  const handleReject = async (userId) => {
-    try {
-      await api.post(`/executive/users/${userId}/reject`);
-      toast.success("User rejected");
-    } catch {
-      toast.error("Error rejecting user");
-    }
-  };
+  const totalRecruitments = groupedData.reduce(
+    (acc, c) =>
+      acc + c.recruitments.filter((r) => r.status !== "NOT_EXIST").length,
+    0,
+  );
 
+  const openRecruitments = groupedData.reduce(
+    (acc, c) => acc + c.recruitments.filter((r) => r.status === "OPEN").length,
+    0,
+  );
+
+  const emptySlots = groupedData.reduce(
+    (acc, c) =>
+      acc + c.recruitments.filter((r) => r.status === "NOT_EXIST").length,
+    0,
+  );
+
+  // ================= TABLE =================
   const columns = [
-    {
-      header: "Committee",
-      accessor: "committeeName",
-    },
+    { header: "Role", accessor: "role" },
+    { header: "Target", accessor: "targetMembers" },
+
     {
       header: "Status",
       accessor: "status",
@@ -134,43 +182,49 @@ function Recruitment() {
           className={`px-2 py-1 rounded text-sm ${
             row.status === "OPEN"
               ? "bg-green-100 text-green-600"
-              : "bg-red-100 text-red-600"
+              : row.status === "CLOSED"
+                ? "bg-red-100 text-red-600"
+                : "bg-gray-100 text-gray-500"
           }`}
         >
           {row.status}
         </span>
       ),
     },
-    {
-      header: "Opened At",
-      accessor: "openedAt",
-      render: (row) => new Date(row.openedAt).toLocaleDateString("en-GB"),
-    },
-    {
-      header: "Closed At",
-      accessor: "closedAt",
-      render: (row) =>
-        row.closedAt ? new Date(row.closedAt).toLocaleDateString("en-GB") : "-",
-    },
+
     {
       header: "Actions",
       render: (row) => (
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            onClick={() => toggleStatus(row)}
-            className={` text-white ${
-              row.status === "OPEN"
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-green-500 hover:bg-green-600"
-            }`}
-          >
-            {row.status === "OPEN" ? "Close" : "Open"}
-          </Button>
+          {row.status === "NOT_EXIST" && (
+            <Button
+              size="sm"
+              className="bg-blue-500 text-white"
+              onClick={() => openRecruitmentForm(row, row.role)}
+            >
+              Open
+            </Button>
+          )}
 
-          <Button variant="default" size="sm" onClick={() => openDetails(row)}>
-            View
-          </Button>
+          {row.status === "OPEN" && row.id && (
+            <Button
+              size="sm"
+              className="bg-red-500 text-white"
+              onClick={() => handleCloseRecruitment(row)}
+            >
+              Close
+            </Button>
+          )}
+
+          {row.status === "CLOSED" && (
+            <Button
+              size="sm"
+              className="bg-gray-500 text-white"
+              onClick={() => openRecruitmentForm(row, row.role)}
+            >
+              Reopen
+            </Button>
+          )}
         </div>
       ),
     },
@@ -179,57 +233,85 @@ function Recruitment() {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-semibold mb-4">Recruitment Management</h1>
+    <div className="p-6 space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Committees"
+          value={totalCommittees}
+          icon={Building2}
+          color="primary"
+        />
 
-      <Table columns={columns} data={data} />
+        <StatCard
+          title="Recruitments"
+          value={totalRecruitments}
+          icon={Users}
+          color="secondary"
+        />
 
-      {/* Details Section */}
-      {selectedCommittee && (
-        <div className="mt-6 bg-white border p-4 rounded">
-          <h2 className="font-semibold mb-3">
-            {selectedCommittee.committeeName}
-          </h2>
+        <StatCard
+          title="Open"
+          value={openRecruitments}
+          icon={CheckCircle}
+          color="success"
+        />
 
-          {/* Directors */}
-          <h3 className="font-medium">Directors</h3>
-          {directors.map((director) => (
-            <div
-              key={director.id}
-              className="flex justify-between border p-2 rounded mb-2"
-            >
-              <span>{director.name}</span>
+        <StatCard
+          title="Empty Slots"
+          value={emptySlots}
+          icon={XCircle}
+          color="warning"
+        />
+      </div>
 
-              <div className="flex gap-2">
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => handleAccept(director.id)}
-                >
-                  Accept
-                </Button>
+      <h1 className="text-xl font-semibold">Recruitment Management</h1>
 
-                <Button
-                  variant="destructive"
-                  onClick={() => handleReject(director.id)}
-                >
-                  Reject
-                </Button>
-              </div>
-            </div>
-          ))}
+      <div className="space-y-4">
+        {groupedData.map((committee) => (
+          <div
+            key={committee.committeeId}
+            className="border rounded-lg p-4 bg-white"
+          >
+            <h2 className="text-lg font-semibold mb-3">
+              {committee.committeeName}
+            </h2>
 
-          {/* Members */}
-          <h3 className="font-medium mt-4">Members</h3>
-          {members.map((member) => (
-            <div
-              key={member.id}
-              className="flex justify-between border p-2 rounded mb-2"
-            >
-              <span>{member.name}</span>
-            </div>
-          ))}
-        </div>
+            <Table
+              columns={columns}
+              data={committee.recruitments}
+              extraProps={committee}
+            />
+          </div>
+        ))}
+      </div>
+
+      {activeCommittee && (
+        <PopupForm
+          open={formOpen}
+          onClose={() => {
+            setFormOpen(false);
+            setActiveCommittee(null);
+          }}
+          title={`Recruitment - ${activeCommittee.committeeName}`}
+          schema={recruitmentSchema}
+          defaultValues={{
+            role: activeCommittee.selectedRole,
+            targetMembers: activeCommittee.existing?.targetMembers || 1,
+          }}
+          fields={[
+            {
+              name: "role",
+              label: "Role",
+              type: "readonly",
+            },
+            {
+              name: "targetMembers",
+              label: "Target Members",
+              type: "number",
+            },
+          ]}
+          onSubmit={handleSubmitRecruitment}
+        />
       )}
     </div>
   );

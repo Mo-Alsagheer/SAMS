@@ -4,13 +4,14 @@ import Quiz from "./user/quiz/pages/Quiz";
 import QuizResult from "./user/quiz/pages/QuizResult";
 import DirectorLayout from "./director/layout/DirectorLayout";
 import DashBoard from "./director/pages/DashBoard";
-import Applications from "./director/pages/Applications";
+import MemberApplications from "./director/pages/Applications";
+import DirectorApplications from "./executive/pages/Applications";
 import Page from "./director/pages/Page";
 import WorkSpace from "./director/pages/WorkSpace";
 import HomePage from "./user/homePage/pages/HomePage";
 import Application from "./user/committees/components/Application";
 import ViewCommittee from "./user/committees/components/ViewCommittee";
-import CommitteeDetails from "./user/committees/components/CommitteeDetails";
+import UserCommitteeDetails from "./user/committees/components/CommitteeDetails";
 
 import Login from "./auth/Login";
 import { Toaster } from "sonner";
@@ -19,50 +20,56 @@ import Dashboard from "./executive/pages/DashBoard";
 import Recruitment from "./executive/pages/Recruitment";
 import Committees from "./executive/pages/Committees";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-
+import CommitteeDetails from "./executive/pages/CommitteeDetails";
+import ApplicationDetails from "./director/pages/ApplicationDetails";
 function App() {
   return (
     <>
-     <Toaster />
-    <Routes>
-      <Route path="/quiz" element={<Quiz />} />
-      <Route path="/result" element={<QuizResult />} />
-      <Route path="/" element={<HomePage />} />
-      <Route path="/home" element={<HomePage />} />
-  
-<Route path="/application/:id" element={<Application />} />
-      <Route path="/committees" element={<ViewCommittee />} />
-       <Route path="/committee/:id" element={<CommitteeDetails />} />
-    
-    
-      
+      <Toaster />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/test" element={<Page />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/result" element={<QuizResult />} />
-        <Route path="/home" element={<HomePage />} />
+        
+        {/* Committees & Applications */}
+        <Route path="/committees" element={<ViewCommittee />} />
+        <Route path="/committee/:id" element={<UserCommitteeDetails />} />
+        <Route path="/application/:id" element={<Application />} />
 
+        {/* Test Route */}
+        <Route path="/test" element={<Page />} />
+
+        {/* Director Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={["DIRECTOR"]} />}>
           <Route path="/director" element={<DirectorLayout />}>
             <Route index element={<DashBoard />} />
-            <Route path="applications" element={<Applications />} />
+            <Route path="applications" element={<MemberApplications />} />
+            <Route path="applications/:id" element={<ApplicationDetails />} />
             <Route path="workspace" element={<WorkSpace />} />
           </Route>
         </Route>
 
+        {/* Executive Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={["EXECUTIVE"]} />}>
           <Route path="/executive" element={<ExecutiveLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="recruitment" element={<Recruitment />} />
+            <Route path="applications" element={<DirectorApplications />} />
             <Route path="committees" element={<Committees />} />
+            <Route
+              path="committees/:committeeId"
+              element={<CommitteeDetails />}
+            />
           </Route>
-          
         </Route>
+
+        {/* Fallback route for 404 */}
+        <Route path="*" element={<div className="flex items-center justify-center h-screen">404 - Page Not Found</div>} />
       </Routes>
     </>
-
-
   );
 }
-
 export default App;
