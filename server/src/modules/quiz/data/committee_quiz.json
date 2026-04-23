@@ -1,0 +1,325 @@
+{
+  "quizLists": [
+    {
+      "category": "Operation",
+      "committees": ["Human Resources (HR)", "Public Relations (PR)", "Logistics"],
+      "description": "This list helps identify if you are best suited for an Operations committee role.",
+      "questions": [
+        {
+          "id": 1,
+          "question": "When your team faces an internal conflict between two members, what is your first instinct?",
+          "answers": [
+            { "id": "A", "text": "Sit them down privately and mediate a calm conversation", "weight": { "HR": 3, "PR": 1, "Logistics": 0 } },
+            { "id": "B", "text": "Draft an official statement and manage how the situation is perceived externally", "weight": { "HR": 0, "PR": 3, "Logistics": 0 } },
+            { "id": "C", "text": "Reorganize team responsibilities to prevent further friction", "weight": { "HR": 1, "PR": 0, "Logistics": 3 } },
+            { "id": "D", "text": "Document the issue and suggest a structured resolution process", "weight": { "HR": 2, "PR": 2, "Logistics": 1 } }
+          ]
+        },
+        {
+          "id": 2,
+          "question": "Which task would you find most fulfilling?",
+          "answers": [
+            { "id": "A", "text": "Designing an onboarding program for new volunteers", "weight": { "HR": 3, "PR": 1, "Logistics": 0 } },
+            { "id": "B", "text": "Crafting a social campaign to attract new members", "weight": { "HR": 0, "PR": 3, "Logistics": 0 } },
+            { "id": "C", "text": "Coordinating the venue and resources for a big event", "weight": { "HR": 0, "PR": 1, "Logistics": 3 } },
+            { "id": "D", "text": "Reviewing performance feedback forms and identifying patterns", "weight": { "HR": 2, "PR": 2, "Logistics": 1 } }
+          ]
+        },
+        {
+          "id": 3,
+          "question": "How do you prefer to communicate with others?",
+          "answers": [
+            { "id": "A", "text": "One-on-one conversations where I can understand people personally", "weight": { "HR": 3, "PR": 0, "Logistics": 0 } },
+            { "id": "B", "text": "Broad, well-crafted messages that reach a wide audience", "weight": { "HR": 0, "PR": 3, "Logistics": 0 } },
+            { "id": "C", "text": "Clear, structured briefings focused on tasks and timelines", "weight": { "HR": 0, "PR": 0, "Logistics": 3 } },
+            { "id": "D", "text": "A mix depending on the situation — I adapt easily", "weight": { "HR": 1, "PR": 2, "Logistics": 2 } }
+          ]
+        },
+        {
+          "id": 4,
+          "question": "A major event is 3 days away and things are falling apart. What do you do?",
+          "answers": [
+            { "id": "A", "text": "Support the team emotionally and ensure morale stays high", "weight": { "HR": 3, "PR": 1, "Logistics": 0 } },
+            { "id": "B", "text": "Communicate transparently with attendees and manage expectations", "weight": { "HR": 0, "PR": 3, "Logistics": 1 } },
+            { "id": "C", "text": "Create a revised checklist and delegate critical tasks immediately", "weight": { "HR": 0, "PR": 0, "Logistics": 3 } },
+            { "id": "D", "text": "Analyze what went wrong and propose solutions for each issue", "weight": { "HR": 1, "PR": 2, "Logistics": 2 } }
+          ]
+        },
+        {
+          "id": 5,
+          "question": "What best describes your personality?",
+          "answers": [
+            { "id": "A", "text": "Empathetic and caring — people naturally come to me with their problems", "weight": { "HR": 3, "PR": 1, "Logistics": 0 } },
+            { "id": "B", "text": "Persuasive and sociable — I thrive in networking environments", "weight": { "HR": 1, "PR": 3, "Logistics": 0 } },
+            { "id": "C", "text": "Methodical and reliable — I make sure everything runs on time", "weight": { "HR": 0, "PR": 0, "Logistics": 3 } },
+            { "id": "D", "text": "Adaptable and quick-thinking — I handle chaos well", "weight": { "HR": 1, "PR": 2, "Logistics": 2 } }
+          ]
+        },
+        {
+          "id": 6,
+          "question": "Which skill do you value most in yourself?",
+          "answers": [
+            { "id": "A", "text": "Active listening and emotional intelligence", "weight": { "HR": 3, "PR": 1, "Logistics": 0 } },
+            { "id": "B", "text": "Storytelling and brand communication", "weight": { "HR": 0, "PR": 3, "Logistics": 0 } },
+            { "id": "C", "text": "Planning, scheduling, and resource management", "weight": { "HR": 0, "PR": 0, "Logistics": 3 } },
+            { "id": "D", "text": "Decision-making under pressure", "weight": { "HR": 1, "PR": 2, "Logistics": 2 } }
+          ]
+        },
+        {
+          "id": 7,
+          "question": "What kind of problems do you enjoy solving?",
+          "answers": [
+            { "id": "A", "text": "People problems — finding what motivates or troubles others", "weight": { "HR": 3, "PR": 1, "Logistics": 0 } },
+            { "id": "B", "text": "Perception problems — changing how others view a situation", "weight": { "HR": 0, "PR": 3, "Logistics": 0 } },
+            { "id": "C", "text": "Operational problems — figuring out how to move things efficiently", "weight": { "HR": 0, "PR": 0, "Logistics": 3 } },
+            { "id": "D", "text": "Strategic problems — improving how a team works as a whole", "weight": { "HR": 2, "PR": 1, "Logistics": 2 } }
+          ]
+        },
+        {
+          "id": 8,
+          "question": "How do you feel about working with external stakeholders or the public?",
+          "answers": [
+            { "id": "A", "text": "I prefer focusing on internal team dynamics and culture", "weight": { "HR": 3, "PR": 0, "Logistics": 1 } },
+            { "id": "B", "text": "I love it — building external relationships is where I shine", "weight": { "HR": 0, "PR": 3, "Logistics": 0 } },
+            { "id": "C", "text": "I interact with them only when needed for operational purposes", "weight": { "HR": 0, "PR": 1, "Logistics": 3 } },
+            { "id": "D", "text": "I'm comfortable with both internal and external interactions", "weight": { "HR": 1, "PR": 2, "Logistics": 2 } }
+          ]
+        },
+        {
+          "id": 9,
+          "question": "What would your dream project look like?",
+          "answers": [
+            { "id": "A", "text": "Building a mentorship or training program for a growing team", "weight": { "HR": 3, "PR": 1, "Logistics": 0 } },
+            { "id": "B", "text": "Launching a media campaign that changes public perception of an organization", "weight": { "HR": 0, "PR": 3, "Logistics": 0 } },
+            { "id": "C", "text": "Organizing a large-scale event from scratch — venue, transport, everything", "weight": { "HR": 0, "PR": 0, "Logistics": 3 } },
+            { "id": "D", "text": "Redesigning a team's internal processes to run more smoothly", "weight": { "HR": 2, "PR": 1, "Logistics": 2 } }
+          ]
+        },
+        {
+          "id": 10,
+          "question": "When volunteering, what role do you naturally fall into?",
+          "answers": [
+            { "id": "A", "text": "The one who checks in on teammates and keeps spirits up", "weight": { "HR": 3, "PR": 1, "Logistics": 0 } },
+            { "id": "B", "text": "The spokesperson or face of the group", "weight": { "HR": 0, "PR": 3, "Logistics": 0 } },
+            { "id": "C", "text": "The one who tracks supplies, schedules, and makes sure nothing is missed", "weight": { "HR": 0, "PR": 0, "Logistics": 3 } },
+            { "id": "D", "text": "The coordinator who bridges all the moving parts together", "weight": { "HR": 1, "PR": 2, "Logistics": 2 } }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Technical",
+      "committees": ["Frontend", "Backend", "Mobile App", "Game Development", "Data Analysis", "Machine Learning"],
+      "description": "This list helps identify which Technical committee best matches your skills and interests.",
+      "questions": [
+        {
+          "id": 1,
+          "question": "When you start a new project, what excites you most?",
+          "answers": [
+            { "id": "A", "text": "Designing beautiful, interactive interfaces users will love", "weight": { "Frontend": 3, "Backend": 0, "Mobile": 1, "GameDev": 1, "DataAnalysis": 0, "ML": 0 } },
+            { "id": "B", "text": "Building the server logic, APIs, and databases that power everything", "weight": { "Frontend": 0, "Backend": 3, "Mobile": 0, "GameDev": 0, "DataAnalysis": 1, "ML": 1 } },
+            { "id": "C", "text": "Making something that lives in someone's pocket and runs smoothly", "weight": { "Frontend": 1, "Backend": 0, "Mobile": 3, "GameDev": 1, "DataAnalysis": 0, "ML": 0 } },
+            { "id": "D", "text": "Creating an interactive world with rules, mechanics, and real-time feedback", "weight": { "Frontend": 1, "Backend": 0, "Mobile": 0, "GameDev": 3, "DataAnalysis": 0, "ML": 1 } }
+          ]
+        },
+        {
+          "id": 2,
+          "question": "Which area of computer science interests you most?",
+          "answers": [
+            { "id": "A", "text": "Human-computer interaction and accessibility", "weight": { "Frontend": 3, "Backend": 0, "Mobile": 2, "GameDev": 1, "DataAnalysis": 0, "ML": 0 } },
+            { "id": "B", "text": "Databases, system design, and scalability", "weight": { "Frontend": 0, "Backend": 3, "Mobile": 0, "GameDev": 0, "DataAnalysis": 2, "ML": 1 } },
+            { "id": "C", "text": "Statistics, probability, and pattern recognition", "weight": { "Frontend": 0, "Backend": 0, "Mobile": 0, "GameDev": 0, "DataAnalysis": 3, "ML": 3 } },
+            { "id": "D", "text": "Real-time systems, physics engines, and graphics rendering", "weight": { "Frontend": 1, "Backend": 1, "Mobile": 0, "GameDev": 3, "DataAnalysis": 0, "ML": 0 } }
+          ]
+        },
+        {
+          "id": 3,
+          "question": "How do you feel about working with data?",
+          "answers": [
+            { "id": "A", "text": "I love digging into datasets and finding hidden trends", "weight": { "Frontend": 0, "Backend": 1, "Mobile": 0, "GameDev": 0, "DataAnalysis": 3, "ML": 2 } },
+            { "id": "B", "text": "I use it to improve user experiences (e.g., analytics, A/B testing)", "weight": { "Frontend": 2, "Backend": 1, "Mobile": 2, "GameDev": 1, "DataAnalysis": 1, "ML": 0 } },
+            { "id": "C", "text": "I build the systems that store and retrieve data efficiently", "weight": { "Frontend": 0, "Backend": 3, "Mobile": 0, "GameDev": 0, "DataAnalysis": 1, "ML": 0 } },
+            { "id": "D", "text": "I feed it into models that learn and make predictions", "weight": { "Frontend": 0, "Backend": 0, "Mobile": 0, "GameDev": 0, "DataAnalysis": 2, "ML": 3 } }
+          ]
+        },
+        {
+          "id": 4,
+          "question": "Which tools or languages are you most drawn to?",
+          "answers": [
+            { "id": "A", "text": "HTML, CSS, JavaScript, React, or Vue", "weight": { "Frontend": 3, "Backend": 0, "Mobile": 1, "GameDev": 0, "DataAnalysis": 0, "ML": 0 } },
+            { "id": "B", "text": "Node.js, Python, Java, SQL, or REST APIs", "weight": { "Frontend": 0, "Backend": 3, "Mobile": 0, "GameDev": 0, "DataAnalysis": 1, "ML": 1 } },
+            { "id": "C", "text": "Python, TensorFlow, scikit-learn, or Jupyter", "weight": { "Frontend": 0, "Backend": 0, "Mobile": 0, "GameDev": 0, "DataAnalysis": 2, "ML": 3 } },
+            { "id": "D", "text": "Unity, C#, C++, or game engines", "weight": { "Frontend": 0, "Backend": 0, "Mobile": 1, "GameDev": 3, "DataAnalysis": 0, "ML": 0 } }
+          ]
+        },
+        {
+          "id": 5,
+          "question": "What kind of end product motivates you the most?",
+          "answers": [
+            { "id": "A", "text": "An app that millions of people use daily on their phones", "weight": { "Frontend": 1, "Backend": 1, "Mobile": 3, "GameDev": 0, "DataAnalysis": 0, "ML": 0 } },
+            { "id": "B", "text": "A dashboard or report that reveals surprising insights in data", "weight": { "Frontend": 1, "Backend": 0, "Mobile": 0, "GameDev": 0, "DataAnalysis": 3, "ML": 1 } },
+            { "id": "C", "text": "A model that learns to make accurate predictions on its own", "weight": { "Frontend": 0, "Backend": 0, "Mobile": 0, "GameDev": 0, "DataAnalysis": 1, "ML": 3 } },
+            { "id": "D", "text": "A game that immerses players in a world I've built", "weight": { "Frontend": 0, "Backend": 0, "Mobile": 1, "GameDev": 3, "DataAnalysis": 0, "ML": 0 } }
+          ]
+        },
+        {
+          "id": 6,
+          "question": "How do you describe your thinking style?",
+          "answers": [
+            { "id": "A", "text": "Visual and creative — I think in layouts, colors, and flows", "weight": { "Frontend": 3, "Backend": 0, "Mobile": 1, "GameDev": 2, "DataAnalysis": 0, "ML": 0 } },
+            { "id": "B", "text": "Logical and architectural — I love designing systems and flows", "weight": { "Frontend": 0, "Backend": 3, "Mobile": 0, "GameDev": 1, "DataAnalysis": 1, "ML": 1 } },
+            { "id": "C", "text": "Analytical — I like breaking problems into numbers and patterns", "weight": { "Frontend": 0, "Backend": 1, "Mobile": 0, "GameDev": 0, "DataAnalysis": 3, "ML": 3 } },
+            { "id": "D", "text": "Inventive and experimental — I love making things that behave unexpectedly", "weight": { "Frontend": 1, "Backend": 0, "Mobile": 1, "GameDev": 3, "DataAnalysis": 0, "ML": 1 } }
+          ]
+        },
+        {
+          "id": 7,
+          "question": "What do you do when you have free coding time?",
+          "answers": [
+            { "id": "A", "text": "Recreate a cool UI I saw or experiment with animations", "weight": { "Frontend": 3, "Backend": 0, "Mobile": 1, "GameDev": 1, "DataAnalysis": 0, "ML": 0 } },
+            { "id": "B", "text": "Build a REST API or mess around with databases", "weight": { "Frontend": 0, "Backend": 3, "Mobile": 0, "GameDev": 0, "DataAnalysis": 1, "ML": 0 } },
+            { "id": "C", "text": "Train a small ML model or explore a dataset on Kaggle", "weight": { "Frontend": 0, "Backend": 0, "Mobile": 0, "GameDev": 0, "DataAnalysis": 2, "ML": 3 } },
+            { "id": "D", "text": "Prototype a simple game mechanic or interactive experience", "weight": { "Frontend": 1, "Backend": 0, "Mobile": 1, "GameDev": 3, "DataAnalysis": 0, "ML": 0 } }
+          ]
+        },
+        {
+          "id": 8,
+          "question": "Which challenge sounds most interesting to you?",
+          "answers": [
+            { "id": "A", "text": "Making an app load 50% faster on a 3G connection", "weight": { "Frontend": 2, "Backend": 1, "Mobile": 3, "GameDev": 1, "DataAnalysis": 0, "ML": 0 } },
+            { "id": "B", "text": "Designing a database schema that handles millions of records", "weight": { "Frontend": 0, "Backend": 3, "Mobile": 0, "GameDev": 0, "DataAnalysis": 2, "ML": 1 } },
+            { "id": "C", "text": "Improving a model's accuracy from 80% to 95%", "weight": { "Frontend": 0, "Backend": 0, "Mobile": 0, "GameDev": 0, "DataAnalysis": 1, "ML": 3 } },
+            { "id": "D", "text": "Creating smooth, fair, and fun game physics", "weight": { "Frontend": 0, "Backend": 0, "Mobile": 0, "GameDev": 3, "DataAnalysis": 0, "ML": 0 } }
+          ]
+        },
+        {
+          "id": 9,
+          "question": "What does 'good code' mean to you?",
+          "answers": [
+            { "id": "A", "text": "Code that renders beautifully and responds instantly on any screen", "weight": { "Frontend": 3, "Backend": 0, "Mobile": 2, "GameDev": 1, "DataAnalysis": 0, "ML": 0 } },
+            { "id": "B", "text": "Code that is secure, scalable, and well-documented", "weight": { "Frontend": 0, "Backend": 3, "Mobile": 0, "GameDev": 0, "DataAnalysis": 1, "ML": 1 } },
+            { "id": "C", "text": "Code that produces reliable, explainable, and accurate outputs", "weight": { "Frontend": 0, "Backend": 0, "Mobile": 0, "GameDev": 0, "DataAnalysis": 2, "ML": 3 } },
+            { "id": "D", "text": "Code that creates immersive experiences with smooth frame rates", "weight": { "Frontend": 1, "Backend": 0, "Mobile": 1, "GameDev": 3, "DataAnalysis": 0, "ML": 0 } }
+          ]
+        },
+        {
+          "id": 10,
+          "question": "Which project would you proudly add to your portfolio?",
+          "answers": [
+            { "id": "A", "text": "A cross-platform mobile app with a polished native feel", "weight": { "Frontend": 1, "Backend": 0, "Mobile": 3, "GameDev": 0, "DataAnalysis": 0, "ML": 0 } },
+            { "id": "B", "text": "A data visualization dashboard that tells a compelling story", "weight": { "Frontend": 2, "Backend": 0, "Mobile": 0, "GameDev": 0, "DataAnalysis": 3, "ML": 1 } },
+            { "id": "C", "text": "An AI-powered tool that solves a real-world problem", "weight": { "Frontend": 0, "Backend": 1, "Mobile": 0, "GameDev": 0, "DataAnalysis": 1, "ML": 3 } },
+            { "id": "D", "text": "A fully playable 2D or 3D game with custom mechanics", "weight": { "Frontend": 0, "Backend": 0, "Mobile": 0, "GameDev": 3, "DataAnalysis": 0, "ML": 0 } }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Media",
+      "committees": ["Graphic Design", "Social Media", "Photography & Video Editing (PV)"],
+      "description": "This list helps identify which Media committee role best fits your creative strengths.",
+      "questions": [
+        {
+          "id": 1,
+          "question": "When you want to express a creative idea, what do you reach for first?",
+          "answers": [
+            { "id": "A", "text": "Adobe Illustrator, Figma, or Canva to design a visual", "weight": { "Graphic": 3, "SocialMedia": 1, "PV": 0 } },
+            { "id": "B", "text": "My phone to post a story, reel, or tweet", "weight": { "Graphic": 0, "SocialMedia": 3, "PV": 1 } },
+            { "id": "C", "text": "My camera or phone to shoot a photo or video", "weight": { "Graphic": 0, "SocialMedia": 1, "PV": 3 } },
+            { "id": "D", "text": "A sketchpad to brainstorm visuals before picking a medium", "weight": { "Graphic": 2, "SocialMedia": 1, "PV": 2 } }
+          ]
+        },
+        {
+          "id": 2,
+          "question": "What is your favorite thing about creating content?",
+          "answers": [
+            { "id": "A", "text": "Crafting a visual identity that feels cohesive and intentional", "weight": { "Graphic": 3, "SocialMedia": 1, "PV": 0 } },
+            { "id": "B", "text": "Sparking engagement and conversations with an audience", "weight": { "Graphic": 0, "SocialMedia": 3, "PV": 1 } },
+            { "id": "C", "text": "Capturing a moment or emotion that words can't describe", "weight": { "Graphic": 0, "SocialMedia": 1, "PV": 3 } },
+            { "id": "D", "text": "Making something that looks so good people stop scrolling", "weight": { "Graphic": 2, "SocialMedia": 2, "PV": 1 } }
+          ]
+        },
+        {
+          "id": 3,
+          "question": "You're promoting an event. What's your go-to contribution?",
+          "answers": [
+            { "id": "A", "text": "Designing the poster, banner, and all printed/digital materials", "weight": { "Graphic": 3, "SocialMedia": 1, "PV": 0 } },
+            { "id": "B", "text": "Managing the countdown posts, stories, and interactive polls", "weight": { "Graphic": 0, "SocialMedia": 3, "PV": 0 } },
+            { "id": "C", "text": "Shooting a hype video or a behind-the-scenes reel to spread the word", "weight": { "Graphic": 0, "SocialMedia": 1, "PV": 3 } },
+            { "id": "D", "text": "Creating a full visual package: poster + teaser clip + story templates", "weight": { "Graphic": 2, "SocialMedia": 1, "PV": 2 } }
+          ]
+        },
+        {
+          "id": 4,
+          "question": "Which software are you most comfortable with (or excited to learn)?",
+          "answers": [
+            { "id": "A", "text": "Photoshop, Illustrator, Figma, or InDesign", "weight": { "Graphic": 3, "SocialMedia": 0, "PV": 0 } },
+            { "id": "B", "text": "Hootsuite, Buffer, Meta Business Suite, or Notion", "weight": { "Graphic": 0, "SocialMedia": 3, "PV": 0 } },
+            { "id": "C", "text": "Premiere Pro, Final Cut, Lightroom, or DaVinci Resolve", "weight": { "Graphic": 0, "SocialMedia": 0, "PV": 3 } },
+            { "id": "D", "text": "A bit of everything — I pick up tools quickly", "weight": { "Graphic": 1, "SocialMedia": 2, "PV": 2 } }
+          ]
+        },
+        {
+          "id": 5,
+          "question": "What kind of feedback makes you feel most accomplished?",
+          "answers": [
+            { "id": "A", "text": "'This design is stunning — it perfectly captures the brand!'", "weight": { "Graphic": 3, "SocialMedia": 0, "PV": 0 } },
+            { "id": "B", "text": "'This post went viral — the comments section is blowing up!'", "weight": { "Graphic": 0, "SocialMedia": 3, "PV": 1 } },
+            { "id": "C", "text": "'This video gave me chills — I watched it three times!'", "weight": { "Graphic": 0, "SocialMedia": 1, "PV": 3 } },
+            { "id": "D", "text": "'The whole campaign looked so professional and put-together!'", "weight": { "Graphic": 2, "SocialMedia": 2, "PV": 1 } }
+          ]
+        },
+        {
+          "id": 6,
+          "question": "How do you spend your creative free time?",
+          "answers": [
+            { "id": "A", "text": "Experimenting with typography, color palettes, or design trends", "weight": { "Graphic": 3, "SocialMedia": 0, "PV": 0 } },
+            { "id": "B", "text": "Analyzing what's trending on Instagram, TikTok, or X (Twitter)", "weight": { "Graphic": 0, "SocialMedia": 3, "PV": 1 } },
+            { "id": "C", "text": "Shooting random photos/videos and editing them just for fun", "weight": { "Graphic": 0, "SocialMedia": 1, "PV": 3 } },
+            { "id": "D", "text": "Browsing Behance, Pinterest, or YouTube for creative inspiration", "weight": { "Graphic": 2, "SocialMedia": 1, "PV": 2 } }
+          ]
+        },
+        {
+          "id": 7,
+          "question": "Which part of content creation feels most natural to you?",
+          "answers": [
+            { "id": "A", "text": "Building visual systems: logos, icons, layouts, and color schemes", "weight": { "Graphic": 3, "SocialMedia": 0, "PV": 0 } },
+            { "id": "B", "text": "Writing captions, planning calendars, and reading analytics", "weight": { "Graphic": 0, "SocialMedia": 3, "PV": 0 } },
+            { "id": "C", "text": "Framing a shot, adjusting lighting, and editing the final cut", "weight": { "Graphic": 0, "SocialMedia": 0, "PV": 3 } },
+            { "id": "D", "text": "All of it — I love end-to-end creative production", "weight": { "Graphic": 1, "SocialMedia": 2, "PV": 2 } }
+          ]
+        },
+        {
+          "id": 8,
+          "question": "What does success look like to you in a media project?",
+          "answers": [
+            { "id": "A", "text": "A design that becomes the visual identity people associate with the brand", "weight": { "Graphic": 3, "SocialMedia": 1, "PV": 0 } },
+            { "id": "B", "text": "A post that gets shared thousands of times and starts a conversation", "weight": { "Graphic": 0, "SocialMedia": 3, "PV": 1 } },
+            { "id": "C", "text": "A video that makes people stop, feel something, and share it", "weight": { "Graphic": 0, "SocialMedia": 1, "PV": 3 } },
+            { "id": "D", "text": "A cohesive media package that elevates the team's public image", "weight": { "Graphic": 2, "SocialMedia": 2, "PV": 1 } }
+          ]
+        },
+        {
+          "id": 9,
+          "question": "How do you approach a new creative brief?",
+          "answers": [
+            { "id": "A", "text": "I start by building a mood board and selecting a visual style", "weight": { "Graphic": 3, "SocialMedia": 0, "PV": 1 } },
+            { "id": "B", "text": "I research the target audience and figure out what content resonates with them", "weight": { "Graphic": 0, "SocialMedia": 3, "PV": 0 } },
+            { "id": "C", "text": "I scout locations, think about angles, and plan the shots I want", "weight": { "Graphic": 0, "SocialMedia": 0, "PV": 3 } },
+            { "id": "D", "text": "I map out the full story we want to tell, then decide on the medium", "weight": { "Graphic": 1, "SocialMedia": 2, "PV": 2 } }
+          ]
+        },
+        {
+          "id": 10,
+          "question": "Which role would you take during a live event?",
+          "answers": [
+            { "id": "A", "text": "Creating live visual updates, banners, and branded materials on the fly", "weight": { "Graphic": 3, "SocialMedia": 0, "PV": 0 } },
+            { "id": "B", "text": "Live-tweeting, posting stories, and engaging followers in real time", "weight": { "Graphic": 0, "SocialMedia": 3, "PV": 0 } },
+            { "id": "C", "text": "Photographing key moments and filming highlights for a recap video", "weight": { "Graphic": 0, "SocialMedia": 1, "PV": 3 } },
+            { "id": "D", "text": "Coordinating the full media coverage: graphics, posts, and footage", "weight": { "Graphic": 1, "SocialMedia": 2, "PV": 2 } }
+          ]
+        }
+      ]
+    }
+  ]
+}
