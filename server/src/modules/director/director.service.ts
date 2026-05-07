@@ -100,15 +100,24 @@ export class DirectorService {
     const plainPassword = this.generatePassword();
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
-    // Create a User account for the accepted applicant
-    const user = this.userRepository.create({
-      name: application.name,
-      email: application.email,
-      phone: application.phone,
-      password: hashedPassword,
-      role: Role.MEMBER,
-      committeeId: application.committeeId,
-    });
+    // Check if a User account already exists
+    let user = await this.userRepository.findOne({ where: { email: application.email } });
+    if (user) {
+      user.name = application.name;
+      user.phone = application.phone;
+      user.password = hashedPassword;
+      user.role = Role.MEMBER;
+      user.committeeId = application.committeeId;
+    } else {
+      user = this.userRepository.create({
+        name: application.name,
+        email: application.email,
+        phone: application.phone,
+        password: hashedPassword,
+        role: Role.MEMBER,
+        committeeId: application.committeeId,
+      });
+    }
     await this.userRepository.save(user);
 
     // Send welcome email with credentials

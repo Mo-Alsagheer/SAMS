@@ -5,4 +5,5 @@ export interface AuthUser {
   email: string;
   role: Role;
   committeeId?: string;
+  name: string;
 }
