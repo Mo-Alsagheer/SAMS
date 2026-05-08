@@ -4,7 +4,7 @@ function QuizCard({ id, question, options, onSelect, selectedOption }) {
   return (
     <fieldset className="space-y-4">
       {/* question */}
-      <legend className="text-xl md:text-2xl font-semibold mb-4">
+      <legend className="text-xl md:text-2xl font-bold mb-6 text-slate-900 italic uppercase tracking-tighter">
         Q {id} : {question}
       </legend>
 
@@ -17,11 +17,11 @@ function QuizCard({ id, question, options, onSelect, selectedOption }) {
             <label
               key={option.id}
               className={`
-                rounded-lg p-3 cursor-pointer transition border text-md font-normal
+                relative rounded-xl p-4 cursor-pointer transition-all duration-300 border-2 text-md font-medium
                 ${
                   isSelected
-                    ? "bg-sky-300 border-sky-500"
-                    : "bg-sky-100 hover:bg-sky-200 border-transparent"
+                    ? "bg-blue-50 border-blue-800 text-blue-900 shadow-md"
+                    : "bg-white hover:bg-slate-50 border-slate-100 text-slate-600 hover:border-blue-200"
                 }
               `}
             >
@@ -31,10 +31,19 @@ function QuizCard({ id, question, options, onSelect, selectedOption }) {
                 value={option.id}
                 checked={isSelected}
                 onChange={() => onSelect(option.id)}
-                className="hidden "
+                className="hidden"
               />
-
-              {option.text}
+              
+              <div className="flex items-center gap-3">
+                
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                  isSelected ? "border-blue-800 bg-blue-800" : "border-slate-300"
+                }`}>
+                  {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                </div>
+                
+                <span>{option.text}</span>
+              </div>
             </label>
           );
         })}
