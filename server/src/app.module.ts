@@ -8,7 +8,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { RecruitmentModule } from './modules/recruitment/recruitment.module';
 import { ApplicationsModule } from './modules/applications/applications.module';
-import { AiModule } from './modules/ai/ai.module';
+import { AiModule } from './integrations/ai-service/ai.module';
 import { QuizModule } from './modules/quiz/quiz.module';
 import { DirectorModule } from './modules/director/director.module';
 import { ExecutiveModule } from './modules/executive/executive.module';
