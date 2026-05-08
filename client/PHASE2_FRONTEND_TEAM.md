@@ -3,7 +3,7 @@
 ## Goal
 Build the Phase 2 LMS interface for the SAMS project. You will construct the user interfaces for the learning journey, online video sessions, file sharing, task submission, and scoring system.
 
-The application relies on our self-hosted BigBlueButton (BBB) server for video conferencing and Cloudinary for file hosting.
+The application relies on our self-hosted **plugNmeet** server for video conferencing and Cloudinary for file hosting.
 
 ---
 
@@ -12,14 +12,14 @@ The application relies on our self-hosted BigBlueButton (BBB) server for video c
 ### Member (User / Applicant)
 - **View Roadmap**: See a timeline or outline of the committee's sessions.
 - **Session Details**: View scheduled date/time, description, and attached resources.
-- **Join Meeting**: Connect to the live BBB video session.
+- **Join Meeting**: Connect to the live plugNmeet video session.
 - **Submit Tasks**: View assigned tasks and upload files/text as a submission.
 - **View Score**: Check accumulated score (Attendance + Graded Tasks).
 
 ### Director
 - **Manage Roadmap**: Create and arrange sessions within their committee.
 - **Manage Resources**: Upload materials (files, documents) to sessions via Cloudinary.
-- **Host Meetings**: Start/Join BBB sessions as a Moderator.
+- **Host Meetings**: Start/Join plugNmeet sessions as an Admin/Moderator.
 - **Assign Tasks**: Create tasks for a session with instructions and due dates.
 - **Grade Submissions**: Review member task submissions and assign a score (0 to 5 points).
 - **Mark Attendance**: Manually check off which members attended the session.
@@ -40,11 +40,11 @@ The application relies on our self-hosted BigBlueButton (BBB) server for video c
 - Use a file picker for Directors uploading materials and Members submitting tasks.
 - If handling uploads on the frontend, use the Cloudinary upload widget or REST API. Ensure you coordinate with the backend team on how URLs or signatures are securely passed.
 
-### 3. BigBlueButton Meeting Join
-- BBB does not typically load in an `iframe` smoothly due to permissions (camera/mic).
+### 3. plugNmeet Meeting Join
+- We will integrate plugNmeet by redirecting users to the client URL.
 - The "Join Meeting" button should call the backend (e.g., `GET /sessions/:id/meeting/join`).
-- The backend will return a secure BBB URL.
-- Use `window.location.href = url` or open a new tab to redirect the user directly to the BigBlueButton room.
+- The backend will return a plugNmeet `access_token` and the `serverUrl`.
+- Use `window.location.href = 'https://[your-plugnmeet-server]/?access_token=' + token` or open a new tab to redirect the user directly to the plugNmeet room.
 
 ### 4. Task Management & Grading (Director)
 - **Task List View**: Shows all tasks for the session.
@@ -68,10 +68,10 @@ Coordinate with the Backend team to consume these endpoints:
 - **Tasks**: POST task, POST submission
 - **Grading**: PATCH submission score
 - **Attendance**: GET members list, PATCH attendance array
-- **Meeting**: GET the join URL
+- **Meeting**: GET the join URL/token
 - **Score**: GET current user score
 
-> **Important**: The backend generates the secure BBB URLs. Do not attempt to generate BBB SHA-1 checksums on the frontend, as this would expose the `BBB_SECRET`.
+> **Important**: The backend generates the secure plugNmeet access tokens. Do not attempt to generate tokens on the frontend, as this would expose your API Secret.
 
 ---
 

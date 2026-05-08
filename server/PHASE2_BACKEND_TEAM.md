@@ -5,7 +5,7 @@ Implement Phase 2 of the SAMS project, transforming the platform into a comprehe
 
 The backend will act as the source of truth for:
 - Course roadmaps & sessions linked to committees
-- BigBlueButton (BBB) meeting integration
+- **plugNmeet** meeting integration (Replacing our previous plan for BBB)
 - Materials and task management (Cloudinary integration for files)
 - Member scoring & manual attendance tracking
 
@@ -15,7 +15,7 @@ The backend will act as the source of truth for:
 
 ### Core Entities (Suggested)
 - **Roadmap / Course**: `id`, `committeeId` (Foreign Key), `title`, `description`, `createdAt`
-- **Session / Meeting**: `id`, `roadmapId` (Foreign Key), `title`, `description`, `scheduledAt`, `bbbMeetingId`, `isRecorded`
+- **Session / Meeting**: `id`, `roadmapId` (Foreign Key), `title`, `description`, `scheduledAt`, `plugnmeetRoomId`, `isRecorded`
 - **Material / Resource**: `id`, `sessionId` (Foreign Key), `title`, `fileUrl` (Cloudinary URL), `uploadedBy`
 - **Task**: `id`, `sessionId` (Foreign Key), `title`, `description`, `dueDate`
 - **TaskSubmission**: `id`, `taskId` (Foreign Key), `userId` (Member), `content` (Optional text), `fileUrl` (Cloudinary URL), `score` (0-5, default null), `submittedAt`
@@ -52,34 +52,35 @@ The backend will act as the source of truth for:
 - `GET /users/me/score` - Get total score (Attendance points + Task points)
 - `GET /committees/:committeeId/scoreboard` - (Optional) Director can view scores for all members
 
-### BigBlueButton (BBB) Integration
-> We are deploying our own BBB server. Use the base URL and Secret for the integration. You can use the `bigbluebutton-js` library or make direct HTTP calls with SHA-1 checksums.
+### plugNmeet Integration
+> We are deploying our own plugNmeet server. Use the `plugnmeet-sdk-js` library to interact with the API (creating rooms, generating tokens).
 
 - `POST /director/sessions/:sessionId/meeting/create`
-  - Calls BBB `create` API to initialize the meeting.
-  - Set `record=true`.
+  - Calls plugNmeet API to initialize the meeting room.
+  - Set recording options.
 - `GET /sessions/:sessionId/meeting/join`
-  - Generates the BBB `join` URL.
-  - If role = `DIRECTOR`, generate Moderator join URL.
-  - If role = `USER`, generate Attendee join URL.
-  - Return the URL so the frontend can redirect the user.
+  - Uses the plugNmeet SDK to generate a signed JWT (access token).
+  - If role = `DIRECTOR`, set `isAdmin: true` in the token payload.
+  - If role = `USER`, set `isAdmin: false`.
+  - Return the `access_token` and the plugNmeet server URL so the frontend can redirect the user.
 - `GET /sessions/:sessionId/meeting/recordings`
-  - Calls BBB `getRecordings` API using the `bbbMeetingId` to fetch the playback URL.
+  - Calls plugNmeet API to fetch the playback URL for a past session.
 
 ---
 
-## BigBlueButton Details
+## plugNmeet Details
 
 ### Expected Environment Variables
-- `BBB_URL=https://your-bbb-server.com/bigbluebutton/api`
-- `BBB_SECRET=your-bbb-shared-secret`
+- `PLUGNMEET_SERVER_URL=https://your-plugnmeet-server.com`
+- `PLUGNMEET_API_KEY=your-api-key`
+- `PLUGNMEET_API_SECRET=your-api-secret`
 - `CLOUDINARY_URL=cloudinary://...` (for file uploads)
 
 ### Meeting Flow
 1. Director schedules a Session in SAMS.
 2. At meeting time, Director clicks "Start Meeting" on the frontend -> calls `POST /create` then `GET /join`.
 3. Member clicks "Join Meeting" -> calls `GET /join`.
-4. SAMS Backend generates the secure hash using the `BBB_SECRET` and returns the URL. The frontend handles the redirect.
+4. SAMS Backend uses the SDK to generate the JWT token and returns it. The frontend redirects to `https://[PLUGNMEET_SERVER_URL]/?access_token=[TOKEN]`.
 5. After the meeting, SAMS can fetch recordings if requested.
 
 ---
@@ -87,6 +88,6 @@ The backend will act as the source of truth for:
 ## Acceptance Criteria (Backend)
 - All CRUD operations for Roadmaps, Sessions, Tasks, and Materials are functional.
 - Cloudinary is fully integrated for uploading resources and task submission files.
-- BBB integration correctly generates join URLs with proper roles (Moderator vs Attendee).
+- plugNmeet integration correctly generates access tokens with proper roles (Admin vs Attendee).
 - The scoring logic correctly computes: 5 points for every attended session + Sum of all task scores (0-5 per task).
 - Manual attendance API properly flags members as `attended=true`.
