@@ -3,12 +3,12 @@ import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import { getCommittees } from "@/features/committee/committee";
-import { getAuthUser } from "@/features/auth/session";
+import { getCurrentUser() } from "@/features/auth/session";
 
 export function useApplications(role, api) {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const user = getAuthUser();
+  const user = getCurrentUser()();
   const isFixedCommittee = role === "director";
 
   const committeeIdFromUrl = searchParams.get("committeeId") || "";

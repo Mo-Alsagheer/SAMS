@@ -17,9 +17,9 @@ import { Input } from "@/components/ui/input";
 import { login } from "@/features/auth/auth";
 import { useNavigate } from "react-router-dom";
 import {
-  getAuthToken,
-  getAuthUser,
+  getCurrentUser,
   getHomeRouteForRole,
+  isAuthenticated,
   setAuthSession,
 } from "@/features/auth/session";
 
@@ -41,21 +41,21 @@ export default function Login() {
   });
   const navigate = useNavigate();
 
-React.useEffect(() => {
-  const user = getAuthUser();
-  const token = getAuthToken();
-  
-  // Only redirect to dashboard if they are ACTUALLY logged in
-  if (token && user && user.role) {
-    navigate(getHomeRouteForRole(user.role), { replace: true });
-  }
-}, [navigate]);
+  React.useEffect(() => {
+    const user = getCurrentUser();
+
+    if (isAuthenticated() && user?.role) {
+      navigate(getHomeRouteForRole(user.role), {
+        replace: true,
+      });
+    }
+  }, [navigate]);
 
   async function onSubmit(data) {
     try {
       const result = await login(data);
       if (result && result.accessToken) {
-        setAuthSession({ token: result.accessToken, user: result.user });
+        setAuthSession(result.accessToken);
         toast.success("Login successful");
         const targetRoute = getHomeRouteForRole(result.user.role);
         setTimeout(() => {
@@ -95,7 +95,8 @@ React.useEffect(() => {
             </div>
 
             <p className="text-blue-100/80 font-medium max-w-xs mx-auto">
-              Unlock your leadership potential and streamline your committee's work.
+              Unlock your leadership potential and streamline your committee's
+              work.
             </p>
           </div>
         </div>

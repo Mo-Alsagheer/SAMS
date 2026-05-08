@@ -10,7 +10,7 @@ import { PopupForm } from "@/components/shared/PopupForm";
 
 import { manageMembersApllications } from "../../features/applications/applications";
 import { getInitials } from "../../utils/getInitials";
-import { getAuthUser } from "@/features/auth/session";
+import { getCurrentUser } from "@/features/auth/session";
 import { Button } from "@/components/ui/button";
 
 const scheduleSchema = z.object({
@@ -36,7 +36,7 @@ function Applications() {
 
   const navigate = useNavigate();
 
-  const user = getAuthUser();
+  const user = getCurrentUser()();
   const committeeId = user?.committeeId || "";
 
   const loadApplications = useCallback(async () => {
