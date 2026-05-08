@@ -7,13 +7,6 @@ import { AiService } from './ai.service';
 export class AiController {
   constructor(private readonly aiService: AiService) {}
 
-  @Post('quiz/generate')
-  @ApiOperation({ summary: 'Generate dynamic quiz using AI' })
-  @ApiResponse({ status: 201, description: 'Quiz content generated successfully.' })
-  generateQuiz() {
-    return this.aiService.generateQuizContent();
-  }
-
   @Post('applications/evaluate')
   @ApiOperation({ summary: 'Evaluate an application using AI' })
   @ApiBody({
@@ -21,11 +14,18 @@ export class AiController {
       type: 'object',
       properties: {
         applicationId: { type: 'string', example: '01HRG...' },
-        answers: { type: 'array', items: { type: 'string' }, example: ['Answer 1', 'Answer 2'] }
-      }
-    }
+        answers: {
+          type: 'array',
+          items: { type: 'string' },
+          example: ['Answer 1', 'Answer 2'],
+        },
+      },
+    },
   })
-  @ApiResponse({ status: 201, description: 'Evaluation completed successfully.' })
+  @ApiResponse({
+    status: 201,
+    description: 'Evaluation completed successfully.',
+  })
   evaluateApplication(@Body() payload: any) {
     return this.aiService.evaluateApplication(payload);
   }
@@ -37,9 +37,12 @@ export class AiController {
       type: 'object',
       properties: {
         sessionId: { type: 'string', example: 'session_123' },
-        message: { type: 'string', example: 'Hello, I am ready for the interview.' }
-      }
-    }
+        message: {
+          type: 'string',
+          example: 'Hello, I am ready for the interview.',
+        },
+      },
+    },
   })
   @ApiResponse({ status: 201, description: 'AI agent response generated.' })
   interviewAgent(@Body() payload: any) {

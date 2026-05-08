@@ -13,22 +13,6 @@ export class AiService {
     );
   }
 
-  async generateQuizContent() {
-    try {
-      const response = await fetch(`${this.aiBaseUrl}/quiz/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!response.ok) {
-        throw new Error(`AI Service Quiz Gen Error: ${response.statusText}`);
-      }
-      return await response.json();
-    } catch (error) {
-      this.logger.error('Failed to generate quiz', error);
-      throw error;
-    }
-  }
-
   async evaluateApplication(payload: any) {
     try {
       const response = await fetch(`${this.aiBaseUrl}/evaluate`, {

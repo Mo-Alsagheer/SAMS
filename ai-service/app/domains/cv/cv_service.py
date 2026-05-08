@@ -2,7 +2,7 @@ import base64
 from app.providers.llm import call_llm
 from app.domains.cv.cv_schema import CVItem
 from app.domains.cv.cv_parser import extract_gdrive_text, extract_pdf_text, parse_json
-from app.domains.cv.cv_prompt import CV_SYSTEM
+from app.domains.cv.cv_prompt import CV_SYSTEM_TEMPLATE
 
 
 def process_single_cv_sync(req: CVItem) -> dict:
@@ -27,9 +27,13 @@ def process_single_cv_sync(req: CVItem) -> dict:
         return {"id": req.id, "error": "Could not extract text from file."}
     
     try:
+        prompt = CV_SYSTEM_TEMPLATE.format(
+            committee_name=req.committee_name,
+            committee_focus=req.committee_focus
+        )
         raw, used = call_llm(
             [{"role": "user", "content": f"Student CV:\n\n{cv_text[:3000]}"}],
-            CV_SYSTEM
+            prompt
         )
         result = parse_json(raw)
         if result is None:

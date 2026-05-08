@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes.quiz import router as quiz_router
 from app.api.routes.cv import router as cv_router
 from app.api.routes.interview import router as interview_router
 from app.providers.llm import setup_backend
@@ -15,7 +14,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(quiz_router)
 app.include_router(cv_router)
 app.include_router(interview_router)
 

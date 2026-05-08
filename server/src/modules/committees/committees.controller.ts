@@ -36,6 +36,7 @@ import { CloudinaryService } from '../../integrations/cloudinary/cloudinary.serv
 import { CreateCommitteeDto } from './dto/create-committee.dto';
 import { UpdateCommitteeDto } from './dto/update-committee.dto';
 import { UpdateCommitteeByDirectorDto } from './dto/update-committee-by-director.dto';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('committees')
 @ApiBearerAuth()
@@ -50,7 +51,7 @@ export class CommitteesController {
   // ── Shared ────────────────────────────────────────────────────────────────
 
   @Get()
-  @Roles(Role.MEMBER, Role.DIRECTOR, Role.EXECUTIVE)
+  @Public()
   @ApiOperation({ summary: 'List all committees' })
   @ApiResponse({
     status: 200,
@@ -61,7 +62,7 @@ export class CommitteesController {
   }
 
   @Get(':id')
-  @Roles(Role.MEMBER, Role.DIRECTOR, Role.EXECUTIVE)
+  @Public()
   @ApiOperation({ summary: 'Get a specific committee by ID' })
   @ApiParam({
     name: 'id',

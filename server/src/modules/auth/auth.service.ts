@@ -24,6 +24,7 @@ export class AuthService {
       email: user.email,
       role: user.role,
       committeeId: user.committeeId,
+      name: user.name,
     };
   }
 
@@ -37,6 +38,7 @@ export class AuthService {
       sub: user.id,
       role: user.role,
       committeeId: user.committeeId,
+      name: user.name,
     };
 
     return {
