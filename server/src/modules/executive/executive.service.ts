@@ -18,6 +18,8 @@ import {
   RecruitmentProcess,
   RecruitmentStatus,
 } from '../recruitment/entities/recruitment.entity';
+import { Committee } from '../committees/entities/committee.entity';
+import { AiService } from '../../integrations/ai-service/ai.service';
 
 @Injectable()
 export class ExecutiveService {
@@ -28,8 +30,11 @@ export class ExecutiveService {
     private applicationRepository: Repository<Application>,
     @InjectRepository(RecruitmentProcess)
     private recruitmentRepository: Repository<RecruitmentProcess>,
+    @InjectRepository(Committee)
+    private committeeRepository: Repository<Committee>,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
+    private readonly aiService: AiService,
   ) {}
 
   async getDirectorsByCommittee(committeeId: string): Promise<User[]> {
@@ -93,7 +98,67 @@ export class ExecutiveService {
       query.andWhere('application.status = :status', { status });
     }
 
-    return query.getMany();
+    const applications = await query.getMany();
+
+    if (applications.length === 0) {
+      return applications;
+    }
+
+    // Fetch all relevant committees
+    const committeeIds = [
+      ...new Set(applications.map((app) => app.committeeId).filter((id) => id)),
+    ];
+    let committeeMap = new Map();
+    if (committeeIds.length > 0) {
+      const committees = await this.committeeRepository.findByIds(committeeIds);
+      committeeMap = new Map(committees.map((c) => [c.id, c]));
+    }
+
+    const cvsToEvaluate = applications
+      .filter((app) => app.cvLink)
+      .map((app) => {
+        const committee = app.committeeId
+          ? committeeMap.get(app.committeeId)
+          : null;
+        return {
+          id: app.id,
+          type: 'gdrive',
+          link: app.cvLink,
+          committee_name: committee ? committee.name : 'General',
+          committee_focus: committee?.description
+            ? committee.description
+            : 'General community operations',
+        };
+      });
+
+    if (cvsToEvaluate.length > 0) {
+      try {
+        const evaluationResponse =
+          await this.aiService.evaluateBatchApplications({
+            cvs: cvsToEvaluate,
+          });
+
+        const aiResultsMap = new Map();
+        if (evaluationResponse && evaluationResponse.results) {
+          for (const res of evaluationResponse.results) {
+            aiResultsMap.set(res.id, res);
+          }
+        }
+
+        return applications.map((app) => {
+          const aiScore = aiResultsMap.get(app.id);
+          return {
+            ...app,
+            aiScore: aiScore || null,
+          };
+        });
+      } catch (error) {
+        console.log(error);
+        return applications;
+      }
+    }
+
+    return applications;
   }
 
   async acceptPhase1(applicationId: string) {

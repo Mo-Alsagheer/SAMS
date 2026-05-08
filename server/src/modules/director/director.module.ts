@@ -7,12 +7,15 @@ import { Application } from '../applications/entities/application.entity';
 import { User } from '../users/entities/user.entity';
 import { EmailModule } from '../email/email.module';
 import { RecruitmentProcess } from '../recruitment/entities/recruitment.entity';
+import { Committee } from '../committees/entities/committee.entity';
+import { AiModule } from '../../integrations/ai-service/ai.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Application, User, RecruitmentProcess]),
+    TypeOrmModule.forFeature([Application, User, RecruitmentProcess, Committee]),
     ConfigModule,
     EmailModule,
+    AiModule,
   ],
   controllers: [DirectorController],
   providers: [DirectorService],
