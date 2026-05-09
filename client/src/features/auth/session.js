@@ -1,85 +1,63 @@
+import { jwtDecode } from "jwt-decode";
+
 const AUTH_KEYS = {
   token: "authToken",
-  user: "authUser",
 };
 
-const LEGACY_KEYS = {
-  token: "token",
-  user: "user",
-};
+function getStorage() {
+  if (typeof window === "undefined") return null;
 
-function readStorageValue(keys) {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return (
-    window.sessionStorage.getItem(keys.token) ||
-    window.localStorage.getItem(keys.token) ||
-    window.sessionStorage.getItem(keys.user) ||
-    window.localStorage.getItem(keys.user)
-  );
+  return window.localStorage;
 }
 
-function parseUserValue(value) {
-  if (!value) {
-    return null;
-  }
+export function getAuthToken() {
+  return getStorage()?.getItem(AUTH_KEYS.token) || null;
+}
+
+export function setAuthSession(token) {
+  const storage = getStorage();
+
+  if (!storage) return;
+
+  storage.setItem(AUTH_KEYS.token, token);
+}
+
+export function clearAuthSession() {
+  const storage = getStorage();
+
+  if (!storage) return;
+
+  storage.removeItem(AUTH_KEYS.token);
+}
+
+export function getCurrentUser() {
+  const token = getAuthToken();
+
+  if (!token) return null;
 
   try {
-    return JSON.parse(value);
+    return jwtDecode(token);
   } catch {
     return null;
   }
 }
 
-export function getAuthToken() {
-  if (typeof window === "undefined") {
-    return null;
+export function isTokenExpired(token) {
+  try {
+    const decoded = jwtDecode(token);
+
+    return decoded.exp * 1000 < Date.now();
+  } catch {
+    return true;
   }
-
-  return (
-    window.sessionStorage.getItem(AUTH_KEYS.token) ||
-    window.localStorage.getItem(AUTH_KEYS.token) ||
-    window.localStorage.getItem(LEGACY_KEYS.token)
-  );
-}
-
-export function getAuthUser() {
-  return parseUserValue(
-    readStorageValue({
-      token: AUTH_KEYS.user,
-      user: LEGACY_KEYS.user,
-    }),
-  );
-}
-
-export function setAuthSession({ token, user }) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  window.sessionStorage.setItem(AUTH_KEYS.token, token);
-  window.sessionStorage.setItem(AUTH_KEYS.user, JSON.stringify(user));
-  window.localStorage.removeItem(LEGACY_KEYS.token);
-  window.localStorage.removeItem(LEGACY_KEYS.user);
-}
-
-export function clearAuthSession() {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  [window.sessionStorage, window.localStorage].forEach((storage) => {
-    storage.removeItem(AUTH_KEYS.token);
-    storage.removeItem(AUTH_KEYS.user);
-    storage.removeItem(LEGACY_KEYS.token);
-    storage.removeItem(LEGACY_KEYS.user);
-  });
 }
 
 export function isAuthenticated() {
-  return Boolean(getAuthToken() && getAuthUser());
+  const token = getAuthToken();
+
+  if (!token) return false;
+
+  return !isTokenExpired(token);
 }
 
 export function normalizeRole(role) {
@@ -87,14 +65,19 @@ export function normalizeRole(role) {
 }
 
 export function getHomeRouteForRole(role) {
-  switch (normalizeRole(role)) {
+  const normalized = normalizeRole(role);
+
+  switch (normalized) {
     case "DIRECTOR":
       return "/director";
+
     case "EXECUTIVE":
       return "/executive";
-    case "USER":
-      return "/home";
+
+    case "MEMBER":
+      return "/member";
+
     default:
-      return "/login";
+      return "/";
   }
 }
