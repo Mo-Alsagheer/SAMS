@@ -20,6 +20,7 @@ import {
 import { getInitials } from "../../utils/getInitials";
 import { getCurrentUser } from "@/features/auth/session";
 import { Button } from "@/components/ui/button";
+import { ACTION_STYLES, APPLICATION_STATUS } from "@/constant/applicationStatus";
 
 const scheduleSchema = z.object({
   date: z.string().min(1, "Date is required"),
@@ -45,14 +46,11 @@ function Applications() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const [actionLoadingId, setActionLoadingId] =
-    useState(null);
+  const [actionLoadingId, setActionLoadingId] = useState(null);
 
-  const [scheduleModalOpen, setScheduleModalOpen] =
-    useState(false);
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
 
-  const [selectedAppId, setSelectedAppId] =
-    useState(null);
+  const [selectedAppId, setSelectedAppId] = useState(null);
 
   const navigate = useNavigate();
 
@@ -149,16 +147,11 @@ function Applications() {
       setActionLoadingId(selectedAppId);
 
       try {
-        await scheduleMemberInterview(
-          selectedAppId,
-          {
-            date: new Date(
-              formData.date,
-            ).toISOString(),
+        await scheduleMemberInterview(selectedAppId, {
+          date: new Date(formData.date).toISOString(),
 
-            link: formData.link,
-          },
-        );
+          link: formData.link,
+        });
 
         toast.success("Interview scheduled");
 
@@ -166,9 +159,7 @@ function Applications() {
 
         closeSchedule();
       } catch {
-        toast.error(
-          "Failed to schedule interview",
-        );
+        toast.error("Failed to schedule interview");
       } finally {
         setActionLoadingId(null);
       }
@@ -180,29 +171,19 @@ function Applications() {
     const q = search.toLowerCase();
 
     return (applications || []).filter((item) => {
-      const matchesStatus =
-        status === "All" ||
-        item.status === status;
+      const matchesStatus = status === "All" || item.status === status;
 
       const matchesSearch =
-        !q ||
-        `${item.name} ${item.email}`
-          .toLowerCase()
-          .includes(q);
+        !q || `${item.name} ${item.email}`.toLowerCase().includes(q);
 
       return matchesStatus && matchesSearch;
     });
   }, [applications, search, status]);
 
   const renderActions = (row) => {
-    const isLoading =
-      actionLoadingId === row.id;
+    const isLoading = actionLoadingId === row.id;
 
-    const btn = (
-      label,
-      onClick,
-      color,
-    ) => (
+    const btn = (label, onClick, color) => (
       <Button
         size="sm"
         disabled={isLoading}
@@ -218,45 +199,25 @@ function Applications() {
       case "AI_REVIEWED":
         return (
           <div className="flex gap-2">
-            {btn(
-              "Accept",
-              () => accept(row),
-              "bg-green-600",
-            )}
+            {btn("Accept", () => accept(row), ACTION_STYLES.ACCEPT)}
 
-            {btn(
-              "Reject",
-              () => reject(row),
-              "bg-red-600",
-            )}
+            {btn("Reject", () => reject(row), ACTION_STYLES.REJECT)}
           </div>
         );
 
       case "PHASE1_ACCEPTED":
         return (
           <div className="flex gap-2">
-            {btn(
-              "Schedule",
-              () => openSchedule(row.id),
-              "bg-blue-600",
-            )}
+            {btn("Schedule", () => openSchedule(row.id), ACTION_STYLES.PRIMARY)}
           </div>
         );
 
       case "INTERVIEW_SCHEDULED":
         return (
           <div className="flex gap-2">
-            {btn(
-              "Accept",
-              () => accept(row),
-              "bg-green-600",
-            )}
+            {btn("Accept", () => accept(row), ACTION_STYLES.ACCEPT)}
 
-            {btn(
-              "Reject",
-              () => reject(row),
-              "bg-red-600",
-            )}
+            {btn("Reject", () => reject(row), ACTION_STYLES.REJECT)}
           </div>
         );
 
@@ -279,9 +240,7 @@ function Applications() {
             <div>
               <p>{row.name}</p>
 
-              <p className="text-sm text-gray-500">
-                {row.email}
-              </p>
+              <p className="text-sm text-gray-500">{row.email}</p>
             </div>
           </div>
         ),
@@ -291,10 +250,17 @@ function Applications() {
         header: "Status",
 
         render: (row) => (
-          <span>{row.status}</span>
+          <span>
+            {APPLICATION_STATUS.find((status) => status.value === row.status)
+              ?.name || row.status}
+          </span>
         ),
       },
-
+      {
+        header: "Cv Score",
+        // accessor: "aiScore.id",
+        render: (row) => <span>{row.aiScore?.id || "-"}</span>,
+      },
       {
         header: "View",
 
@@ -302,11 +268,7 @@ function Applications() {
           <Button
             size="sm"
             className="bg-indigo-600"
-            onClick={() =>
-              navigate(
-                `/director/applications/${row.id}`,
-              )
-            }
+            onClick={() => navigate(`/director/applications/${row.id}`)}
           >
             View
           </Button>
@@ -316,47 +278,25 @@ function Applications() {
       {
         header: "Actions",
 
-        render: (row) =>
-          renderActions(row),
+        render: (row) => renderActions(row),
       },
     ],
-    [
-      actionLoadingId,
-      accept,
-      reject,
-      navigate,
-    ],
+    [actionLoadingId, accept, reject, navigate],
   );
 
   return (
     <div>
       <div className="flex gap-4 mb-6">
-        <SearchBar
-          value={search}
-          onChange={setSearch}
-        />
+        <SearchBar value={search} onChange={setSearch} />
 
         <FilterDropdown
-          options={[
-            "All",
-            "SUBMITTED",
-            "AI_REVIEWED",
-            "INTERVIEW_SCHEDULED",
-            "PHASE1_ACCEPTED",
-            "PHASE1_REJECTED",
-            "PHASE2_ACCEPTED",
-            "PHASE2_REJECTED",
-          ]}
+          options={APPLICATION_STATUS}
           value={status}
           onChange={setStatus}
         />
       </div>
 
-      <Table
-        columns={columns}
-        data={filteredData}
-        loading={loading}
-      />
+      <Table columns={columns} data={filteredData} loading={loading} />
 
       <PopupForm
         open={scheduleModalOpen}

@@ -1,34 +1,16 @@
-export const APPLICATION_STATUS = {
-  SUBMITTED: {
-    label: "Submitted",
-    color: "bg-yellow-100 text-yellow-800",
-  },
+export const APPLICATION_STATUS = [
+  { name: "All Applications", value: "All" },
+  { name: "Submitted", value: "SUBMITTED" },
+  { name: "AI Reviewed", value: "AI_REVIEWED" },
+  { name: "Interview Scheduled", value: "INTERVIEW_SCHEDULED" },
+  { name: "Phase 1 Accepted", value: "PHASE1_ACCEPTED" },
+  { name: "Phase 1 Rejected", value: "PHASE1_REJECTED" },
+  { name: "Phase 2 Accepted", value: "PHASE2_ACCEPTED" },
+  { name: "Phase 2 Rejected", value: "PHASE2_REJECTED" },
+];
 
-  AI_REVIEWED: {
-    label: "AI Reviewed",
-    color: "bg-purple-100 text-purple-800",
-  },
-
-  PHASE1_ACCEPTED: {
-    label: "Phase 1 Accepted",
-    color: "bg-green-100 text-green-800",
-  },
-  PHASE1_REJECTED: {
-    label: "Phase 1 Rejected",
-    color: "bg-red-100 text-red-800",
-  },
-  INTERVIEW_SCHEDULED: {
-    label: "Interview Scheduled",
-    color: "bg-blue-100 text-blue-800",
-  },
-
-  PHASE2_ACCEPTED: {
-    label: "Phase 2 Accepted",
-    color: "bg-emerald-100 text-emerald-800",
-  },
-
-  PHASE2_REJECTED: {
-    label: "Phase 2 Rejected",
-    color: "bg-red-100 text-red-800",
-  },
+export const ACTION_STYLES = {
+  ACCEPT: "bg-green-600 hover:bg-green-500 text-white",
+  REJECT: "bg-red-600 hover:bg-red-500 text-white",
+  PRIMARY: "bg-primary  text-white",
 };
