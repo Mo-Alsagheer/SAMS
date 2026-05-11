@@ -66,11 +66,10 @@ const ApplicationDetails = () => {
   if (!app) return <div>Application not found</div>;
   return (
     <div className="">
-      {app.name}
       <div className="space-y-5">
         {/* Back + Decision bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <Link to="/applications">
+          <Link to="/director/applications">
             <Button variant="ghost" size="sm" className="gap-1.5">
               <ArrowLeft className="h-4 w-4" /> Back to Applications
             </Button>

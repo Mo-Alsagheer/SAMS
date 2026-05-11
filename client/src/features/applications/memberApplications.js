@@ -1,53 +1,53 @@
 import api from "@/features/api";
 
-export async function listDirectorApplications({ committeeId, status } = {}) {
+export async function listMemberApplications({ committeeId, status } = {}) {
   const params = {};
 
   if (committeeId) params.committeeId = committeeId;
   if (status) params.status = status;
 
-  const { data } = await api.get(`/executive/applications`, {
+  const { data } = await api.get(`/director/applications`, {
     params,
   });
 
   return data;
 }
 
-export async function acceptDirectorPhase1(applicationId) {
+export async function acceptMemberPhase1(applicationId) {
   const { data } = await api.post(
-    `/executive/applications/${applicationId}/phase1/accept`,
+    `/director/applications/${applicationId}/phase1/accept`,
   );
 
   return data;
 }
 
-export async function rejectDirectorPhase1(applicationId) {
+export async function rejectMemberPhase1(applicationId) {
   const { data } = await api.post(
-    `/executive/applications/${applicationId}/phase1/reject`,
+    `/director/applications/${applicationId}/phase1/reject`,
   );
 
   return data;
 }
 
-export async function acceptDirectorPhase2(applicationId) {
+export async function acceptMemberPhase2(applicationId) {
   const { data } = await api.post(
-    `/executive/applications/${applicationId}/phase2/accept`,
+    `/director/applications/${applicationId}/phase2/accept`,
   );
 
   return data;
 }
 
-export async function rejectDirectorPhase2(applicationId) {
+export async function rejectMemberPhase2(applicationId) {
   const { data } = await api.post(
-    `/executive/applications/${applicationId}/phase2/reject`,
+    `/director/applications/${applicationId}/phase2/reject`,
   );
 
   return data;
 }
 
-export async function scheduleDirectorInterview(applicationId, { date, link }) {
+export async function scheduleMemberInterview(applicationId, { date, link }) {
   const { data } = await api.post(
-    `/executive/applications/${applicationId}/interview/schedule`,
+    `/director/applications/${applicationId}/interview/schedule`,
     { date, link },
   );
 

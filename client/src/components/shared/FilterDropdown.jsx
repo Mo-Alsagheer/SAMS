@@ -21,7 +21,6 @@ function FilterDropdown({ options, value, onChange }) {
               key={option}
               onClick={() => {
                 onChange(option);
-                console.log("user select" + option );
                 setOpen(false);
               }}
               className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${
