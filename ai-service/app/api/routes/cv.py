@@ -7,7 +7,14 @@ router = APIRouter()
 
 @router.post("/evaluate")
 async def evaluate_cv(req: CVRequest):
-    item = CVItem(id="single", type=req.type, data=req.data, link=req.link)
+    item = CVItem(
+        id="single", 
+        type=req.type, 
+        data=req.data, 
+        link=req.link,
+        committee_name=req.committee_name,
+        committee_focus=req.committee_focus
+    )
     res = await asyncio.to_thread(process_single_cv_sync, item)
     res.pop("id", None)
     return res
