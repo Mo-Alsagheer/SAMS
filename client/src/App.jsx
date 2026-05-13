@@ -22,6 +22,10 @@ import Committees from "./executive/pages/Committees";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import CommitteeDetails from "./executive/pages/CommitteeDetails";
 import ApplicationDetails from "./director/pages/ApplicationDetails";
+import ManageRoadmap from "./director/pages/ManageRoadmap";
+import TaskManagement from "./director/pages/TaskManagement";
+import Members from "./director/pages/Members";
+
 function App() {
   return (
     <>
@@ -33,7 +37,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/result" element={<QuizResult />} />
-        
+ 
         {/* Committees & Applications */}
         <Route path="/committees" element={<ViewCommittee />} />
         <Route path="/committee/:id" element={<UserCommitteeDetails />} />
@@ -41,7 +45,7 @@ function App() {
 
         {/* Test Route */}
         <Route path="/test" element={<Page />} />
-
+ 
         {/* Director Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={["DIRECTOR"]} />}>
           <Route path="/director" element={<DirectorLayout />}>
@@ -49,6 +53,10 @@ function App() {
             <Route path="applications" element={<MemberApplications />} />
             <Route path="applications/:id" element={<ApplicationDetails />} />
             <Route path="workspace" element={<WorkSpace />} />
+            <Route path="manageRoadmap" element={<ManageRoadmap />} />
+             <Route path="taskManagement" element={<TaskManagement />} />
+             <Route path="members" element={<Members />} />
+           
           </Route>
         </Route>
 
@@ -67,7 +75,14 @@ function App() {
         </Route>
 
         {/* Fallback route for 404 */}
-        <Route path="*" element={<div className="flex items-center justify-center h-screen">404 - Page Not Found</div>} />
+        <Route
+          path="*"
+          element={
+            <div className="flex items-center justify-center h-screen">
+              404 - Page Not Found
+            </div>
+          }
+        />
       </Routes>
     </>
   );
