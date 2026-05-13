@@ -4,12 +4,17 @@ import { dashboardStats } from "../../data/committeeData";
 import CommitteeInfo from "../components/CommitteeInfo";
 import StatsSection from "../components/StatsSection";
 import { useEffect, useState } from "react";
-import { getCommittee, updateCommitteeDescription } from "../../features/committee/committee";
+import {
+  directorUpdateCommittee,
+  getCommittee,
+} from "@/features/committee/committee";
 import { toast } from "sonner";
+import { getCurrentUser } from "@/features/auth/session";
 function DashBoard() {
   const [committee, setCommittee] = useState(null);
 
-  const committeeId = "01KJZDXEV4YDQJ0JQP11GDRHW2";
+  const user = getCurrentUser();
+  const committeeId = user?.committeeId || "";
 
   useEffect(() => {
     async function fetchCommittee() {
@@ -22,16 +27,24 @@ function DashBoard() {
 
   const handleUpdateDescription = async (newText) => {
     try {
-      const updated = await updateCommitteeDescription(committee.id, newText);
+      const updated = await directorUpdateCommittee(committee.id, {
+        description: newText,
+      });
 
       setCommittee((prev) => ({
         ...prev,
         description: updated.description,
       }));
 
-      toast("Description updated", { position: "top-center" });
+      toast.success("Description updated", {
+        position: "top-center",
+      });
     } catch (err) {
       console.error(err);
+
+      toast.error("Failed to update description", {
+        position: "top-center",
+      });
     }
   };
 
@@ -39,12 +52,11 @@ function DashBoard() {
 
   return (
     <div className="space-y-6">
+      <StatsSection stats={dashboardStats} />
       <CommitteeInfo
         committee={committee}
         onSaveDescription={handleUpdateDescription}
       />
-
-      <StatsSection stats={dashboardStats} />
     </div>
   );
 }

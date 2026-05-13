@@ -258,8 +258,8 @@ function Applications() {
       },
       {
         header: "Cv Score",
-        // accessor: "aiScore.id",
-        render: (row) => <span>{row.aiScore?.id || "-"}</span>,
+        // accessor: "aiScore.overall",
+        render: (row) => <span>{row.aiScore?.overall ?? "-"}</span>,
       },
       {
         header: "View",

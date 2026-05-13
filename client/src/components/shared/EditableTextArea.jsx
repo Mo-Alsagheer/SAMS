@@ -20,12 +20,7 @@ function EditableTextArea({ value, onSave, label }) {
             {text || "No description yet"}
           </p>
 
-          <Button
-            className="bg-sky-600 hover:bg-sky-800"
-            onClick={() => setIsEditing(true)}
-          >
-            Edit
-          </Button>
+          <Button onClick={() => setIsEditing(true)}>Edit</Button>
         </div>
       ) : (
         <div className="space-y-3">
@@ -36,14 +31,9 @@ function EditableTextArea({ value, onSave, label }) {
           />
 
           <div className="flex gap-2">
-            <Button onClick={handleSave}>
-              Save
-            </Button>
+            <Button onClick={handleSave}>Save</Button>
 
-            <Button
-              variant="outline"
-              onClick={() => setIsEditing(false)}
-            >
+            <Button variant="outline" onClick={() => setIsEditing(false)}>
               Cancel
             </Button>
           </div>
