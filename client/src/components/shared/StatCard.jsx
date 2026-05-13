@@ -20,9 +20,7 @@ const StatCard = ({
       <div className="flex items-start p-2 rounded-lg bg-white border justify-between">
         <div className="space-y-1">
           <p className="text-sm text-gray-600">{title}</p>
-          <p className="text-xl font-bold font-display text-black">
-            {value}
-          </p>
+          <p className="text-xl font-bold font-display text-black">{value}</p>
           {subtitle && <p className="text-xs text-destructive">{subtitle}</p>}
           <div className="h-4">
             {trend && (

@@ -12,6 +12,9 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { VscRequestChanges } from "react-icons/vsc";
+import { MdOutlineManageAccounts } from "react-icons/md";
+import { MdPersonOutline } from "react-icons/md";
+import { MdOutlinePersonOutline } from "react-icons/md";
 export const directormenu = [
   {
     icon: LayoutDashboardIcon,
@@ -30,10 +33,22 @@ export const directormenu = [
   },
   {
     icon: ListTodo,
-    path: "tasks",
-    name: "Tasks",
+    path: "taskManagement",
+    name: "Task Management",
   },
+  {
+    icon: MdOutlineManageAccounts,
+    path: "manageRoadmap",
+    name: "Manage Roadmap",
+  },
+  {
+    icon: MdOutlinePersonOutline,
+    path: "members",
+    name: "Members",
+  },
+  
 ];
+
 
 export const executive = [
   { name: "Dashboard", path: "/executive", icon: LayoutDashboard },
