@@ -12,8 +12,9 @@ import {
   RecruitmentProcess,
   RecruitmentStatus,
 } from '../recruitment/entities/recruitment.entity';
+import { Committee } from '../committees/entities/committee.entity';
 import { CreateApplicationDto } from './dto/create-application.dto';
-import { AiService } from '../ai/ai.service';
+import { AiService } from '../../integrations/ai-service/ai.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -22,13 +23,17 @@ export class ApplicationsService {
     private applicationRepository: Repository<Application>,
     @InjectRepository(RecruitmentProcess)
     private recruitmentProcessRepository: Repository<RecruitmentProcess>,
+    @InjectRepository(Committee)
+    private committeeRepository: Repository<Committee>,
     private aiService: AiService,
   ) {}
 
   async createApplication(dto: CreateApplicationDto) {
     if (dto.targetRole === Role.EXECUTIVE) {
       if (dto.committeeId) {
-        throw new BadRequestException('Executive applications cannot target a specific committee');
+        throw new BadRequestException(
+          'Executive applications cannot target a specific committee',
+        );
       }
     } else {
       if (!dto.committeeId) {
@@ -50,10 +55,16 @@ export class ApplicationsService {
 
     // Check if user already applied by email
     const existing = await this.applicationRepository.findOne({
-      where: { email: dto.email, committeeId: committeeIdCondition, targetRole: dto.targetRole },
+      where: {
+        email: dto.email,
+        committeeId: committeeIdCondition,
+        targetRole: dto.targetRole,
+      },
     });
     if (existing) {
-      throw new ConflictException('An application with this email has already been submitted for the specified role');
+      throw new ConflictException(
+        'An application with this email has already been submitted for the specified role',
+      );
     }
 
     const application = this.applicationRepository.create({
@@ -84,17 +95,36 @@ export class ApplicationsService {
     const applications = await this.applicationRepository.find({
       where: { status: ApplicationStatus.SUBMITTED },
     });
-    
+
+    // Fetch all relevant committees
+    const committeeIds = [
+      ...new Set(applications.map((app) => app.committeeId).filter((id) => id)),
+    ];
+    const committees = await this.committeeRepository.findByIds(committeeIds);
+    const committeeMap = new Map(committees.map((c) => [c.id, c]));
+
     const cvsToEvaluate = applications
-      .filter(app => app.cvLink)
-      .map(app => ({
-        id: app.id,
-        type: 'gdrive',
-        link: app.cvLink,
-      }));
+      .filter((app) => app.cvLink)
+      .map((app) => {
+        const committee = app.committeeId
+          ? committeeMap.get(app.committeeId)
+          : null;
+        return {
+          id: app.id,
+          type: 'gdrive',
+          link: app.cvLink,
+          committee_name: committee ? committee.name : 'General',
+          committee_focus: committee?.description
+            ? committee.description
+            : 'General community operations',
+        };
+      });
 
     if (cvsToEvaluate.length === 0) {
-      return { message: 'No applications pending evaluation with a valid CV link.', results: [] };
+      return {
+        message: 'No applications pending evaluation with a valid CV link.',
+        results: [],
+      };
     }
 
     return this.aiService.evaluateBatchApplications({ cvs: cvsToEvaluate });

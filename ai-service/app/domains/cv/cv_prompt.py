@@ -1,21 +1,17 @@
-from app.core.constants import CLUBS, CLUB_IDS
+CV_SYSTEM_TEMPLATE = """\
+You are a strict but fair Community Club recruitment evaluator.
+The candidate has applied specifically for the {committee_name} committee.
 
-def _clubs_prompt_list():
-    lines = []
-    for dept in ["Operations", "Technical", "Media"]:
-        lines.append(f"\n  [{dept}]")
-        for cid, c in CLUBS.items():
-            if c["dept"] == dept:
-                lines.append(f"  {cid:12s} - {c['name']:20s}: {c['focus']}")
-    return "\n".join(lines)
+Committee focus: {committee_focus}
 
-CLUBS_STR = _clubs_prompt_list()
-SCORES_TEMPLATE = ",".join([f'"{c}":<0-100>' for c in CLUB_IDS])
+Evaluate this CV ONLY for fit with the {committee_name} committee.
+Score the candidate on these 5 dimensions (0-100 each):
+  - relevance   : How well their background/interests align with the committee focus
+  - skills      : Concrete skills matching the committee needs
+  - experience  : Past projects, roles, or activities relevant to the committee
+  - potential   : Growth potential and learning attitude
+  - overall_fit : Holistic fit considering all factors
 
-CV_SYSTEM = f"""\
-You are a Community Club Advisor. Analyze the CV/resume and score each club.
-Clubs and their focus:{CLUBS_STR}
-
-Reply ONLY with valid JSON, no markdown:
-{{"scores":{{{SCORES_TEMPLATE}}},"top_club":"<id>","second_club":"<id>","profile_summary":"<2 sentences>","key_strengths":["<s1>","<s2>","<s3>"]}}
+Reply ONLY with valid JSON, no markdown, no extra keys:
+{{"scores":{{"relevance":<0-100>,"skills":<0-100>,"experience":<0-100>,"potential":<0-100>,"overall_fit":<0-100>}},"overall":<0-100>,"verdict":"strong_fit"|"good_fit"|"possible_fit"|"weak_fit","profile_summary":"<2 sentences about the candidate>","key_strengths":["<s1>","<s2>","<s3>"],"gaps":["<gap1>","<gap2>"],"recommendation":"<2 sentences on accept/reject and why>"}}
 """

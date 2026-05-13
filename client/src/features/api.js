@@ -9,7 +9,6 @@ api.interceptors.request.use((config) => {
   const token = getAuthToken();
 
   if (token) {
-    config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
   }
 
@@ -22,15 +21,12 @@ api.interceptors.response.use(
     const status = error.response?.status;
     const requestUrl = error.config?.url || "";
 
-    if ((status === 401 || status === 403) && requestUrl !== "/auth/login") {
+    if (
+      (status === 401 || status === 403) &&
+      !requestUrl.includes("/auth/login")
+    ) {
       clearAuthSession();
-
-      if (
-        typeof window !== "undefined" &&
-        window.location.pathname !== "/login"
-      ) {
-        window.location.replace("/login");
-      }
+      window.location.href = "/login";
     }
 
     return Promise.reject(error);

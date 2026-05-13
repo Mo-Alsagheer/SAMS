@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import Table from "@/components/shared/Table";
 import { getInitials } from "@/utils/getInitials";
 import { ArrowLeft } from "lucide-react";
+import TabButton from "../components/TabButton";
+import InfoCard from "../components/InfoCard";
 
 /* ---------------- Skeleton Components ---------------- */
 
@@ -217,30 +219,5 @@ function CommitteeDetails() {
   );
 }
 
-/* ---------------- Reusable Components ---------------- */
-
-function InfoCard({ label, value }) {
-  return (
-    <div className="border border-border rounded-xl p-4 bg-card">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="font-medium">{value ?? "-"}</p>
-    </div>
-  );
-}
-
-function TabButton({ active, onClick, label }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-5 py-3 text-sm font-medium transition ${
-        active
-          ? "border-b-2 border-primary text-primary"
-          : "text-muted-foreground hover:text-primary"
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
 
 export default CommitteeDetails;
