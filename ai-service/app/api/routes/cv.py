@@ -21,6 +21,10 @@ async def evaluate_cv(req: CVRequest):
 
 @router.post("/evaluate/batch")
 async def evaluate_cv_batch(req: BatchCVRequest):
-    tasks = [asyncio.to_thread(process_single_cv_sync, cv) for cv in req.cvs]
-    results = await asyncio.gather(*tasks)
+    results = []
+    for cv in req.cvs:
+        res = await asyncio.to_thread(process_single_cv_sync, cv)
+        results.append(res)
+        # Add a 2-second delay between requests to respect free-tier API rate limits (30 RPM)
+        await asyncio.sleep(2)
     return {"results": results}
