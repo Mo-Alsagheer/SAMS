@@ -22,6 +22,10 @@ import Committees from "./executive/pages/Committees";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import CommitteeDetails from "./executive/pages/CommitteeDetails";
 import ApplicationDetails from "./director/pages/ApplicationDetails";
+import ManageRoadmap from "./director/pages/ManageRoadmap";
+import TaskManagement from "./director/pages/TaskManagement";
+import Members from "./director/pages/Members";
+
 import MemberLayout from "./member/layout/MemberLayout";
 function App() {
   return (
@@ -49,6 +53,9 @@ function App() {
             <Route path="applications" element={<MemberApplications />} />
             <Route path="applications/:id" element={<ApplicationDetails />} />
             <Route path="workspace" element={<WorkSpace />} />
+            <Route path="manageRoadmap" element={<ManageRoadmap />} />
+            <Route path="taskManagement" element={<TaskManagement />} />
+            <Route path="members" element={<Members />} />
           </Route>
         </Route>
         {/* Member Protected Routes */}

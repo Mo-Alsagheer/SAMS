@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,11 +22,18 @@ export function PopupForm({
   onSubmit,
   title,
   submitLabel = "Submit",
+  bgColor = "bg-white", 
+  titleColor = "", 
+  labelColor = "",
+  submitClassName = "", 
+  renderCustomField 
 }) {
   const {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(schema),
@@ -44,69 +50,39 @@ export function PopupForm({
   };
 
   const renderField = (field) => {
+    if (field.type === "custom" && renderCustomField) {
+      return renderCustomField(field, watch, setValue);
+    }
+
     switch (field.type) {
       case "textarea":
-        return <Textarea {...register(field.name)} />;
-
+        return <Textarea {...register(field.name)} placeholder={field.placeholder} />;
       case "select":
         return (
-          <select
-            {...register(field.name)}
-            className="w-full border rounded p-2"
-          >
+          <select {...register(field.name)} className="w-full border rounded p-2">
             {field.options?.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
+              <option key={opt} value={opt}>{opt}</option>
             ))}
           </select>
         );
-
       case "number":
-        return (
-          <Input
-            type="number"
-            {...register(field.name, { valueAsNumber: true })}
-          />
-        );
-      case "datetime-local":
-        return(
-        <Input type="datetime-local"
-         {...register(field.name)}
-          />
-        );
-      case "checkbox":
-        return (
-          <input
-            type="checkbox"
-            {...register(field.name)}
-            className="h-4 w-4"
-          />
-        );
-      case "readonly":
-        return (
-          <Input
-            {...register(field.name)}
-            readOnly
-            className="bg-gray-100 cursor-not-allowed"
-          />
-        );
+        return <Input type="number" {...register(field.name, { valueAsNumber: true })} placeholder={field.placeholder} />;
       default:
-        return <Input type="text" {...register(field.name)} />;
+        return <Input type={field.type || "text"} {...register(field.name)} placeholder={field.placeholder} />;
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className={`sm:max-w-lg ${bgColor}`}>
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className={titleColor}>{title}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
           {fields.map((field) => (
             <div className="space-y-2" key={field.name}>
-              <Label>{field.label}</Label>
+              <Label className={labelColor}>{field.label}</Label>
 
               {renderField(field)}
 
@@ -119,10 +95,14 @@ export function PopupForm({
           ))}
 
           <DialogFooter>
-            <Button variant="outline" onClick={onClose} type="button">
+            <Button variant="outline" onClick={onClose} type="button"  className={submitClassName}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className={submitClassName} 
+            >
               {isSubmitting ? "Submitting..." : submitLabel}
             </Button>
           </DialogFooter>
