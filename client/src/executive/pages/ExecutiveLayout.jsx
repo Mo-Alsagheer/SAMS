@@ -1,7 +1,6 @@
 import DashboardLayout from "@/layout/DashBoardLayout";
 import { Outlet } from "react-router-dom";
 import { getInitials } from "@/utils/getInitials";
-import { useEffect, useState } from "react";
 import { getCurrentUser } from "@/features/auth/session";
 
 function ExecutiveLayout() {

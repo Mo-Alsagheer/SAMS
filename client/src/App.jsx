@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Quiz from "./user/quiz/pages/Quiz";
 import QuizResult from "./user/quiz/pages/QuizResult";
 import DirectorLayout from "./director/layout/DirectorLayout";
-import DashBoard from "./director/pages/DashBoard";
+import DirectorDashBoard from "./director/pages/DashBoard";
 import MemberApplications from "./director/pages/Applications";
 import DirectorApplications from "./executive/pages/Applications";
 import Page from "./director/pages/Page";
@@ -16,7 +16,7 @@ import UserCommitteeDetails from "./user/committees/components/CommitteeDetails"
 import Login from "./auth/Login";
 import { Toaster } from "sonner";
 import ExecutiveLayout from "./executive/pages/ExecutiveLayout";
-import Dashboard from "./executive/pages/DashBoard";
+import ExecutiveDashboard from "./executive/pages/DashBoard";
 import Recruitment from "./executive/pages/Recruitment";
 import Committees from "./executive/pages/Committees";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -27,6 +27,8 @@ import TaskManagement from "./director/pages/TaskManagement";
 import Members from "./director/pages/Members";
 
 import MemberLayout from "./member/layout/MemberLayout";
+import Roadmap from "./member/pages/RoadMap";
+import MemberDashboard from "./member/pages/DashBoard";
 function App() {
   return (
     <>
@@ -49,7 +51,7 @@ function App() {
         {/* Director Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={["DIRECTOR"]} />}>
           <Route path="/director" element={<DirectorLayout />}>
-            <Route index element={<DashBoard />} />
+            <Route index element={<DirectorDashBoard />} />
             <Route path="applications" element={<MemberApplications />} />
             <Route path="applications/:id" element={<ApplicationDetails />} />
             <Route path="workspace" element={<WorkSpace />} />
@@ -59,14 +61,17 @@ function App() {
           </Route>
         </Route>
         {/* Member Protected Routes */}
-        <Route element={<ProtectedRoute allowedRoles={["MEMBER"]} />}>
-          <Route path="/member" element={<MemberLayout />}></Route>
+        <Route element={<ProtectedRoute allowedRoles={["DIRECTOR"]} />}>
+          <Route path="/member" element={<MemberLayout />}>
+          <Route index element={< MemberDashboard/>} />
+          <Route path="roadmap" element={<Roadmap />} />
+          </Route>
         </Route>
 
         {/* Executive Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={["EXECUTIVE"]} />}>
           <Route path="/executive" element={<ExecutiveLayout />}>
-            <Route index element={<Dashboard />} />
+            <Route index element={<ExecutiveDashboard />} />
             <Route path="recruitment" element={<Recruitment />} />
             <Route path="applications" element={<DirectorApplications />} />
             <Route path="committees" element={<Committees />} />
