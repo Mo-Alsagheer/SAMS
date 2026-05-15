@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   CheckCircle2,
@@ -8,84 +14,38 @@ import {
   Calendar,
   ArrowRight,
   Video,
+  User,
+  Layers,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import StatCard from "@/components/shared/StatCard";
 
+import { committee, sessions } from "@/data/mock-data";
+
 /* =========================
-   MOCK DATA (merged here)
+   DERIVED DATA
 ========================= */
 
-const sessions = [
-  {
-    id: "1",
-    title: "Intro to React",
-    date: "2025-04-01T18:00:00",
-    description: "Components, JSX, and the React mental model.",
-    status: "Done",
-  },
-  {
-    id: "2",
-    title: "Hooks Deep Dive",
-    date: "2025-04-08T18:00:00",
-    description: "useState, useEffect, custom hooks, and patterns.",
-    status: "Done",
-  },
-  {
-    id: "3",
-    title: "APIs Integration",
-    date: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString(),
-    description:
-      "Fetching, caching, and managing async state with React Query.",
-    status: "Live",
-  },
-  {
-    id: "4",
-    title: "State Management",
-    date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
-    description: "Zustand, Context, and when to reach for each.",
-    status: "Upcoming",
-  },
-];
-
-const tasks = [
-  {
-    id: "t1",
-    title: "Build a Counter Component",
-    sessionId: "1",
-    status: "Graded",
-    grade: "5/5",
-  },
-  {
-    id: "t2",
-    title: "Custom Hook Challenge",
-    sessionId: "2",
-    status: "Submitted",
-  },
-  {
-    id: "t3",
-    title: "Build a Navbar",
-    sessionId: "3",
-    status: "Pending",
-  },
-  {
-    id: "t4",
-    title: "Form Validation",
-    sessionId: "2",
-    status: "Pending",
-  },
-];
+const tasks = sessions.flatMap((s) => s.tasks || []);
 
 const stats = {
-  completedSessions: sessions.filter((s) => s.status === "Done").length,
-  pendingTasks: tasks.filter((t) => t.status === "Pending").length,
-  attendanceRate: 92,
+  completedSessions: sessions.filter((s) => s.status === "completed").length,
+
+  pendingTasks: tasks.filter((t) => t.status === "pending").length,
+
+  attendanceRate: Math.round(
+    (sessions.filter((s) => s.attended).length / sessions.length) * 100,
+  ),
 };
 
 const upcomingSession =
-  sessions.find((s) => s.status === "Live") ||
-  sessions.find((s) => s.status === "Upcoming");
+  sessions.find((s) => s.status === "live") ||
+  sessions.find((s) => s.status === "upcoming");
+
+const latest = tasks.slice(0, 3);
+
+const isLive = upcomingSession?.status === "live";
 
 /* =========================
    HOOK
@@ -112,21 +72,23 @@ function useCountdown(target) {
 }
 
 /* =========================
-   BADGES (merged here)
+   BADGES
 ========================= */
 
 function TaskStatusBadge({ status }) {
-  const map = {
-    Pending: "bg-warning/15 text-warning-foreground border border-warning/30",
-    Submitted: "bg-info/15 text-info border border-info/30",
-    Graded: "bg-success/15 text-success border border-success/30",
+  const styles = {
+    pending: "bg-warning/15 text-warning-foreground border border-warning/30",
+
+    submitted: "bg-info/15 text-info border border-info/30",
+
+    graded: "bg-success/15 text-success border border-success/30",
   };
 
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-        map[status],
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
+        styles[status],
       )}
     >
       {status}
@@ -140,69 +102,83 @@ function TaskStatusBadge({ status }) {
 
 export default function Dashboard() {
   const countdown = useCountdown(upcomingSession?.date);
-  const isLive = upcomingSession?.status?.toLowerCase() === "live";
-  const latest = tasks.slice(0, 3);
-
-  const statCards = [
-    {
-      label: "Completed Sessions",
-      value: stats.completedSessions,
-      icon: CheckCircle2,
-      color: "text-success",
-      bg: "bg-success/10",
-    },
-    {
-      label: "Pending Tasks",
-      value: stats.pendingTasks,
-      icon: Clock,
-      color: "text-muted-foreground",
-      bg: "bg-muted/40",
-    },
-    {
-      label: "Attendance Rate",
-      value: `${stats.attendanceRate}%`,
-      icon: TrendingUp,
-      color: "text-primary",
-      bg: "bg-primary/10",
-    },
-  ];
 
   return (
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Welcome back, name
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Here's what's happening with your learning journey today.
         </p>
       </div>
+      {/* Committee Overview */}
+      <Card className="mb-8 border-border/60">
+        <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-center lg:justify-between">
+          {/* LEFT */}
+          <div className="space-y-2">
+            <div className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              Committee
+            </div>
+
+            <div>
+              <h2 className="text-2xl font-bold">{committee.name}</h2>
+
+              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                {committee.description}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+
+        {/* FOOTER */}
+        <CardFooter className="flex flex-col gap-4 border-t border-border/50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+          {/* Director */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <User className="h-4 w-4 text-primary" />
+            <span>
+              <span className="font-medium text-foreground">
+                {committee.director}
+              </span>{" "}
+              • Director
+            </span>
+          </div>
+
+          {/* Sessions */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Layers className="h-4 w-4 text-primary" />
+            <span>
+              <span className="font-medium text-foreground">
+                {committee.totalSessions}
+              </span>{" "}
+              Sessions
+            </span>
+          </div>
+        </CardFooter>
+      </Card>
 
       {/* Stats */}
-      <div className="">
-        <div className="grid grid-cols-3">
-          <StatCard
-            title="Completed Sessions"
-            value={stats.completedSessions}
-            icon={CheckCircle2}
-            color="success"
-          />
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <StatCard
+          title="Completed Sessions"
+          value={stats.completedSessions}
+          icon={CheckCircle2}
+          color="success"
+        />
 
-          <StatCard
-            title="Pending Tasks"
-            value={stats.pendingTasks}
-            icon={Clock}
-            color="warning"
-          />
+        <StatCard
+          title="Pending Tasks"
+          value={stats.pendingTasks}
+          icon={Clock}
+          color="warning"
+        />
 
-          <StatCard
-            title="Attendance Rate"
-            value={`${stats.attendanceRate}%`}
-            icon={TrendingUp}
-            color="primary"
-          />
-        </div>
+        <StatCard
+          title="Attendance Rate"
+          value={`${stats.attendanceRate}%`}
+          icon={TrendingUp}
+          color="primary"
+        />
       </div>
 
       {/* Main Grid */}
@@ -251,7 +227,7 @@ export default function Dashboard() {
             <CardTitle className="text-base">Latest Tasks</CardTitle>
 
             <Link
-              to="/tasks"
+              to="/member/tasks"
               className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
             >
               View all <ArrowRight className="h-3 w-3" />
@@ -269,9 +245,9 @@ export default function Dashboard() {
                 <div className="mt-2 flex items-center justify-between">
                   <TaskStatusBadge status={t.status} />
 
-                  {t.grade && (
+                  {t.score !== undefined && (
                     <span className="text-xs font-semibold text-success">
-                      {t.grade}
+                      {t.score}/{t.maxScore}
                     </span>
                   )}
                 </div>
