@@ -9,6 +9,7 @@ import { EmailModule } from '../email/email.module';
 import { RecruitmentProcess } from '../recruitment/entities/recruitment.entity';
 import { Committee } from '../committees/entities/committee.entity';
 import { AiModule } from '../../integrations/ai-service/ai.module';
+import { SessionsModule } from '../sessions/sessions.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AiModule } from '../../integrations/ai-service/ai.module';
     ConfigModule,
     EmailModule,
     AiModule,
+    SessionsModule,
   ],
   controllers: [DirectorController],
   providers: [DirectorService],
