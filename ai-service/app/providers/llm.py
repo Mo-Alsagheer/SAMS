@@ -1,5 +1,8 @@
 import os, json, urllib.request, urllib.error
+import logging
 from typing import Optional, Tuple
+
+logger = logging.getLogger(__name__)
 
 if os.path.exists('.env'):
     with open('.env', 'r', encoding='utf-8') as f:
@@ -9,7 +12,10 @@ if os.path.exists('.env'):
                 key, val = line.split('=', 1)
                 os.environ[key.strip()] = val.strip().strip('"\'')
 
-MLVOCA_URL   = os.environ.get("MLVOCA_URL", "https://mlvoca.com/api/chat")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+
+MLVOCA_URL   = os.environ.get("MLVOCA_URL", "https://mlvoca.com/api/generate")
 MLVOCA_MODEL = os.environ.get("MLVOCA_MODEL", "deepseek-r1:1.5b")
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
@@ -38,12 +44,32 @@ def _post(url, payload, headers, timeout=30):
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read().decode())
 
+def _call_gemini(messages, system):
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+    contents = []
+    for m in messages:
+        role = "user" if m["role"] == "user" else "model"
+        contents.append({
+            "role": role,
+            "parts": [{"text": m["content"]}]
+        })
+    
+    payload = {"contents": contents}
+    if system:
+        payload["systemInstruction"] = {"parts": [{"text": system}]}
+        
+    body = _post(url, payload, {}, timeout=30)
+    try:
+        return body["candidates"][0]["content"]["parts"][0]["text"]
+    except KeyError:
+        raise RuntimeError(f"Unexpected response from Gemini: {body}")
+
 def _call_mlvoca(messages, system):
-    full = [{"role": "system", "content": system}] + messages
+    prompt = "\n".join([f"{m['role']}: {m['content']}" for m in messages])
     body = _post(MLVOCA_URL,
-                 {"model": MLVOCA_MODEL, "messages": full, "stream": False},
+                 {"model": MLVOCA_MODEL, "prompt": prompt, "system": system, "stream": False},
                  {}, timeout=60)
-    return body["message"]["content"]
+    return body.get("response", "")
 
 def _call_github(messages, system):
     full = [{"role": "system", "content": system}] + messages
@@ -60,14 +86,28 @@ def _call_groq(messages, system, model):
     return body["choices"][0]["message"]["content"]
 
 def setup_backend():
+    logger.info("Setting up LLM backend...")
+    
+    if GEMINI_API_KEY:
+        try:
+            _call_gemini([{"role": "user", "content": "hi"}], "Reply: ok")
+            Backend.kind  = "gemini"
+            Backend.model = GEMINI_MODEL
+            Backend.name  = f"Gemini / {GEMINI_MODEL}"
+            print(f"========== [LLM BACKEND INITIALIZED] Using {Backend.name} ==========")
+            return True
+        except Exception as e:
+            logger.warning(f"gemini backend failed during setup: {e}")
+
     try:
         _call_mlvoca([{"role": "user", "content": "hi"}], "Reply: ok")
         Backend.kind  = "mlvoca"
         Backend.model = MLVOCA_MODEL
         Backend.name  = f"mlvoca / {MLVOCA_MODEL} (free)"
+        print(f"========== [LLM BACKEND INITIALIZED] Using {Backend.name} ==========")
         return True
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"mlvoca backend failed during setup: {e}")
 
     if GITHUB_TOKEN:
         try:
@@ -75,9 +115,10 @@ def setup_backend():
             Backend.kind  = "github"
             Backend.model = GITHUB_MODEL
             Backend.name  = f"GitHub Models / {GITHUB_MODEL} (free)"
+            print(f"========== [LLM BACKEND INITIALIZED] Using {Backend.name} ==========")
             return True
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"github backend failed during setup: {e}")
 
     if GROQ_API_KEY:
         for model in GROQ_MODELS:
@@ -86,17 +127,23 @@ def setup_backend():
                 Backend.kind  = "groq"
                 Backend.model = model
                 Backend.name  = f"Groq / {model} (free)"
+                print(f"========== [LLM BACKEND INITIALIZED] Using {Backend.name} ==========")
                 return True
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(f"groq model {model} failed during setup: {e}")
 
+    print("========== [LLM BACKEND FAILURE] No working backend found! ==========")
     return False
 
 def call_llm(messages, system) -> Tuple[str, str]:
     if not Backend.kind:
         setup_backend()
+    
+    print(f"[LLM Provider] Handling request using model: {Backend.name}")
     try:
-        if Backend.kind == "mlvoca":
+        if Backend.kind == "gemini":
+            return _call_gemini(messages, system), Backend.name
+        elif Backend.kind == "mlvoca":
             return _call_mlvoca(messages, system), Backend.name
         elif Backend.kind == "github":
             return _call_github(messages, system), Backend.name

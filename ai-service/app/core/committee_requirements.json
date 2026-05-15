@@ -1,0 +1,569 @@
+{
+  "committees": {
+    "hr": {
+      "name": "HR",
+      "dept": "Operations",
+      "required_skills": [
+        "Strong written and verbal communication",
+        "Conflict resolution and mediation",
+        "Organizational and administrative skills",
+        "Empathy and interpersonal skills"
+      ],
+      "preferred_skills": [
+        "Experience in recruitment or onboarding",
+        "Knowledge of HR practices or labor basics",
+        "Event or workshop facilitation",
+        "Team culture building experience"
+      ],
+      "experience": [
+        "Prior involvement in club/student organization management",
+        "Volunteer or leadership role with people coordination",
+        "Any HR-related coursework or internship"
+      ],
+      "evaluation_criteria": {
+        "communication_skills": {
+          "weight": 0.3,
+          "description": "Clarity, professionalism, and effectiveness in written and verbal communication"
+        },
+        "interpersonal_skills": {
+          "weight": 0.25,
+          "description": "Empathy, active listening, and ability to work with diverse personalities"
+        },
+        "organizational_skills": {
+          "weight": 0.2,
+          "description": "Ability to manage tasks, schedules, and documentation"
+        },
+        "leadership_experience": {
+          "weight": 0.15,
+          "description": "Past roles involving team coordination or people management"
+        },
+        "hr_domain_knowledge": {
+          "weight": 0.1,
+          "description": "Familiarity with HR concepts, recruitment, or onboarding processes"
+        }
+      },
+      "disqualifiers": [
+        "No basic knowledge of teamwork or communication skills",
+        "History of unprofessional conduct"
+      ]
+    },
+    "pr": {
+      "name": "PR",
+      "dept": "Operations",
+      "required_skills": [
+        "Strong written communication and copywriting",
+        "Understanding of branding and tone of voice",
+        "Strategic thinking and messaging"
+      ],
+      "preferred_skills": [
+        "Experience writing press releases, newsletters, or announcements",
+        "Social media or communications strategy",
+        "Crisis communication or reputation management",
+        "Public speaking or media interaction"
+      ],
+      "experience": [
+        "Prior PR, marketing, or communications role",
+        "Managing a brand's public presence or voice",
+        "Journalism, blogging, or content writing background"
+      ],
+      "evaluation_criteria": {
+        "writing_quality": {
+          "weight": 0.3,
+          "description": "Quality, clarity, and persuasiveness of written work"
+        },
+        "branding_awareness": {
+          "weight": 0.25,
+          "description": "Understanding of brand identity, tone, and consistency"
+        },
+        "communications_strategy": {
+          "weight": 0.2,
+          "description": "Ability to plan and execute messaging campaigns"
+        },
+        "creativity": {
+          "weight": 0.15,
+          "description": "Originality in content ideas and storytelling"
+        },
+        "pr_domain_knowledge": {
+          "weight": 0.1,
+          "description": "Familiarity with PR tools, press writing, and media relations"
+        }
+      },
+      "disqualifiers": [
+        "No basic knowledge of writing or communication",
+        "No interest in communications"
+      ]
+    },
+    "logistics": {
+      "name": "Logistics",
+      "dept": "Operations",
+      "required_skills": [
+        "Strong organizational and planning skills",
+        "Attention to detail",
+        "Time management and deadline adherence",
+        "Resource and budget awareness"
+      ],
+      "preferred_skills": [
+        "Event planning or coordination experience",
+        "Supply chain or operations knowledge",
+        "Project management tools (Notion, Trello, Asana, Excel)",
+        "Vendor or stakeholder communication"
+      ],
+      "experience": [
+        "Organized events, workshops, or meetups",
+        "Managed schedules, logistics, or inventories",
+        "Project coordination in academic or professional settings"
+      ],
+      "evaluation_criteria": {
+        "organizational_skills": {
+          "weight": 0.3,
+          "description": "Ability to plan, structure, and manage complex moving parts"
+        },
+        "attention_to_detail": {
+          "weight": 0.25,
+          "description": "Thoroughness and accuracy in planning and execution"
+        },
+        "time_management": {
+          "weight": 0.2,
+          "description": "Track record of meeting deadlines and managing schedules"
+        },
+        "problem_solving": {
+          "weight": 0.15,
+          "description": "Ability to handle last-minute changes and operational challenges"
+        },
+        "tool_proficiency": {
+          "weight": 0.1,
+          "description": "Familiarity with planning or project management tools"
+        }
+      },
+      "disqualifiers": [
+        "No basic knowledge of coordination, planning, or time management",
+        "Demonstrated pattern of missing deadlines"
+      ]
+    },
+    "frontend": {
+      "name": "Frontend",
+      "dept": "Technical",
+      "required_skills": [
+        "Proficiency in HTML and CSS",
+        "JavaScript fundamentals",
+        "Responsive design principles"
+      ],
+      "preferred_skills": [
+        "React.js or similar framework experience",
+        "UI/UX design sensibility",
+        "Version control with Git",
+        "Figma or design tool familiarity"
+      ],
+      "experience": [
+        "Personal projects or portfolio with live/deployed websites",
+        "Contributions to open-source or team web projects",
+        "Internship or freelance web development work"
+      ],
+      "evaluation_criteria": {
+        "html_css_proficiency": {
+          "weight": 0.25,
+          "description": "Demonstrated ability to write clean, semantic HTML and CSS"
+        },
+        "javascript_skills": {
+          "weight": 0.25,
+          "description": "JavaScript knowledge including DOM manipulation and ES6+"
+        },
+        "framework_experience": {
+          "weight": 0.2,
+          "description": "Experience with React or other modern frontend frameworks"
+        },
+        "ui_ux_sensibility": {
+          "weight": 0.2,
+          "description": "Attention to design quality, accessibility, and user experience"
+        },
+        "portfolio_quality": {
+          "weight": 0.1,
+          "description": "Quality and complexity of past frontend projects"
+        }
+      },
+      "disqualifiers": [
+        "No basic knowledge of HTML/CSS or frontend concepts",
+        "No interest in frontend development"
+      ]
+    },
+    "backend": {
+      "name": "Backend",
+      "dept": "Technical",
+      "required_skills": [
+        "Proficiency in at least one backend language (Python, Node.js, etc.)",
+        "Understanding of REST APIs",
+        "Basic database knowledge (SQL or NoSQL)"
+      ],
+      "preferred_skills": [
+        "Experience with frameworks (Express, Django, FastAPI, etc.)",
+        "Authentication and security best practices",
+        "System design and architecture thinking",
+        "Cloud platforms (AWS, GCP, Firebase)"
+      ],
+      "experience": [
+        "Built and deployed APIs or server-side applications",
+        "Database design and query optimization",
+        "Backend contributions to team or open-source projects"
+      ],
+      "evaluation_criteria": {
+        "language_proficiency": {
+          "weight": 0.25,
+          "description": "Depth of knowledge in a primary backend language"
+        },
+        "api_and_database_skills": {
+          "weight": 0.25,
+          "description": "Ability to design and work with APIs and databases"
+        },
+        "system_design_thinking": {
+          "weight": 0.2,
+          "description": "Understanding of scalable and maintainable backend architecture"
+        },
+        "framework_experience": {
+          "weight": 0.2,
+          "description": "Hands-on experience with backend frameworks"
+        },
+        "project_complexity": {
+          "weight": 0.1,
+          "description": "Complexity and scope of past backend projects"
+        }
+      },
+      "disqualifiers": [
+        "No basic knowledge of backend languages or concepts",
+        "No interest in backend development"
+      ]
+    },
+    "mobile": {
+      "name": "Mobile App",
+      "dept": "Technical",
+      "required_skills": [
+        "Experience with React Native or Flutter",
+        "Understanding of mobile UX patterns",
+        "Basic knowledge of iOS or Android development"
+      ],
+      "preferred_skills": [
+        "Published app on App Store or Google Play",
+        "State management (Redux, Provider, Riverpod)",
+        "API integration in mobile apps",
+        "Cross-platform development awareness"
+      ],
+      "experience": [
+        "Built or contributed to mobile applications",
+        "Personal mobile app projects with working demos",
+        "Internship or freelance mobile development"
+      ],
+      "evaluation_criteria": {
+        "framework_proficiency": {
+          "weight": 0.3,
+          "description": "Hands-on experience with React Native or Flutter"
+        },
+        "mobile_ux_understanding": {
+          "weight": 0.25,
+          "description": "Knowledge of mobile-specific design and interaction patterns"
+        },
+        "api_integration": {
+          "weight": 0.2,
+          "description": "Ability to integrate APIs and manage app state"
+        },
+        "project_quality": {
+          "weight": 0.15,
+          "description": "Quality and functionality of past mobile projects"
+        },
+        "platform_knowledge": {
+          "weight": 0.1,
+          "description": "Understanding of iOS/Android ecosystems and deployment"
+        }
+      },
+      "disqualifiers": [
+        "No basic knowledge of mobile development concepts",
+        "No knowledge or interest in mobile frameworks"
+      ]
+    },
+    "gamedev": {
+      "name": "Game Development",
+      "dept": "Technical",
+      "required_skills": [
+        "Experience with Unity or Unreal Engine",
+        "Basic scripting in C# or C++",
+        "Understanding of game loop and mechanics design"
+      ],
+      "preferred_skills": [
+        "2D or 3D asset integration",
+        "Physics, animation, or shader knowledge",
+        "Published or submitted game jam entries",
+        "Game design documentation (GDD)"
+      ],
+      "experience": [
+        "Completed game projects (jam entries, prototypes, or full games)",
+        "Contributions to team game development projects",
+        "Game design or level design experience"
+      ],
+      "evaluation_criteria": {
+        "engine_proficiency": {
+          "weight": 0.3,
+          "description": "Hands-on experience with Unity or Unreal Engine"
+        },
+        "scripting_skills": {
+          "weight": 0.25,
+          "description": "Ability to write functional gameplay scripts in C# or C++"
+        },
+        "game_design_sense": {
+          "weight": 0.2,
+          "description": "Understanding of fun mechanics, player experience, and game feel"
+        },
+        "project_completeness": {
+          "weight": 0.15,
+          "description": "Ability to take projects from concept to a playable state"
+        },
+        "creativity": {
+          "weight": 0.1,
+          "description": "Originality in game concepts and design ideas"
+        }
+      },
+      "disqualifiers": [
+        "No basic knowledge of game engines or game design",
+        "No interest in game development"
+      ]
+    },
+    "data": {
+      "name": "Data Analysis",
+      "dept": "Technical",
+      "required_skills": [
+        "Proficiency in Excel or Google Sheets",
+        "Basic SQL querying",
+        "Data cleaning and preparation"
+      ],
+      "preferred_skills": [
+        "Python with pandas or NumPy",
+        "Data visualization tools (Power BI, Tableau, Matplotlib)",
+        "Statistical analysis and interpretation",
+        "Business intelligence concepts"
+      ],
+      "experience": [
+        "Analyzed real datasets for academic or professional projects",
+        "Created dashboards or visual reports",
+        "SQL or Python-based data work"
+      ],
+      "evaluation_criteria": {
+        "data_tool_proficiency": {
+          "weight": 0.25,
+          "description": "Skill with Excel, SQL, or Python for data work"
+        },
+        "analytical_thinking": {
+          "weight": 0.25,
+          "description": "Ability to draw meaningful insights from data"
+        },
+        "visualization_skills": {
+          "weight": 0.2,
+          "description": "Quality of charts, dashboards, and data storytelling"
+        },
+        "statistics_knowledge": {
+          "weight": 0.2,
+          "description": "Understanding of statistical methods and their application"
+        },
+        "project_relevance": {
+          "weight": 0.1,
+          "description": "Relevance and depth of past data projects"
+        }
+      },
+      "disqualifiers": [
+        "No basic knowledge of data tools or concepts",
+        "No interest in working with data"
+      ]
+    },
+    "ml": {
+      "name": "Machine Learning",
+      "dept": "Technical",
+      "required_skills": [
+        "Python programming proficiency",
+        "Understanding of ML fundamentals (supervised/unsupervised learning)",
+        "Familiarity with NumPy, pandas, and scikit-learn"
+      ],
+      "preferred_skills": [
+        "Deep learning frameworks (TensorFlow, PyTorch, Keras)",
+        "Model training, evaluation, and tuning",
+        "Data preprocessing and feature engineering",
+        "Kaggle competitions or research paper implementations"
+      ],
+      "experience": [
+        "Completed ML projects with documented results",
+        "Academic coursework in ML, AI, or data science",
+        "Kaggle participation or research contributions"
+      ],
+      "evaluation_criteria": {
+        "python_and_ml_libraries": {
+          "weight": 0.25,
+          "description": "Fluency in Python and core ML libraries"
+        },
+        "ml_conceptual_knowledge": {
+          "weight": 0.25,
+          "description": "Understanding of algorithms, model evaluation, and tradeoffs"
+        },
+        "deep_learning_exposure": {
+          "weight": 0.2,
+          "description": "Hands-on experience with neural networks and DL frameworks"
+        },
+        "project_depth": {
+          "weight": 0.2,
+          "description": "Complexity and rigor of past ML projects"
+        },
+        "research_or_curiosity": {
+          "weight": 0.1,
+          "description": "Engagement with latest ML developments or research"
+        }
+      },
+      "disqualifiers": [
+        "No basic knowledge of Python or ML concepts",
+        "No interest in machine learning"
+      ]
+    },
+    "graphic": {
+      "name": "Graphic Design",
+      "dept": "Media",
+      "required_skills": [
+        "Proficiency in Adobe Illustrator, Photoshop, or Figma",
+        "Strong understanding of typography and layout",
+        "Color theory and visual hierarchy"
+      ],
+      "preferred_skills": [
+        "Brand identity and logo design",
+        "Motion graphics or After Effects",
+        "Print and digital design formats",
+        "Illustration or icon design"
+      ],
+      "experience": [
+        "Portfolio demonstrating diverse design work",
+        "Designed for clubs, organizations, or clients",
+        "Branding or marketing design projects"
+      ],
+      "evaluation_criteria": {
+        "portfolio_quality": {
+          "weight": 0.35,
+          "description": "Overall quality, diversity, and polish of design portfolio"
+        },
+        "tool_proficiency": {
+          "weight": 0.25,
+          "description": "Mastery of design tools (Adobe Suite, Figma, etc.)"
+        },
+        "design_fundamentals": {
+          "weight": 0.2,
+          "description": "Application of typography, color, and composition principles"
+        },
+        "creativity_and_style": {
+          "weight": 0.15,
+          "description": "Distinctive visual voice and creative originality"
+        },
+        "branding_experience": {
+          "weight": 0.05,
+          "description": "Experience designing cohesive brand identities"
+        }
+      },
+      "disqualifiers": [
+        "No basic knowledge of design principles",
+        "No interest in learning design software"
+      ]
+    },
+    "socialmedia": {
+      "name": "Social Media",
+      "dept": "Media",
+      "required_skills": [
+        "Active understanding of Instagram, TikTok, or LinkedIn",
+        "Content creation and copywriting for social platforms",
+        "Community engagement and audience awareness"
+      ],
+      "preferred_skills": [
+        "Social media analytics and performance tracking",
+        "Content calendar planning",
+        "Trend research and viral content strategy",
+        "Basic graphic design or video editing for posts"
+      ],
+      "experience": [
+        "Managed a social media account (personal brand, club, or business)",
+        "Grew or engaged an online audience",
+        "Ran campaigns or content series"
+      ],
+      "evaluation_criteria": {
+        "platform_knowledge": {
+          "weight": 0.25,
+          "description": "Deep understanding of how major platforms work algorithmically and culturally"
+        },
+        "content_creation_skills": {
+          "weight": 0.25,
+          "description": "Ability to produce engaging, on-brand content"
+        },
+        "strategy_and_analytics": {
+          "weight": 0.2,
+          "description": "Data-driven approach to content performance and growth"
+        },
+        "creativity": {
+          "weight": 0.2,
+          "description": "Originality and trendiness of content ideas"
+        },
+        "past_account_performance": {
+          "weight": 0.1,
+          "description": "Evidence of measurable growth or engagement in past accounts"
+        }
+      },
+      "disqualifiers": [
+        "No basic knowledge of social media platforms or content creation",
+        "No interest in content creation or community engagement"
+      ]
+    },
+    "pv": {
+      "name": "Photography & Video Editing",
+      "dept": "Media",
+      "required_skills": [
+        "Photography or videography fundamentals (exposure, composition, framing)",
+        "Video editing proficiency (Premiere Pro, DaVinci Resolve, or Final Cut)",
+        "Storytelling through visuals"
+      ],
+      "preferred_skills": [
+        "Color grading and post-production",
+        "Motion graphics or title design",
+        "Drone or specialized camera operation",
+        "Audio editing and sound design"
+      ],
+      "experience": [
+        "Portfolio of photo or video work (events, short films, reels, etc.)",
+        "Covered events, shoots, or productions",
+        "YouTube channel, Behance, or equivalent showcase"
+      ],
+      "evaluation_criteria": {
+        "portfolio_quality": {
+          "weight": 0.35,
+          "description": "Visual quality, storytelling, and consistency of past work"
+        },
+        "technical_proficiency": {
+          "weight": 0.25,
+          "description": "Command of camera techniques and editing software"
+        },
+        "storytelling_ability": {
+          "weight": 0.2,
+          "description": "Ability to craft compelling visual narratives"
+        },
+        "post_production_skills": {
+          "weight": 0.15,
+          "description": "Color grading, cutting rhythm, and finishing quality"
+        },
+        "versatility": {
+          "weight": 0.05,
+          "description": "Range across photography, video, and different content styles"
+        }
+      },
+      "disqualifiers": [
+        "No basic knowledge of photography, videography, or editing tools",
+        "No interest in visual storytelling"
+      ]
+    }
+  },
+  "scoring_instructions": {
+    "score_range": "0\u2013100",
+    "score_breakdown": {
+      "90\u2013100": "Exceptional fit \u2014 shows great potential and solid basic knowledge",
+      "75\u201389": "Strong fit \u2014 good basic knowledge and enthusiasm",
+      "60\u201374": "Good fit \u2014 acceptable basic knowledge",
+      "45\u201359": "Partial fit \u2014 borderline basic knowledge, needs review",
+      "0\u201344": "Poor fit \u2014 lacks basic knowledge of the committee's domain"
+    },
+    "prompt_template": "You are evaluating a university student's candidate CV for the '{committee_name}' committee. Keep in mind that applicants are university students. You must evaluate them based ONLY on whether they possess the *basic knowledge*, foundational understanding, and potential for the committee they applied for. Do NOT expect professional-level experience, extensive portfolios, or mastery of the listed skills. Treat the provided skills and experience criteria as guidelines for what basic knowledge or interest might look like, rather than strict prerequisites. Use the following evaluation criteria with their weights to assign a score from 0 to 100. For each criterion, assign a sub-score (0\u2013100), multiply by the weight, and sum for the final score. Return a JSON with: 'final_score' (an integer out of 100), 'per_criterion_scores', a short 'justification' per criterion, an 'overall_summary', and a 'recommendation' (Accept / Borderline / Reject). Flag any disqualifiers if present. Evaluation criteria: {evaluation_criteria}. Disqualifiers: {disqualifiers}."
+  }
+}
