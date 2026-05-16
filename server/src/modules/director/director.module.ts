@@ -13,7 +13,12 @@ import { SessionsModule } from '../sessions/sessions.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Application, User, RecruitmentProcess, Committee]),
+    TypeOrmModule.forFeature([
+      Application,
+      User,
+      RecruitmentProcess,
+      Committee,
+    ]),
     ConfigModule,
     EmailModule,
     AiModule,
