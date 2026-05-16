@@ -1,5 +1,4 @@
 import EditableTextArea from "@/components/shared/EditableTextArea";
-import { updateCommitteeDescription } from "../../features/committee/committee";
 import { toast } from "sonner";
 
 function CommitteeInfo({ committee, onSaveDescription }) {

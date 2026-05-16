@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import { getCommittees } from "@/features/committee/committee";
-import { getCurrentUser() } from "@/features/auth/session";
+import { getCurrentUser } from "@/features/auth/session";
 
 export function useApplications(role, api) {
   const [searchParams, setSearchParams] = useSearchParams();

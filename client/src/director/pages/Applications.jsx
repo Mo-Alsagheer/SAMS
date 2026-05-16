@@ -20,7 +20,10 @@ import {
 import { getInitials } from "../../utils/getInitials";
 import { getCurrentUser } from "@/features/auth/session";
 import { Button } from "@/components/ui/button";
-import { ACTION_STYLES, APPLICATION_STATUS } from "@/constant/applicationStatus";
+import {
+  ACTION_STYLES,
+  APPLICATION_STATUS,
+} from "@/constant/applicationStatus";
 
 const scheduleSchema = z.object({
   date: z.string().min(1, "Date is required"),
@@ -258,8 +261,8 @@ function Applications() {
       },
       {
         header: "Cv Score",
-        // accessor: "aiScore.id",
-        render: (row) => <span>{row.aiScore?.id || "-"}</span>,
+        // accessor: "aiScore.overall",
+        render: (row) => <span>{row.aiScore?.final_score ?? "-"}</span>,
       },
       {
         header: "View",

@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bell, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { directormenu, executive } from "@/assets/menus";
+import { directormenu, executive ,membermenu} from "@/assets/menus";
 import AppSidebar from "@/components/layout/AppSidebar";
 import ThemeToggle from "@/components/shared/theme-toggle";
 import { clearAuthSession } from "@/features/auth/session";
@@ -21,6 +21,7 @@ const DashboardLayout = ({
   const roleNavs = {
     executive: executive,
     director: directormenu,
+    member:membermenu
   };
   const navItems = roleNavs[role] || [];
 

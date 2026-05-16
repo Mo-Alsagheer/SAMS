@@ -1,5 +1,5 @@
 export const APPLICATION_STATUS = [
-  { name: "All Applications", value: "All" },
+  { name: "All", value: "All" },
   { name: "Submitted", value: "SUBMITTED" },
   { name: "AI Reviewed", value: "AI_REVIEWED" },
   { name: "Interview Scheduled", value: "INTERVIEW_SCHEDULED" },

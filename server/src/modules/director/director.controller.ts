@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBody,
   ApiOperation,
@@ -13,13 +6,21 @@ import {
   ApiQuery,
   ApiResponse,
   ApiTags,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { DirectorService } from './director.service';
+import { SessionsService } from '../sessions/sessions.service';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @ApiTags('director')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('director')
 export class DirectorController {
-  constructor(private readonly directorService: DirectorService) {}
+  constructor(
+    private readonly directorService: DirectorService,
+    private readonly sessionsService: SessionsService,
+  ) {}
 
   @Get('applications')
   @ApiOperation({ summary: 'Get applications for a committee' })
@@ -140,5 +141,29 @@ export class DirectorController {
   @ApiResponse({ status: 404, description: 'Application not found.' })
   rejectPhase2(@Param('id') id: string) {
     return this.directorService.rejectPhase2(id);
+  }
+
+  @Post('sessions/:sessionId/meeting/create')
+  @ApiOperation({ summary: 'Create a plugNmeet video session room' })
+  @ApiParam({
+    name: 'sessionId',
+    description: 'ULID of the session',
+    example: '01HRGZ...',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Meeting room created successfully.',
+  })
+  @ApiResponse({ status: 404, description: 'Session not found.' })
+  createMeeting(@Param('sessionId') sessionId: string) {
+    return this.sessionsService.createMeeting(sessionId);
+  }
+
+  @Post('sessions/:sessionId/meeting/end')
+  @ApiOperation({ summary: 'End a session meeting' })
+  @ApiParam({ name: 'sessionId', description: 'Session ID' })
+  @ApiResponse({ status: 200, description: 'Meeting ended successfully.' })
+  endSessionMeeting(@Param('sessionId') sessionId: string) {
+    return this.sessionsService.endMeeting(sessionId);
   }
 }

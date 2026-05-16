@@ -13,6 +13,7 @@ import { QuizModule } from './modules/quiz/quiz.module';
 import { DirectorModule } from './modules/director/director.module';
 import { ExecutiveModule } from './modules/executive/executive.module';
 import { RoadmapModule } from './modules/roadmap/roadmap.module';
+import { SessionsModule } from './modules/sessions/sessions.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { RoadmapModule } from './modules/roadmap/roadmap.module';
     DirectorModule,
     ExecutiveModule,
     RoadmapModule,
+    SessionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
