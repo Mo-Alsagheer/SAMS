@@ -114,7 +114,7 @@ export default function Dashboard() {
       </div>
       {/* Committee Overview */}
       <Card className="mb-8 border-border/60">
-        <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-center lg:justify-between">
+        <CardContent className="flex flex-col gap-6  lg:flex-row lg:items-center lg:justify-between">
           {/* LEFT */}
           <div className="space-y-2">
             <div className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">

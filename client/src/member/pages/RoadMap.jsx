@@ -259,7 +259,7 @@ export default function Roadmap() {
                               s.status === "live" ? "default" : "outline"
                             }
                           >
-                            <Link to={`/session/${s.id}`}>
+                            <Link to={`../session/${s.id}`}>
                               {s.status === "live" ? "Join now" : "View"}
 
                               <ArrowRight className="ml-1 h-4 w-4" />

@@ -29,6 +29,8 @@ import Members from "./director/pages/Members";
 import MemberLayout from "./member/layout/MemberLayout";
 import Roadmap from "./member/pages/RoadMap";
 import MemberDashboard from "./member/pages/DashBoard";
+import SessionDetails from "./member/pages/SessionDetails";
+import Tasks from "./member/pages/Tasks";
 function App() {
   return (
     <>
@@ -63,8 +65,10 @@ function App() {
         {/* Member Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={["DIRECTOR"]} />}>
           <Route path="/member" element={<MemberLayout />}>
-          <Route index element={< MemberDashboard/>} />
-          <Route path="roadmap" element={<Roadmap />} />
+            <Route index element={<MemberDashboard />} />
+            <Route path="roadmap" element={<Roadmap />} />
+            <Route path="session/:sessionId" element={<SessionDetails />} />
+            <Route path="tasks" element={<Tasks />} />
           </Route>
         </Route>
 

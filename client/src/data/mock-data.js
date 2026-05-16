@@ -198,7 +198,7 @@ export const sessions = [
 ];
 
 export function getSession(id) {
-  return sessions.find((s) => s.id === id);
+  return sessions.find((s) => String(s.id) === String(id));
 }
 
 export function getScore() {
