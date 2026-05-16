@@ -23,8 +23,8 @@ export class RecruitmentService {
   ) {}
 
   async openProcess(
-    executiveId: string,
-    committeeId: string,
+    executiveId: number,
+    committeeId: number,
     dto: OpenRecruitmentDto,
   ) {
     if (dto.role === Role.EXECUTIVE) {
@@ -66,7 +66,7 @@ export class RecruitmentService {
     return this.recruitmentRepository.save(process);
   }
 
-  async openGlobalProcess(executiveId: string, dto: OpenRecruitmentDto) {
+  async openGlobalProcess(executiveId: number, dto: OpenRecruitmentDto) {
     if (dto.role !== Role.EXECUTIVE) {
       throw new BadRequestException(
         'Global recruitment processes must be for the EXECUTIVE role',
@@ -100,7 +100,7 @@ export class RecruitmentService {
     return this.recruitmentRepository.save(process);
   }
 
-  async closeProcess(id: string) {
+  async closeProcess(id: number) {
     const process = await this.recruitmentRepository.findOne({
       where: { id },
     });
@@ -121,7 +121,7 @@ export class RecruitmentService {
     return this.recruitmentRepository.find();
   }
 
-  async getStatusByCommittee(committeeId: string, role?: Role) {
+  async getStatusByCommittee(committeeId: number, role?: Role) {
     const committee = await this.committeeRepository.findOne({
       where: { id: committeeId },
     });

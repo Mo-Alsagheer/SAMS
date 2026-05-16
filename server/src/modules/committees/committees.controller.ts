@@ -30,7 +30,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Role } from '../../common/constants/role.enum';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { ParseUlidPipe } from '../../common/pipes/parse-ulid.pipe';
+import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
 import { CommitteesService } from './committees.service';
 import { AttendaceService } from '../attendace/attendace.service';
 import { CloudinaryService } from '../../integrations/cloudinary/cloudinary.service';
@@ -74,7 +74,7 @@ export class CommitteesController {
   @ApiResponse({ status: 200, description: 'Committee scoreboard returned.' })
   @ApiResponse({ status: 403, description: 'Director not assigned to this committee.' })
   async getScoreboard(
-    @Param('id', new ParseUlidPipe()) id: string,
+    @Param('id', ParseIntIdPipe) id: number,
     @Req() req: Request,
   ) {
     const user = req.user as AuthUser;
@@ -95,7 +95,7 @@ export class CommitteesController {
   })
   @ApiResponse({ status: 200, description: 'The committee details.' })
   @ApiResponse({ status: 404, description: 'Committee not found.' })
-  getById(@Param('id', new ParseUlidPipe()) id: string) {
+  getById(@Param('id', ParseIntIdPipe) id: number) {
     return this.committeesService.getById(id);
   }
 
@@ -200,7 +200,7 @@ export class CommitteesController {
   })
   @ApiResponse({ status: 404, description: 'Committee not found.' })
   async update(
-    @Param('id', new ParseUlidPipe()) id: string,
+    @Param('id', ParseIntIdPipe) id: number,
     @Body() dto: UpdateCommitteeDto,
     @Req() req: Request,
     @UploadedFile() image?: Express.Multer.File,
@@ -248,7 +248,7 @@ export class CommitteesController {
     description: 'Cannot delete committee with an open recruitment process.',
   })
   @ApiResponse({ status: 404, description: 'Committee not found.' })
-  delete(@Param('id', new ParseUlidPipe()) id: string) {
+  delete(@Param('id', ParseIntIdPipe) id: number) {
     return this.committeesService.delete(id);
   }
 }

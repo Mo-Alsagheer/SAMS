@@ -15,6 +15,7 @@ import { ExecutiveModule } from './modules/executive/executive.module';
 import { RoadmapModule } from './modules/roadmap/roadmap.module';
 import { SessionsModule } from './modules/sessions/sessions.module';
 import { AttendaceModule } from './modules/attendace/attendace.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { AttendaceModule } from './modules/attendace/attendace.module';
     RoadmapModule,
     SessionsModule,
     AttendaceModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,9 +1,9 @@
 export interface Committee {
-  id: string;
+  id: number;
   name: string;
   description: string;
-  createdBy: string;
-  directorId: string | null;
+  createdBy: number;
+  directorId: number | null;
   isOpen: boolean;
   createdAt: string;
 }

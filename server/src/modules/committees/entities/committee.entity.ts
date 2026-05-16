@@ -1,25 +1,16 @@
 import {
-  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ulid } from 'ulid';
 import { CommitteeType } from '../enums/committee-type.enum';
 
 @Entity('committees')
 export class Committee {
-  @PrimaryColumn({ type: 'text' })
-  id: string;
-
-  @BeforeInsert()
-  generateId() {
-    if (!this.id) {
-      this.id = ulid();
-    }
-  }
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ length: 200 })
   name: string;
@@ -33,8 +24,8 @@ export class Committee {
   @Column({ type: 'text', nullable: true })
   planID: string | null;
 
-  @Column({ type: 'text', array: true, default: '{}' })
-  directorIDs: string[];
+  @Column({ type: 'int', array: true, default: '{}' })
+  directorIDs: number[];
 
   @Column({ type: 'int', default: 0 })
   membersCount: number;
@@ -45,8 +36,8 @@ export class Committee {
   @Column({ type: 'text', nullable: true })
   imageUrl: string | null;
 
-  @Column({ type: 'text' })
-  createdBy: string;
+  @Column({ type: 'int' })
+  createdBy: number;
 
   @CreateDateColumn()
   createdAt: Date;

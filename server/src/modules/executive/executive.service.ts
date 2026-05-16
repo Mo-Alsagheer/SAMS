@@ -37,7 +37,7 @@ export class ExecutiveService {
     private readonly aiService: AiService,
   ) {}
 
-  async getDirectorsByCommittee(committeeId: string): Promise<User[]> {
+  async getDirectorsByCommittee(committeeId: number): Promise<User[]> {
     return this.userRepository.find({
       where: {
         committeeId: committeeId,
@@ -57,7 +57,7 @@ export class ExecutiveService {
     });
   }
 
-  async getMembersByCommittee(committeeId: string): Promise<User[]> {
+  async getMembersByCommittee(committeeId: number): Promise<User[]> {
     return this.userRepository.find({
       where: {
         committeeId: committeeId,
@@ -77,7 +77,7 @@ export class ExecutiveService {
     });
   }
 
-  async getApplications(committeeId?: string, status?: string) {
+  async getApplications(committeeId?: number, status?: string) {
     const query = this.applicationRepository.createQueryBuilder('application');
 
     if (committeeId) {
@@ -110,7 +110,9 @@ export class ExecutiveService {
     ];
     let committeeMap = new Map();
     if (committeeIds.length > 0) {
-      const committees = await this.committeeRepository.findByIds(committeeIds);
+      const committees = await this.committeeRepository.findBy({
+        id: In(committeeIds as number[]),
+      });
       committeeMap = new Map(committees.map((c) => [c.id, c]));
     }
 
@@ -161,7 +163,7 @@ export class ExecutiveService {
     return applications;
   }
 
-  async acceptPhase1(applicationId: string) {
+  async acceptPhase1(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: {
         id: applicationId,
@@ -175,7 +177,7 @@ export class ExecutiveService {
     return this.applicationRepository.save(application);
   }
 
-  async rejectPhase1(applicationId: string) {
+  async rejectPhase1(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: {
         id: applicationId,
@@ -189,7 +191,7 @@ export class ExecutiveService {
     return this.applicationRepository.save(application);
   }
 
-  async scheduleInterview(applicationId: string, payload: any) {
+  async scheduleInterview(applicationId: number, payload: any) {
     const application = await this.applicationRepository.findOne({
       where: { id: applicationId },
     });
@@ -201,7 +203,7 @@ export class ExecutiveService {
     return { ...application, ...payload };
   }
 
-  async acceptPhase2(applicationId: string) {
+  async acceptPhase2(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: {
         id: applicationId,
@@ -297,7 +299,7 @@ export class ExecutiveService {
     return application;
   }
 
-  async rejectPhase2(applicationId: string) {
+  async rejectPhase2(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: {
         id: applicationId,

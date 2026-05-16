@@ -17,23 +17,22 @@ export class Attendace {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'text' })
-  sessionId: string;
+  @Column({ type: 'int' })
+  sessionId: number;
 
   @ManyToOne(() => Session, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'sessionId' })
   session: Session;
 
-  @Column({ type: 'text' })
-  userId: string;
+  @Column({ type: 'int' })
+  userId: number;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  /** Committee this session belongs to (via roadmap), for filtering attendance by committee. */
-  @Column({ type: 'text' })
-  committeeId: string;
+  @Column({ type: 'int' })
+  committeeId: number;
 
   @ManyToOne(() => Committee, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'committeeId' })

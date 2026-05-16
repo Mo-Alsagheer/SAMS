@@ -37,7 +37,7 @@ export class DirectorService {
     private readonly aiService: AiService,
   ) {}
 
-  async getApplications(committeeId: string, status?: string) {
+  async getApplications(committeeId: number, status?: string) {
     const query = this.applicationRepository
       .createQueryBuilder('application')
       .where('application.committeeId = :committeeId', { committeeId })
@@ -102,7 +102,7 @@ export class DirectorService {
     return applications;
   }
 
-  async acceptPhase1(applicationId: string) {
+  async acceptPhase1(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: { id: applicationId, targetRole: Role.MEMBER },
     });
@@ -113,7 +113,7 @@ export class DirectorService {
     return this.applicationRepository.save(application);
   }
 
-  async rejectPhase1(applicationId: string) {
+  async rejectPhase1(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: { id: applicationId, targetRole: Role.MEMBER },
     });
@@ -124,7 +124,7 @@ export class DirectorService {
     return this.applicationRepository.save(application);
   }
 
-  async scheduleInterview(applicationId: string, payload: any) {
+  async scheduleInterview(applicationId: number, payload: any) {
     const application = await this.applicationRepository.findOne({
       where: { id: applicationId, targetRole: Role.MEMBER },
     });
@@ -136,7 +136,7 @@ export class DirectorService {
     return { ...application, ...payload };
   }
 
-  async acceptPhase2(applicationId: string) {
+  async acceptPhase2(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: { id: applicationId, targetRole: Role.MEMBER },
     });
@@ -212,7 +212,7 @@ export class DirectorService {
     return application;
   }
 
-  async rejectPhase2(applicationId: string) {
+  async rejectPhase2(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: { id: applicationId, targetRole: Role.MEMBER },
     });

@@ -1,12 +1,10 @@
 import {
-  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ulid } from 'ulid';
 import { Role } from '../../../common/constants/role.enum';
 
 export enum ApplicationStatus {
@@ -21,18 +19,11 @@ export enum ApplicationStatus {
 
 @Entity('applications')
 export class Application {
-  @PrimaryColumn({ type: 'text' })
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @BeforeInsert()
-  generateId() {
-    if (!this.id) {
-      this.id = ulid();
-    }
-  }
-
-  @Column({ type: 'text', nullable: true })
-  committeeId: string | null;
+  @Column({ type: 'int', nullable: true })
+  committeeId: number | null;
 
   @Column({ type: 'text' })
   name: string;

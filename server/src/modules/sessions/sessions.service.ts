@@ -19,6 +19,7 @@ export class SessionsService {
   async create(createSessionDto: CreateSessionDto): Promise<Session> {
     const session = this.sessionsRepository.create({
       ...createSessionDto,
+      scheduledAt: new Date(createSessionDto.scheduledAt),
       isRecorded: createSessionDto.isRecorded ?? false,
     });
     return this.sessionsRepository.save(session);
@@ -28,18 +29,23 @@ export class SessionsService {
     return this.sessionsRepository.find();
   }
 
-  async update(id: string, updateSessionDto: UpdateSessionDto): Promise<Session> {
+  async update(id: number, updateSessionDto: UpdateSessionDto): Promise<Session> {
     const session = await this.findById(id);
-    Object.assign(session, updateSessionDto);
+    Object.assign(session, {
+      ...updateSessionDto,
+      ...(updateSessionDto.scheduledAt !== undefined && {
+        scheduledAt: new Date(updateSessionDto.scheduledAt),
+      }),
+    });
     return this.sessionsRepository.save(session);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     const session = await this.findById(id);
     await this.sessionsRepository.remove(session);
   }
 
-  async findById(id: string): Promise<Session> {
+  async findById(id: number): Promise<Session> {
     const session = await this.sessionsRepository.findOne({ where: { id } });
     if (!session) {
       throw new NotFoundException('Session not found');
@@ -47,65 +53,91 @@ export class SessionsService {
     return session;
   }
 
-  async getJoinToken(sessionId: string, user: AuthUser) {
+  async getJoinToken(sessionId: number, user: AuthUser) {
     const session = await this.findById(sessionId);
 
     const isDirector = user.role === Role.DIRECTOR || user.role === Role.EXECUTIVE;
 
     if (!session.plugnmeetRoomId) {
-        throw new NotFoundException('Meeting room has not been created for this session yet');
+      throw new NotFoundException(
+        'Meeting room has not been created for this session yet',
+      );
     }
 
     if (isDirector) {
-      const isActive = await this.meetingsService.isRoomActive(session.plugnmeetRoomId);
+      const isActive = await this.meetingsService.isRoomActive(
+        session.plugnmeetRoomId,
+      );
       if (!isActive) {
-        await this.meetingsService.createMeeting(session.plugnmeetRoomId, session.title, session.isRecorded);
+        await this.meetingsService.createMeeting(
+          session.plugnmeetRoomId,
+          session.title,
+          session.isRecorded,
+        );
       }
     }
 
     return this.meetingsService.getJoinToken(
       session.plugnmeetRoomId,
-      { id: user.id, name: user.name },
+      { id: String(user.id), name: user.name },
       isDirector,
     );
   }
 
-  async getRecordings(sessionId: string) {
+  async getRecordings(sessionId: number) {
     const session = await this.findById(sessionId);
     if (!session.plugnmeetRoomId) {
-        throw new NotFoundException('Meeting room has not been created for this session yet');
+      throw new NotFoundException(
+        'Meeting room has not been created for this session yet',
+      );
     }
     return this.meetingsService.getRecordings(session.plugnmeetRoomId);
   }
 
-  async createMeeting(sessionId: string) {
+  async createMeeting(sessionId: number) {
     const session = await this.findById(sessionId);
     if (session.plugnmeetRoomId) {
-      const isActive = await this.meetingsService.isRoomActive(session.plugnmeetRoomId);
+      const isActive = await this.meetingsService.isRoomActive(
+        session.plugnmeetRoomId,
+      );
       if (isActive) {
-        return { message: 'Meeting room already exists and is active', plugnmeetRoomId: session.plugnmeetRoomId };
+        return {
+          message: 'Meeting room already exists and is active',
+          plugnmeetRoomId: session.plugnmeetRoomId,
+        };
       }
     }
 
     const roomId = session.plugnmeetRoomId || `room-${session.id}`;
-    
-    await this.meetingsService.createMeeting(roomId, session.title, session.isRecorded);
-    
+
+    await this.meetingsService.createMeeting(
+      roomId,
+      session.title,
+      session.isRecorded,
+    );
+
     if (!session.plugnmeetRoomId) {
       session.plugnmeetRoomId = roomId;
       await this.sessionsRepository.save(session);
     }
 
-    return { message: 'Meeting room created successfully', plugnmeetRoomId: roomId };
+    return {
+      message: 'Meeting room created successfully',
+      plugnmeetRoomId: roomId,
+    };
   }
 
-  async endMeeting(sessionId: string) {
+  async endMeeting(sessionId: number) {
     const session = await this.findById(sessionId);
     if (!session.plugnmeetRoomId) {
-      throw new NotFoundException('Meeting room has not been created for this session yet');
+      throw new NotFoundException(
+        'Meeting room has not been created for this session yet',
+      );
     }
 
-    const isActive = await this.meetingsService.isRoomActive(session.plugnmeetRoomId);
+    const isActive = await this.meetingsService.isRoomActive(
+      session.plugnmeetRoomId,
+    );
     if (!isActive) {
       return { message: 'Meeting room is already inactive or ended' };
     }

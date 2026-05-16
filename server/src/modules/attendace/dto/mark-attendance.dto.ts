@@ -1,13 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsInt } from 'class-validator';
 
 export class MarkAttendanceDto {
   @ApiProperty({
-    type: [String],
+    type: [Number],
     description: 'User IDs to mark as attended for this session',
-    example: ['01HRGZ...', '01HRGZ...'],
+    example: [1, 2, 3],
   })
   @IsArray()
-  @IsString({ each: true })
-  userIds: string[];
+  @Type(() => Number)
+  @IsInt({ each: true })
+  userIds: number[];
 }

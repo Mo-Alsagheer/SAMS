@@ -7,22 +7,22 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Attendace } from './entities/attendace.entity';
 import { Session } from '../sessions/entities/session.entity';
-import { Roadmap } from '../sessions/entities/roadmap.entity';
 import { User, UserStatus } from '../users/entities/user.entity';
 import { TaskSubmission } from '../tasks/entities/task-submission.entity';
+import { RoadmapService } from '../roadmap/roadmap.service';
 import { Role } from '../../common/constants/role.enum';
 
 const ATTENDANCE_POINTS = 5;
 
 export interface AttendanceMemberRow {
-  userId: string;
+  userId: number;
   name: string;
   email: string;
   attended: boolean;
 }
 
 export interface UserScoreBreakdown {
-  userId: string;
+  userId: number;
   name: string;
   email: string;
   attendanceCount: number;
@@ -38,37 +38,34 @@ export class AttendaceService {
     private readonly attendanceRepo: Repository<Attendace>,
     @InjectRepository(Session)
     private readonly sessionRepo: Repository<Session>,
-    @InjectRepository(Roadmap)
-    private readonly roadmapRepo: Repository<Roadmap>,
+    private readonly roadmapService: RoadmapService,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     @InjectRepository(TaskSubmission)
     private readonly submissionRepo: Repository<TaskSubmission>,
   ) {}
 
-  private async resolveCommitteeIdForSession(sessionId: string): Promise<{
+  private async resolveCommitteeIdForSession(sessionId: number): Promise<{
     session: Session;
-    committeeId: string;
+    committeeId: number;
   }> {
     const session = await this.sessionRepo.findOne({ where: { id: sessionId } });
     if (!session) {
       throw new NotFoundException('Session not found');
     }
-    if (!session.roadmapId) {
+    if (session.roadmapId == null) {
       throw new BadRequestException('Session is not linked to a roadmap');
     }
 
-    const roadmap = await this.roadmapRepo.findOne({
-      where: { id: session.roadmapId },
-    });
-    if (!roadmap) {
-      throw new NotFoundException('Roadmap not found for this session');
+    const roadmap = await this.roadmapService.findOne(session.roadmapId);
+    if (roadmap.committeeId == null) {
+      throw new BadRequestException('Roadmap is not assigned to a committee');
     }
 
     return { session, committeeId: roadmap.committeeId };
   }
 
-  private async getCommitteeMembers(committeeId: string): Promise<User[]> {
+  private async getCommitteeMembers(committeeId: number): Promise<User[]> {
     return this.userRepo.find({
       where: {
         committeeId,
@@ -79,9 +76,9 @@ export class AttendaceService {
     });
   }
 
-  async getSessionAttendance(sessionId: string): Promise<{
-    sessionId: string;
-    committeeId: string;
+  async getSessionAttendance(sessionId: number): Promise<{
+    sessionId: number;
+    committeeId: number;
     members: AttendanceMemberRow[];
   }> {
     const { committeeId } = await this.resolveCommitteeIdForSession(sessionId);
@@ -107,9 +104,13 @@ export class AttendaceService {
   }
 
   async markAttendance(
-    sessionId: string,
-    userIds: string[],
-  ): Promise<{ sessionId: string; committeeId: string; members: AttendanceMemberRow[] }> {
+    sessionId: number,
+    userIds: number[],
+  ): Promise<{
+    sessionId: number;
+    committeeId: number;
+    members: AttendanceMemberRow[];
+  }> {
     const { committeeId } = await this.resolveCommitteeIdForSession(sessionId);
     const members = await this.getCommitteeMembers(committeeId);
     const memberIds = new Set(members.map((m) => m.id));
@@ -134,14 +135,14 @@ export class AttendaceService {
     return this.getSessionAttendance(sessionId);
   }
 
-  async getUserScore(userId: string): Promise<UserScoreBreakdown> {
+  async getUserScore(userId: number): Promise<UserScoreBreakdown> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
     const committeeId = user.committeeId;
-    if (!committeeId) {
+    if (committeeId == null) {
       return {
         userId: user.id,
         name: user.name,
@@ -156,8 +157,8 @@ export class AttendaceService {
     return this.buildScoreForUser(user, committeeId);
   }
 
-  async getCommitteeScoreboard(committeeId: string): Promise<{
-    committeeId: string;
+  async getCommitteeScoreboard(committeeId: number): Promise<{
+    committeeId: number;
     scores: UserScoreBreakdown[];
   }> {
     const members = await this.getCommitteeMembers(committeeId);
@@ -170,7 +171,7 @@ export class AttendaceService {
 
   private async buildScoreForUser(
     user: User,
-    committeeId: string,
+    committeeId: number,
   ): Promise<UserScoreBreakdown> {
     const { count } = await this.attendanceRepo
       .createQueryBuilder('a')

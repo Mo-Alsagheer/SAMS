@@ -1,9 +1,9 @@
 import { Role } from '../../common/constants/role.enum';
 
 export interface AuthUser {
-  id: string;
+  id: number;
   email: string;
   role: Role;
-  committeeId?: string;
+  committeeId?: number | null;
   name: string;
 }

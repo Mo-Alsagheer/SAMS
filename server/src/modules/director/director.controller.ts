@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+  ParseIntPipe,
+} from '@nestjs/common';
 import {
   ApiBody,
   ApiOperation,
@@ -16,6 +26,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/role.enum';
+import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
 
 @ApiTags('director')
 @ApiBearerAuth()
@@ -34,8 +45,8 @@ export class DirectorController {
   @ApiQuery({
     name: 'committeeId',
     required: true,
-    description: 'ULID of the committee',
-    example: '01HRGZ...',
+    description: 'Numeric committee ID',
+    example: 1,
   })
   @ApiQuery({
     name: 'status',
@@ -48,7 +59,7 @@ export class DirectorController {
     description: 'List of applications for the specified committee.',
   })
   getApplications(
-    @Query('committeeId') committeeId: string,
+    @Query('committeeId', ParseIntPipe) committeeId: number,
     @Query('status') status?: string,
   ) {
     return this.directorService.getApplications(committeeId, status);
@@ -66,7 +77,7 @@ export class DirectorController {
     description: 'Application accepted for Phase 1.',
   })
   @ApiResponse({ status: 404, description: 'Application not found.' })
-  acceptPhase1(@Param('id') id: string) {
+  acceptPhase1(@Param('id', ParseIntIdPipe) id: number) {
     return this.directorService.acceptPhase1(id);
   }
 
@@ -82,7 +93,7 @@ export class DirectorController {
     description: 'Application rejected during Phase 1.',
   })
   @ApiResponse({ status: 404, description: 'Application not found.' })
-  rejectPhase1(@Param('id') id: string) {
+  rejectPhase1(@Param('id', ParseIntIdPipe) id: number) {
     return this.directorService.rejectPhase1(id);
   }
 
@@ -114,7 +125,7 @@ export class DirectorController {
     description: 'Interview scheduled successfully.',
   })
   @ApiResponse({ status: 404, description: 'Application not found.' })
-  scheduleInterview(@Param('id') id: string, @Body() payload: any) {
+  scheduleInterview(@Param('id', ParseIntIdPipe) id: number, @Body() payload: any) {
     return this.directorService.scheduleInterview(id, payload);
   }
 
@@ -130,7 +141,7 @@ export class DirectorController {
     description: 'Application accepted for Phase 2.',
   })
   @ApiResponse({ status: 404, description: 'Application not found.' })
-  acceptPhase2(@Param('id') id: string) {
+  acceptPhase2(@Param('id', ParseIntIdPipe) id: number) {
     return this.directorService.acceptPhase2(id);
   }
 
@@ -146,7 +157,7 @@ export class DirectorController {
     description: 'Application rejected during Phase 2.',
   })
   @ApiResponse({ status: 404, description: 'Application not found.' })
-  rejectPhase2(@Param('id') id: string) {
+  rejectPhase2(@Param('id', ParseIntIdPipe) id: number) {
     return this.directorService.rejectPhase2(id);
   }
 
@@ -154,16 +165,16 @@ export class DirectorController {
   @ApiOperation({
     summary: 'List committee members and attendance status for a session',
   })
-  @ApiParam({ name: 'sessionId', description: 'ULID of the session' })
+  @ApiParam({ name: 'sessionId', description: 'Numeric session ID' })
   @ApiResponse({ status: 200, description: 'Attendance roster returned.' })
   @ApiResponse({ status: 404, description: 'Session or roadmap not found.' })
-  getSessionAttendance(@Param('sessionId') sessionId: string) {
+  getSessionAttendance(@Param('sessionId', ParseIntIdPipe) sessionId: number) {
     return this.attendaceService.getSessionAttendance(sessionId);
   }
 
   @Patch('sessions/:sessionId/attendance')
   @ApiOperation({ summary: 'Mark attendance for committee members' })
-  @ApiParam({ name: 'sessionId', description: 'ULID of the session' })
+  @ApiParam({ name: 'sessionId', description: 'Numeric session ID' })
   @ApiBody({ type: MarkAttendanceDto })
   @ApiResponse({ status: 200, description: 'Attendance updated.' })
   @ApiResponse({
@@ -171,7 +182,7 @@ export class DirectorController {
     description: 'Invalid user IDs or session not linked to a roadmap.',
   })
   markSessionAttendance(
-    @Param('sessionId') sessionId: string,
+    @Param('sessionId', ParseIntIdPipe) sessionId: number,
     @Body() dto: MarkAttendanceDto,
   ) {
     return this.attendaceService.markAttendance(sessionId, dto.userIds);
@@ -181,23 +192,23 @@ export class DirectorController {
   @ApiOperation({ summary: 'Create a plugNmeet video session room' })
   @ApiParam({
     name: 'sessionId',
-    description: 'ULID of the session',
-    example: '01HRGZ...',
+    description: 'Numeric session ID',
+    example: 1,
   })
   @ApiResponse({
     status: 201,
     description: 'Meeting room created successfully.',
   })
   @ApiResponse({ status: 404, description: 'Session not found.' })
-  createMeeting(@Param('sessionId') sessionId: string) {
+  createMeeting(@Param('sessionId', ParseIntIdPipe) sessionId: number) {
     return this.sessionsService.createMeeting(sessionId);
   }
 
   @Post('sessions/:sessionId/meeting/end')
   @ApiOperation({ summary: 'End a session meeting' })
-  @ApiParam({ name: 'sessionId', description: 'Session ID' })
+  @ApiParam({ name: 'sessionId', description: 'Numeric session ID' })
   @ApiResponse({ status: 200, description: 'Meeting ended successfully.' })
-  endSessionMeeting(@Param('sessionId') sessionId: string) {
+  endSessionMeeting(@Param('sessionId', ParseIntIdPipe) sessionId: number) {
     return this.sessionsService.endMeeting(sessionId);
   }
 }

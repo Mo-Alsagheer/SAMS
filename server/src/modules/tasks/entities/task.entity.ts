@@ -2,17 +2,24 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Session } from '../../sessions/entities/session.entity';
 
-@Entity('sessions')
-export class Session {
+@Entity('tasks')
+export class Task {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'int', nullable: true })
-  roadmapId: number | null;
+  @Column({ type: 'int' })
+  sessionId: number;
+
+  @ManyToOne(() => Session, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'sessionId' })
+  session: Session;
 
   @Column({ type: 'text' })
   title: string;
@@ -21,13 +28,7 @@ export class Session {
   description: string | null;
 
   @Column({ type: 'timestamp' })
-  scheduledAt: Date;
-
-  @Column({ type: 'text', nullable: true })
-  plugnmeetRoomId: string | null;
-
-  @Column({ type: 'boolean', default: false })
-  isRecorded: boolean;
+  dueDate: Date;
 
   @CreateDateColumn()
   createdAt: Date;

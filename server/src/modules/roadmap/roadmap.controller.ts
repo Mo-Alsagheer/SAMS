@@ -17,6 +17,7 @@ import { Role } from 'src/common/constants/role.enum';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
+import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
 
 @ApiTags('roadmap')
 @Controller('roadmap')
@@ -45,7 +46,7 @@ export class RoadmapController {
   @Roles(Role.DIRECTOR, Role.EXECUTIVE)
   @Patch(':committeeId')
   update(
-    @Param('committeeId') committeeId: string,
+    @Param('committeeId', ParseIntIdPipe) committeeId: number,
     @Body() updateRoadmapDto: UpdateRoadmapDto,
   ) {
     return this.roadmapService.updateByCommitteeId(
@@ -69,7 +70,7 @@ export class RoadmapController {
   @Patch(':id/assign/:committeeId')
   assignCommittee(
     @Param('id', ParseIntPipe) id: number,
-    @Param('committeeId') committeeId: string,
+    @Param('committeeId', ParseIntIdPipe) committeeId: number,
   ) {
     return this.roadmapService.assignCommittee(id, committeeId);
   }
