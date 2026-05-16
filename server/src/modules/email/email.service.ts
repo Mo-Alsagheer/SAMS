@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class EmailService {
@@ -8,7 +9,7 @@ export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private readonly fromAddress: string;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private readonly configService: ConfigService, private readonly audit: AuditLogService) {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
     this.resend = new Resend(apiKey);
     this.fromAddress =
@@ -92,8 +93,10 @@ export class EmailService {
         html,
       });
       this.logger.log(`Welcome email sent to ${to}`);
+      this.audit.log({ action: 'EmailService.sendWelcomeEmail', body: { to, role } }).catch(() => undefined);
     } catch (error) {
       this.logger.error(`Failed to send welcome email to ${to}`, error);
+      this.audit.log({ action: 'EmailService.sendWelcomeEmailFailed', body: { to, errorMessage: String(error) } }).catch(() => undefined);
       // Do not rethrow — email failure should not block the acceptance response
     }
   }

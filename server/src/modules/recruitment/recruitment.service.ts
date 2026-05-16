@@ -12,6 +12,7 @@ import {
 } from './entities/recruitment.entity';
 import { Committee } from '../committees/entities/committee.entity';
 import { Role } from '../../common/constants/role.enum';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class RecruitmentService {
@@ -20,6 +21,7 @@ export class RecruitmentService {
     private recruitmentRepository: Repository<RecruitmentProcess>,
     @InjectRepository(Committee)
     private committeeRepository: Repository<Committee>,
+    private readonly audit: AuditLogService,
   ) {}
 
   async openProcess(
@@ -27,6 +29,12 @@ export class RecruitmentService {
     committeeId: string,
     dto: OpenRecruitmentDto,
   ) {
+    this.audit
+      .log({
+        action: 'RecruitmentService.openProcess',
+        body: { executiveId, committeeId, dto },
+      })
+      .catch(() => undefined);
     if (dto.role === Role.EXECUTIVE) {
       throw new BadRequestException(
         'Committee recruitment processes can only be for MEMBER or DIRECTOR roles',
@@ -67,6 +75,12 @@ export class RecruitmentService {
   }
 
   async openGlobalProcess(executiveId: string, dto: OpenRecruitmentDto) {
+    this.audit
+      .log({
+        action: 'RecruitmentService.openGlobalProcess',
+        body: { executiveId, dto },
+      })
+      .catch(() => undefined);
     if (dto.role !== Role.EXECUTIVE) {
       throw new BadRequestException(
         'Global recruitment processes must be for the EXECUTIVE role',
@@ -101,6 +115,9 @@ export class RecruitmentService {
   }
 
   async closeProcess(id: string) {
+    this.audit
+      .log({ action: 'RecruitmentService.closeProcess', body: { id } })
+      .catch(() => undefined);
     const process = await this.recruitmentRepository.findOne({
       where: { id },
     });
@@ -118,10 +135,19 @@ export class RecruitmentService {
   }
 
   async findAll() {
+    this.audit
+      .log({ action: 'RecruitmentService.findAll' })
+      .catch(() => undefined);
     return this.recruitmentRepository.find();
   }
 
   async getStatusByCommittee(committeeId: string, role?: Role) {
+    this.audit
+      .log({
+        action: 'RecruitmentService.getStatusByCommittee',
+        body: { committeeId, role },
+      })
+      .catch(() => undefined);
     const committee = await this.committeeRepository.findOne({
       where: { id: committeeId },
     });
