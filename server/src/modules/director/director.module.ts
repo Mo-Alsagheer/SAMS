@@ -12,7 +12,12 @@ import { AiModule } from '../../integrations/ai-service/ai.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Application, User, RecruitmentProcess, Committee]),
+    TypeOrmModule.forFeature([
+      Application,
+      User,
+      RecruitmentProcess,
+      Committee,
+    ]),
     ConfigModule,
     EmailModule,
     AiModule,
