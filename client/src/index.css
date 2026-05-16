@@ -32,7 +32,6 @@
     --color-muted-foreground: var(--muted-foreground);
     --color-accent: var(--accent);
     --color-accent-foreground: var(--accent-foreground);
-    --color-destructive: var(--destructive);
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
@@ -60,14 +59,15 @@
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
     --primary:#3656f4c5;
-    --primary-foreground: oklch(0.985 0 0);
+    --primary-foreground: oklch(30.221% 0.00143 15.911);
     --secondary:#000755;
     --secondary-foreground: #ffffff;
     --muted: oklch(0.97 0 0);
     --muted-foreground: oklch(0.556 0 0);
     --accent: oklch(97.015% 0.00011 271.152);
     --accent-foreground: #2a3cff;
-    --destructive: oklch(0.577 0.245 27.325);
+    --destructive: oklch(0.6 0.24 27);
+    --destructive-foreground: oklch(0.99 0 0);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
@@ -88,8 +88,6 @@
     --success-foreground: oklch(0.99 0 0);
     --warning: oklch(0.78 0.16 75);
     --warning-foreground: oklch(0.2 0.05 60);
-    --destructive: oklch(0.6 0.24 27);
-    --destructive-foreground: oklch(0.99 0 0);
 }
 
 .dark {
@@ -100,14 +98,15 @@
     --popover: oklch(0.205 0 0);
     --popover-foreground: oklch(0.985 0 0);
     --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
+    --primary-foreground: oklch(92.191% 0.0001 271.152);
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
     --muted: oklch(0.269 0 0);
     --muted-foreground: oklch(0.708 0 0);
     --accent: oklch(0.269 0 0);
     --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
+    --destructive: oklch(0.65 0.22 27);
+    --destructive-foreground: oklch(0.97 0.01 250);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
@@ -128,8 +127,6 @@
     --success-foreground: oklch(0.14 0.025 260);
     --warning: oklch(0.78 0.16 75);
     --warning-foreground: oklch(0.14 0.025 260);
-    --destructive: oklch(0.65 0.22 27);
-    --destructive-foreground: oklch(0.97 0.01 250);
 }
 
 @layer base {
