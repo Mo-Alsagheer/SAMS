@@ -12,6 +12,7 @@ import { AiModule } from './integrations/ai-service/ai.module';
 import { QuizModule } from './modules/quiz/quiz.module';
 import { DirectorModule } from './modules/director/director.module';
 import { ExecutiveModule } from './modules/executive/executive.module';
+import { SessionsModule } from './modules/sessions/sessions.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ExecutiveModule } from './modules/executive/executive.module';
     QuizModule,
     DirectorModule,
     ExecutiveModule,
+    SessionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
