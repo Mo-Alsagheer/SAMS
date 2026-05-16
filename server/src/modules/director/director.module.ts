@@ -14,7 +14,12 @@ import { AttendaceModule } from '../attendace/attendace.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Application, User, RecruitmentProcess, Committee]),
+    TypeOrmModule.forFeature([
+      Application,
+      User,
+      RecruitmentProcess,
+      Committee,
+    ]),
     ConfigModule,
     EmailModule,
     AiModule,

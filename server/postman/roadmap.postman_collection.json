@@ -1,0 +1,109 @@
+{
+    "info": {
+        "name": "SAMS Roadmap API",
+        "_postman_id": "roadmap-collection",
+        "description": "Requests for centralized Roadmap endpoints. Write operations require JWT with DIRECTOR or EXECUTIVE role.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        { "key": "baseUrl", "value": "http://localhost:3000" },
+        { "key": "jwt", "value": "" },
+        { "key": "directorId", "value": "" },
+        { "key": "committeeId", "value": "" },
+        { "key": "roadmapId", "value": "" }
+    ],
+    "item": [{
+            "name": "Create Roadmap",
+            "request": {
+                "method": "POST",
+                "header": [
+                    { "key": "Content-Type", "value": "application/json" },
+                    { "key": "Authorization", "value": "Bearer {{jwt}}" }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"directorId\": \"{{directorId}}\",\n  \"title\": \"Intro to JS\",\n  \"description\": \"Basics of JavaScript\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/roadmap", "host": ["{{baseUrl}}"], "path": ["roadmap"] }
+            }
+        },
+        {
+            "name": "List Roadmaps",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/roadmap", "host": ["{{baseUrl}}"], "path": ["roadmap"] }
+            }
+        },
+        {
+            "name": "Get Roadmap",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/roadmap/{{roadmapId}}", "host": ["{{baseUrl}}"], "path": ["roadmap", "{{roadmapId}}"] }
+            }
+        },
+        {
+            "name": "Update Roadmap By Committee",
+            "request": {
+                "method": "PATCH",
+                "header": [
+                    { "key": "Content-Type", "value": "application/json" },
+                    { "key": "Authorization", "value": "Bearer {{jwt}}" }
+                ],
+                "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated committee roadmap\",\n  \"description\": \"Updated desc\"\n}" },
+                "url": { "raw": "{{baseUrl}}/roadmap/{{committeeId}}", "host": ["{{baseUrl}}"], "path": ["roadmap", "{{committeeId}}"] }
+            }
+        },
+        {
+            "name": "Update Roadmap By Id",
+            "request": {
+                "method": "PATCH",
+                "header": [
+                    { "key": "Content-Type", "value": "application/json" },
+                    { "key": "Authorization", "value": "Bearer {{jwt}}" }
+                ],
+                "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated by id\",\n  \"description\": \"Updated desc\"\n}" },
+                "url": { "raw": "{{baseUrl}}/roadmap/by-id/{{roadmapId}}", "host": ["{{baseUrl}}"], "path": ["roadmap", "by-id", "{{roadmapId}}"] }
+            }
+        },
+        {
+            "name": "Assign Committee To Roadmap",
+            "request": {
+                "method": "PATCH",
+                "header": [
+                    { "key": "Authorization", "value": "Bearer {{jwt}}" }
+                ],
+                "url": { "raw": "{{baseUrl}}/roadmap/{{roadmapId}}/assign/{{committeeId}}", "host": ["{{baseUrl}}"], "path": ["roadmap", "{{roadmapId}}", "assign", "{{committeeId}}"] }
+            }
+        },
+        {
+            "name": "Unassign Committee From Roadmap",
+            "request": {
+                "method": "PATCH",
+                "header": [
+                    { "key": "Authorization", "value": "Bearer {{jwt}}" }
+                ],
+                "url": { "raw": "{{baseUrl}}/roadmap/{{roadmapId}}/unassign", "host": ["{{baseUrl}}"], "path": ["roadmap", "{{roadmapId}}", "unassign"] }
+            }
+        },
+        {
+            "name": "Delete Roadmap",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    { "key": "Authorization", "value": "Bearer {{jwt}}" }
+                ],
+                "url": { "raw": "{{baseUrl}}/roadmap/{{roadmapId}}", "host": ["{{baseUrl}}"], "path": ["roadmap", "{{roadmapId}}"] }
+            }
+        },
+        {
+            "name": "Get Roadmap For Committee",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/committees/{{committeeId}}/roadmap", "host": ["{{baseUrl}}"], "path": ["committees", "{{committeeId}}", "roadmap"] }
+            }
+        }
+    ]
+}

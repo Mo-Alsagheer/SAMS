@@ -12,6 +12,7 @@ import { AiModule } from './integrations/ai-service/ai.module';
 import { QuizModule } from './modules/quiz/quiz.module';
 import { DirectorModule } from './modules/director/director.module';
 import { ExecutiveModule } from './modules/executive/executive.module';
+import { RoadmapModule } from './modules/roadmap/roadmap.module';
 import { SessionsModule } from './modules/sessions/sessions.module';
 import { AttendaceModule } from './modules/attendace/attendace.module';
 
@@ -37,6 +38,7 @@ import { AttendaceModule } from './modules/attendace/attendace.module';
     QuizModule,
     DirectorModule,
     ExecutiveModule,
+    RoadmapModule,
     SessionsModule,
     AttendaceModule,
   ],
