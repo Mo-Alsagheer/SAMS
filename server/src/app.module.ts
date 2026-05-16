@@ -13,6 +13,7 @@ import { QuizModule } from './modules/quiz/quiz.module';
 import { DirectorModule } from './modules/director/director.module';
 import { ExecutiveModule } from './modules/executive/executive.module';
 import { SessionsModule } from './modules/sessions/sessions.module';
+import { AttendaceModule } from './modules/attendace/attendace.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { SessionsModule } from './modules/sessions/sessions.module';
     DirectorModule,
     ExecutiveModule,
     SessionsModule,
+    AttendaceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

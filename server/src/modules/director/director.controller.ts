@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBody,
   ApiOperation,
@@ -10,16 +10,23 @@ import {
 } from '@nestjs/swagger';
 import { DirectorService } from './director.service';
 import { SessionsService } from '../sessions/sessions.service';
+import { AttendaceService } from '../attendace/attendace.service';
+import { MarkAttendanceDto } from '../attendace/dto/mark-attendance.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Role } from '../../common/constants/role.enum';
 
 @ApiTags('director')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.DIRECTOR)
 @Controller('director')
 export class DirectorController {
   constructor(
     private readonly directorService: DirectorService,
     private readonly sessionsService: SessionsService,
+    private readonly attendaceService: AttendaceService,
   ) {}
 
   @Get('applications')
@@ -141,6 +148,33 @@ export class DirectorController {
   @ApiResponse({ status: 404, description: 'Application not found.' })
   rejectPhase2(@Param('id') id: string) {
     return this.directorService.rejectPhase2(id);
+  }
+
+  @Get('sessions/:sessionId/attendance')
+  @ApiOperation({
+    summary: 'List committee members and attendance status for a session',
+  })
+  @ApiParam({ name: 'sessionId', description: 'ULID of the session' })
+  @ApiResponse({ status: 200, description: 'Attendance roster returned.' })
+  @ApiResponse({ status: 404, description: 'Session or roadmap not found.' })
+  getSessionAttendance(@Param('sessionId') sessionId: string) {
+    return this.attendaceService.getSessionAttendance(sessionId);
+  }
+
+  @Patch('sessions/:sessionId/attendance')
+  @ApiOperation({ summary: 'Mark attendance for committee members' })
+  @ApiParam({ name: 'sessionId', description: 'ULID of the session' })
+  @ApiBody({ type: MarkAttendanceDto })
+  @ApiResponse({ status: 200, description: 'Attendance updated.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid user IDs or session not linked to a roadmap.',
+  })
+  markSessionAttendance(
+    @Param('sessionId') sessionId: string,
+    @Body() dto: MarkAttendanceDto,
+  ) {
+    return this.attendaceService.markAttendance(sessionId, dto.userIds);
   }
 
   @Post('sessions/:sessionId/meeting/create')

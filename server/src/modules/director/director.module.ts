@@ -10,6 +10,7 @@ import { RecruitmentProcess } from '../recruitment/entities/recruitment.entity';
 import { Committee } from '../committees/entities/committee.entity';
 import { AiModule } from '../../integrations/ai-service/ai.module';
 import { SessionsModule } from '../sessions/sessions.module';
+import { AttendaceModule } from '../attendace/attendace.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { SessionsModule } from '../sessions/sessions.module';
     EmailModule,
     AiModule,
     SessionsModule,
+    AttendaceModule,
   ],
   controllers: [DirectorController],
   providers: [DirectorService],

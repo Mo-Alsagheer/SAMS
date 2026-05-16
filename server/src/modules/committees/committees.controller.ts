@@ -32,6 +32,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { ParseUlidPipe } from '../../common/pipes/parse-ulid.pipe';
 import { CommitteesService } from './committees.service';
+import { AttendaceService } from '../attendace/attendace.service';
 import { CloudinaryService } from '../../integrations/cloudinary/cloudinary.service';
 import { CreateCommitteeDto } from './dto/create-committee.dto';
 import { UpdateCommitteeDto } from './dto/update-committee.dto';
@@ -45,6 +46,7 @@ import { Public } from '../../common/decorators/public.decorator';
 export class CommitteesController {
   constructor(
     private readonly committeesService: CommitteesService,
+    private readonly attendaceService: AttendaceService,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
@@ -59,6 +61,28 @@ export class CommitteesController {
   })
   listAll() {
     return this.committeesService.listAll();
+  }
+
+  @Get(':id/scoreboard')
+  @Roles(Role.DIRECTOR)
+  @ApiOperation({ summary: 'View scores for all committee members' })
+  @ApiParam({
+    name: 'id',
+    description: 'ULID of the committee',
+    example: '01HRGZ...',
+  })
+  @ApiResponse({ status: 200, description: 'Committee scoreboard returned.' })
+  @ApiResponse({ status: 403, description: 'Director not assigned to this committee.' })
+  async getScoreboard(
+    @Param('id', new ParseUlidPipe()) id: string,
+    @Req() req: Request,
+  ) {
+    const user = req.user as AuthUser;
+    const committee = await this.committeesService.getById(id);
+    if (!committee.directorIDs.includes(user.id)) {
+      throw new ForbiddenException('Director not assigned to this committee');
+    }
+    return this.attendaceService.getCommitteeScoreboard(id);
   }
 
   @Get(':id')
