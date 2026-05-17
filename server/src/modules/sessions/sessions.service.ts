@@ -7,6 +7,7 @@ import { AuthUser } from '../auth/auth.types';
 import { Role } from '../../common/constants/role.enum';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class SessionsService {
@@ -14,9 +15,11 @@ export class SessionsService {
     @InjectRepository(Session)
     private readonly sessionsRepository: Repository<Session>,
     private readonly meetingsService: MeetingsService,
+    private readonly audit: AuditLogService,
   ) {}
 
   async create(createSessionDto: CreateSessionDto): Promise<Session> {
+    this.audit.log({ action: 'SessionsService.create', body: { createSessionDto } }).catch(() => undefined);
     const session = this.sessionsRepository.create({
       ...createSessionDto,
       isRecorded: createSessionDto.isRecorded ?? false,
@@ -29,12 +32,14 @@ export class SessionsService {
   }
 
   async update(id: string, updateSessionDto: UpdateSessionDto): Promise<Session> {
+    this.audit.log({ action: 'SessionsService.update', body: { id, updateSessionDto } }).catch(() => undefined);
     const session = await this.findById(id);
     Object.assign(session, updateSessionDto);
     return this.sessionsRepository.save(session);
   }
 
   async remove(id: string): Promise<void> {
+    this.audit.log({ action: 'SessionsService.remove', body: { id } }).catch(() => undefined);
     const session = await this.findById(id);
     await this.sessionsRepository.remove(session);
   }
@@ -48,6 +53,7 @@ export class SessionsService {
   }
 
   async getJoinToken(sessionId: string, user: AuthUser) {
+    this.audit.log({ action: 'SessionsService.getJoinToken', body: { sessionId, userId: user?.id } }).catch(() => undefined);
     const session = await this.findById(sessionId);
 
     const isDirector = user.role === Role.DIRECTOR || user.role === Role.EXECUTIVE;
@@ -79,6 +85,7 @@ export class SessionsService {
   }
 
   async createMeeting(sessionId: string) {
+    this.audit.log({ action: 'SessionsService.createMeeting', body: { sessionId } }).catch(() => undefined);
     const session = await this.findById(sessionId);
     if (session.plugnmeetRoomId) {
       const isActive = await this.meetingsService.isRoomActive(session.plugnmeetRoomId);
@@ -100,6 +107,7 @@ export class SessionsService {
   }
 
   async endMeeting(sessionId: string) {
+    this.audit.log({ action: 'SessionsService.endMeeting', body: { sessionId } }).catch(() => undefined);
     const session = await this.findById(sessionId);
     if (!session.plugnmeetRoomId) {
       throw new NotFoundException('Meeting room has not been created for this session yet');

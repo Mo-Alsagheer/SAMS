@@ -15,6 +15,7 @@ import {
 import { Committee } from '../committees/entities/committee.entity';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { AiService } from '../../integrations/ai-service/ai.service';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -26,9 +27,11 @@ export class ApplicationsService {
     @InjectRepository(Committee)
     private committeeRepository: Repository<Committee>,
     private aiService: AiService,
+    private readonly audit: AuditLogService,
   ) {}
 
   async createApplication(dto: CreateApplicationDto) {
+    this.audit.log({ action: 'ApplicationsService.createApplication', body: { dto } }).catch(() => undefined);
     if (dto.targetRole === Role.EXECUTIVE) {
       if (dto.committeeId) {
         throw new BadRequestException(
@@ -82,6 +85,7 @@ export class ApplicationsService {
   }
 
   async findOne(id: string) {
+    this.audit.log({ action: 'ApplicationsService.findOne', body: { id } }).catch(() => undefined);
     const application = await this.applicationRepository.findOne({
       where: { id },
     });
@@ -92,6 +96,7 @@ export class ApplicationsService {
   }
 
   async evaluatePendingApplications() {
+    this.audit.log({ action: 'ApplicationsService.evaluatePendingApplications' }).catch(() => undefined);
     const applications = await this.applicationRepository.find({
       where: { status: ApplicationStatus.SUBMITTED },
     });
