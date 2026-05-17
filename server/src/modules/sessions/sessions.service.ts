@@ -7,6 +7,7 @@ import { AuthUser } from '../auth/auth.types';
 import { Role } from '../../common/constants/role.enum';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class SessionsService {
@@ -14,9 +15,11 @@ export class SessionsService {
     @InjectRepository(Session)
     private readonly sessionsRepository: Repository<Session>,
     private readonly meetingsService: MeetingsService,
-  ) {}
+    private readonly audit: AuditLogService,
+  ) { }
 
   async create(createSessionDto: CreateSessionDto): Promise<Session> {
+    this.audit.log({ action: 'SessionsService.create', body: { createSessionDto } }).catch(() => undefined);
     const session = this.sessionsRepository.create({
       ...createSessionDto,
       scheduledAt: new Date(createSessionDto.scheduledAt),

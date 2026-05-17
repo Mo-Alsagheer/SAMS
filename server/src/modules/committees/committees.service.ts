@@ -9,6 +9,7 @@ import { CreateCommitteeDto } from './dto/create-committee.dto';
 import { UpdateCommitteeDto } from './dto/update-committee.dto';
 import { UpdateCommitteeByDirectorDto } from './dto/update-committee-by-director.dto';
 import { Committee } from './entities/committee.entity';
+import { AuditLogService } from '../audit-log/audit-log.service';
 import {
   RecruitmentProcess,
   RecruitmentStatus,
@@ -21,6 +22,7 @@ export class CommitteesService {
     private readonly committeesRepo: Repository<Committee>,
     @InjectRepository(RecruitmentProcess)
     private readonly recruitmentRepo: Repository<RecruitmentProcess>,
+    private readonly audit: AuditLogService,
   ) {}
 
   listAll(): Promise<Committee[]> {
@@ -40,6 +42,9 @@ export class CommitteesService {
     createdBy: number,
     imageUrl?: string,
   ): Promise<Committee> {
+    this.audit
+      .log({ action: 'CommitteesService.create', body: { dto, createdBy } })
+      .catch(() => undefined);
     const committee = this.committeesRepo.create({
       name: dto.name,
       description: dto.description ?? null,
@@ -99,7 +104,7 @@ export class CommitteesService {
         'Cannot delete committee with an open recruitment process',
       );
     }
-
+    this.audit.log({ action: 'CommitteesService.delete', body: { id } }).catch(() => undefined);
     await this.committeesRepo.remove(committee);
   }
 }

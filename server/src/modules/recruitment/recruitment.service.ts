@@ -12,6 +12,7 @@ import {
 } from './entities/recruitment.entity';
 import { Committee } from '../committees/entities/committee.entity';
 import { Role } from '../../common/constants/role.enum';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class RecruitmentService {
@@ -20,13 +21,20 @@ export class RecruitmentService {
     private recruitmentRepository: Repository<RecruitmentProcess>,
     @InjectRepository(Committee)
     private committeeRepository: Repository<Committee>,
-  ) {}
+    private readonly audit: AuditLogService,
+  ) { }
 
   async openProcess(
     executiveId: number,
     committeeId: number,
     dto: OpenRecruitmentDto,
   ) {
+    this.audit
+      .log({
+        action: 'RecruitmentService.openProcess',
+        body: { executiveId, committeeId, dto },
+      })
+      .catch(() => undefined);
     if (dto.role === Role.EXECUTIVE) {
       throw new BadRequestException(
         'Committee recruitment processes can only be for MEMBER or DIRECTOR roles',
@@ -118,6 +126,9 @@ export class RecruitmentService {
   }
 
   async findAll() {
+    this.audit
+      .log({ action: 'RecruitmentService.findAll' })
+      .catch(() => undefined);
     return this.recruitmentRepository.find();
   }
 

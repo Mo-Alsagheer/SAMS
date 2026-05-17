@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { AuditLogService } from '../audit-log/audit-log.service';
 import * as quizDataRaw from './data/committee_quiz.json';
 
 const quizData: any = (quizDataRaw as any).default || quizDataRaw;
@@ -10,8 +11,10 @@ interface AnswerPayload {
 
 @Injectable()
 export class QuizService {
+  constructor(private readonly audit: AuditLogService) {}
 
   getQuestionsByCategory(category: string) {
+    this.audit.log({ action: 'QuizService.getQuestionsByCategory', body: { category } }).catch(() => undefined);
     if (!quizData || !quizData.quizLists) {
       throw new BadRequestException('Quiz data not available');
     }
@@ -30,6 +33,7 @@ export class QuizService {
   }
 
   calculateRecommendation(category: string, answers: AnswerPayload[]) {
+    this.audit.log({ action: 'QuizService.calculateRecommendation', body: { category, answers } }).catch(() => undefined);
     const quizList = this.getQuestionsByCategory(category);
 
     const scores: Record<string, number> = {};

@@ -6,6 +6,9 @@ import { CommitteesModule } from './modules/committees/committees.module';
 import { UsersModule } from './modules/users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuditLogModule } from './modules/audit-log/audit-log.module';
+import { AuditLogInterceptor } from './modules/audit-log/audit-log.interceptor';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { RecruitmentModule } from './modules/recruitment/recruitment.module';
 import { ApplicationsModule } from './modules/applications/applications.module';
 import { AiModule } from './integrations/ai-service/ai.module';
@@ -43,8 +46,15 @@ import { TasksModule } from './modules/tasks/tasks.module';
     SessionsModule,
     AttendaceModule,
     TasksModule,
+    AuditLogModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditLogInterceptor,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule { }

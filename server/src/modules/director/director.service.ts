@@ -20,6 +20,7 @@ import {
 } from '../recruitment/entities/recruitment.entity';
 import { Committee } from '../committees/entities/committee.entity';
 import { AiService } from '../../integrations/ai-service/ai.service';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class DirectorService {
@@ -35,7 +36,8 @@ export class DirectorService {
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
     private readonly aiService: AiService,
-  ) {}
+    private readonly audit: AuditLogService,
+  ) { }
 
   async getApplications(committeeId: number, status?: string) {
     const query = this.applicationRepository

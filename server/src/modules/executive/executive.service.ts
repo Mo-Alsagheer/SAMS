@@ -20,6 +20,7 @@ import {
 } from '../recruitment/entities/recruitment.entity';
 import { Committee } from '../committees/entities/committee.entity';
 import { AiService } from '../../integrations/ai-service/ai.service';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class ExecutiveService {
@@ -35,7 +36,8 @@ export class ExecutiveService {
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
     private readonly aiService: AiService,
-  ) {}
+    private readonly audit: AuditLogService,
+  ) { }
 
   async getDirectorsByCommittee(committeeId: number): Promise<User[]> {
     return this.userRepository.find({
@@ -218,15 +220,15 @@ export class ExecutiveService {
     const recruitmentWhere =
       application.targetRole === Role.EXECUTIVE
         ? {
-            role: Role.EXECUTIVE,
-            committeeId: IsNull(),
-            status: RecruitmentStatus.OPEN,
-          }
+          role: Role.EXECUTIVE,
+          committeeId: IsNull(),
+          status: RecruitmentStatus.OPEN,
+        }
         : {
-            role: Role.DIRECTOR,
-            committeeId: application.committeeId,
-            status: RecruitmentStatus.OPEN,
-          };
+          role: Role.DIRECTOR,
+          committeeId: application.committeeId,
+          status: RecruitmentStatus.OPEN,
+        };
 
     const recruitment = await this.recruitmentRepository.findOne({
       where: recruitmentWhere,
