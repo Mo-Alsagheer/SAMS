@@ -13,6 +13,7 @@ import { TaskSubmission } from '../tasks/entities/task-submission.entity';
 import { Committee } from '../committees/entities/committee.entity';
 import { RoadmapService } from '../roadmap/roadmap.service';
 import { Role } from '../../common/constants/role.enum';
+import { AuditLogService } from '../audit-log/audit-log.service';
 export interface AttendanceMemberRow {
   userId: number;
   name: string;
@@ -50,6 +51,7 @@ export class AttendaceService {
     private readonly submissionRepo: Repository<TaskSubmission>,
     @InjectRepository(Committee)
     private readonly committeeRepo: Repository<Committee>,
+    private readonly audit: AuditLogService,
   ) {}
 
   private async resolveCommitteeIdForSession(sessionId: number): Promise<{
@@ -132,6 +134,14 @@ export class AttendaceService {
         `The following user IDs are not active members of this committee: ${invalid.join(', ')}`,
       );
     }
+
+    this.audit
+      .log({
+        action: 'AttendaceService.markAttendance',
+        userId: String(directorId),
+        body: { sessionId, membersData },
+      })
+      .catch(() => undefined);
 
     const existingRecords = await this.attendanceRepo.find({
       where: { sessionId, committeeId },

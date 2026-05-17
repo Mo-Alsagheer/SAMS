@@ -8,6 +8,7 @@ import { User } from '../users/entities/user.entity';
 import { TaskSubmission } from '../tasks/entities/task-submission.entity';
 import { Committee } from '../committees/entities/committee.entity';
 import { RoadmapModule } from '../roadmap/roadmap.module';
+import { AuditLogModule } from '../audit-log/audit-log.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RoadmapModule } from '../roadmap/roadmap.module';
       Committee,
     ]),
     RoadmapModule,
+    AuditLogModule,
   ],
   controllers: [AttendaceController],
   providers: [AttendaceService],
