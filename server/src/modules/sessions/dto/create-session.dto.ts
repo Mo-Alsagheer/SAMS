@@ -1,11 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsDateString,
+  IsInt,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateSessionDto {
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 1 })
   @IsOptional()
-  @IsString()
-  roadmapId?: string;
+  @Type(() => Number)
+  @IsInt()
+  roadmapId?: number;
 
   @ApiProperty()
   @IsString()

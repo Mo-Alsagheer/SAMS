@@ -1,12 +1,10 @@
 import {
-  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ulid } from 'ulid';
 import { Role } from '../../../common/constants/role.enum';
 
 export enum RecruitmentStatus {
@@ -16,18 +14,11 @@ export enum RecruitmentStatus {
 
 @Entity('recruitment_processes')
 export class RecruitmentProcess {
-  @PrimaryColumn({ type: 'text' })
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @BeforeInsert()
-  generateId() {
-    if (!this.id) {
-      this.id = ulid();
-    }
-  }
-
-  @Column({ type: 'text', nullable: true })
-  committeeId: string | null;
+  @Column({ type: 'int', nullable: true })
+  committeeId: number | null;
 
   @Column({ type: 'enum', enum: Role, default: Role.MEMBER })
   role: Role;
@@ -42,8 +33,8 @@ export class RecruitmentProcess {
   })
   status: RecruitmentStatus;
 
-  @Column({ type: 'text' })
-  createdBy: string;
+  @Column({ type: 'int', nullable: true })
+  createdBy: number | null;
 
   @Column({ type: 'timestamp', nullable: true })
   openedAt: Date | null;

@@ -22,11 +22,11 @@ export class RecruitmentService {
     @InjectRepository(Committee)
     private committeeRepository: Repository<Committee>,
     private readonly audit: AuditLogService,
-  ) {}
+  ) { }
 
   async openProcess(
-    executiveId: string,
-    committeeId: string,
+    executiveId: number,
+    committeeId: number,
     dto: OpenRecruitmentDto,
   ) {
     this.audit
@@ -74,13 +74,7 @@ export class RecruitmentService {
     return this.recruitmentRepository.save(process);
   }
 
-  async openGlobalProcess(executiveId: string, dto: OpenRecruitmentDto) {
-    this.audit
-      .log({
-        action: 'RecruitmentService.openGlobalProcess',
-        body: { executiveId, dto },
-      })
-      .catch(() => undefined);
+  async openGlobalProcess(executiveId: number, dto: OpenRecruitmentDto) {
     if (dto.role !== Role.EXECUTIVE) {
       throw new BadRequestException(
         'Global recruitment processes must be for the EXECUTIVE role',
@@ -114,10 +108,7 @@ export class RecruitmentService {
     return this.recruitmentRepository.save(process);
   }
 
-  async closeProcess(id: string) {
-    this.audit
-      .log({ action: 'RecruitmentService.closeProcess', body: { id } })
-      .catch(() => undefined);
+  async closeProcess(id: number) {
     const process = await this.recruitmentRepository.findOne({
       where: { id },
     });
@@ -141,13 +132,7 @@ export class RecruitmentService {
     return this.recruitmentRepository.find();
   }
 
-  async getStatusByCommittee(committeeId: string, role?: Role) {
-    this.audit
-      .log({
-        action: 'RecruitmentService.getStatusByCommittee',
-        body: { committeeId, role },
-      })
-      .catch(() => undefined);
+  async getStatusByCommittee(committeeId: number, role?: Role) {
     const committee = await this.committeeRepository.findOne({
       where: { id: committeeId },
     });

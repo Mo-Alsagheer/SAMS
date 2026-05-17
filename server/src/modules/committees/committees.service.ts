@@ -29,7 +29,7 @@ export class CommitteesService {
     return this.committeesRepo.find();
   }
 
-  async getById(id: string): Promise<Committee> {
+  async getById(id: number): Promise<Committee> {
     const committee = await this.committeesRepo.findOne({ where: { id } });
     if (!committee) {
       throw new NotFoundException('Committee not found');
@@ -39,7 +39,7 @@ export class CommitteesService {
 
   create(
     dto: CreateCommitteeDto,
-    createdBy: string,
+    createdBy: number,
     imageUrl?: string,
   ): Promise<Committee> {
     this.audit
@@ -60,7 +60,7 @@ export class CommitteesService {
   }
 
   async update(
-    id: string,
+    id: number,
     dto: UpdateCommitteeDto | UpdateCommitteeByDirectorDto,
     imageUrl?: string,
   ): Promise<Committee> {
@@ -83,13 +83,13 @@ export class CommitteesService {
     return this.committeesRepo.save(committee);
   }
 
-  async updateDescription(id: string, description: string): Promise<Committee> {
+  async updateDescription(id: number, description: string): Promise<Committee> {
     const committee = await this.getById(id);
     committee.description = description;
     return this.committeesRepo.save(committee);
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: number): Promise<void> {
     const committee = await this.getById(id);
 
     const openRecruitment = await this.recruitmentRepo.findOne({

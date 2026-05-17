@@ -60,18 +60,19 @@ export class UpdateCommitteeDto {
   planID?: string;
 
   @ApiPropertyOptional({
-    type: [String],
-    example: ['01HRGZ...'],
+    type: [Number],
+    example: [1, 2],
     description: 'List of director user IDs managing this committee',
   })
   @Transform(({ value }) => {
     if (value === '' || value == null) return undefined;
-    return Array.isArray(value) ? value : [value];
+    const arr = Array.isArray(value) ? value : [value];
+    return arr.map((v) => Number(v));
   })
   @IsArray()
-  @IsString({ each: true })
+  @IsInt({ each: true })
   @IsOptional()
-  directorIDs?: string[];
+  directorIDs?: number[];
 
   @ApiPropertyOptional({
     example: 15,

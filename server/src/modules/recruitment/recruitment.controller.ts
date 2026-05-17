@@ -26,6 +26,7 @@ import { Req } from '@nestjs/common';
 import { AuthUser } from '../auth/auth.types';
 import { OpenRecruitmentDto } from './dto/open-recruitment.dto';
 import { Public } from '../../common/decorators/public.decorator';
+import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
 
 @ApiTags('recruitment')
 @ApiBearerAuth()
@@ -72,7 +73,7 @@ export class RecruitmentController {
   @ApiResponse({ status: 404, description: 'Committee not found.' })
   @ApiBody({ type: OpenRecruitmentDto })
   openRecruitment(
-    @Param('committeeId') committeeId: string,
+    @Param('committeeId', ParseIntIdPipe) committeeId: number,
     @Body() dto: OpenRecruitmentDto,
     @Req() req: Request,
   ) {
@@ -96,7 +97,7 @@ export class RecruitmentController {
     status: 404,
     description: 'Active recruitment process not found.',
   })
-  closeRecruitment(@Param('id') id: string) {
+  closeRecruitment(@Param('id', ParseIntIdPipe) id: number) {
     return this.recruitmentService.closeProcess(id);
   }
 
@@ -150,7 +151,7 @@ export class RecruitmentController {
   })
   @ApiResponse({ status: 404, description: 'Committee not found.' })
   getCommitteeStatus(
-    @Param('committeeId') committeeId: string,
+    @Param('committeeId', ParseIntIdPipe) committeeId: number,
     @Query('role') role?: 'MEMBER' | 'DIRECTOR',
   ) {
     return this.recruitmentService.getStatusByCommittee(

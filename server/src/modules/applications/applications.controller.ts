@@ -2,6 +2,7 @@ import { Controller, Post, Get, Param, Body } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
+import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
 
 @ApiTags('applications')
 @Controller('applications')
@@ -42,12 +43,12 @@ export class ApplicationsController {
   @ApiOperation({ summary: 'Get a specific application' })
   @ApiParam({
     name: 'id',
-    description: 'ULID of the application',
-    example: '01HRGZ...',
+    description: 'Numeric application ID',
+    example: 1,
   })
   @ApiResponse({ status: 200, description: 'Application details retrieved.' })
   @ApiResponse({ status: 404, description: 'Application not found.' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntIdPipe) id: number) {
     return this.applicationsService.findOne(id);
   }
 }

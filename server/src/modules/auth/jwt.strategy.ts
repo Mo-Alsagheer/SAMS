@@ -4,10 +4,10 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthUser } from './auth.types';
 
 interface JwtPayload {
-  sub: string;
+  sub: number;
   email: string;
   role: string;
-  committeeId?: string;
+  committeeId?: number | null;
   name: string;
 }
 
@@ -26,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       id: payload.sub,
       email: payload.email,
       role: payload.role as AuthUser['role'],
-      committeeId: payload.committeeId,
+      committeeId: payload.committeeId ?? null,
       name: payload.name,
     };
   }

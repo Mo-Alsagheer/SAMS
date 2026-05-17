@@ -1,6 +1,8 @@
+import { Type } from 'class-transformer';
 import {
   IsEmail,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -11,12 +13,14 @@ import { Role } from '../../../common/constants/role.enum';
 
 export class CreateApplicationDto {
   @ApiPropertyOptional({
-    example: '01HRGZ...',
-    description: 'The ULID of the committee you are applying to (omit for globally available roles like EXECUTIVE)',
+    example: 1,
+    description:
+      'Numeric committee ID (omit for globally available roles like EXECUTIVE)',
   })
-  @IsString()
   @IsOptional()
-  committeeId?: string;
+  @Type(() => Number)
+  @IsInt()
+  committeeId?: number;
 
   @ApiProperty({
     example: 'User Name',

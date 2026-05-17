@@ -6,7 +6,9 @@ import {
   Post,
   Query,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
+import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
 import {
   ApiTags,
   ApiOperation,
@@ -37,7 +39,7 @@ export class ExecutiveController {
     status: 403,
     description: 'Forbidden. Requires Executive role.',
   })
-  getDirectorsByCommittee(@Param('committeeId') committeeId: string) {
+  getDirectorsByCommittee(@Param('committeeId', ParseIntIdPipe) committeeId: number) {
     return this.executiveService.getDirectorsByCommittee(committeeId);
   }
 
@@ -48,7 +50,7 @@ export class ExecutiveController {
     status: 403,
     description: 'Forbidden. Requires Executive role.',
   })
-  getMembersByCommittee(@Param('committeeId') committeeId: string) {
+  getMembersByCommittee(@Param('committeeId', ParseIntIdPipe) committeeId: number) {
     return this.executiveService.getMembersByCommittee(committeeId);
   }
 
@@ -57,8 +59,8 @@ export class ExecutiveController {
   @ApiQuery({
     name: 'committeeId',
     required: false,
-    description: 'ULID of the committee (omit to fetch EXECUTIVE applications)',
-    example: '01HRGZ...',
+    description: 'Numeric committee ID (omit to fetch EXECUTIVE applications)',
+    example: 1,
   })
   @ApiQuery({
     name: 'status',
@@ -71,7 +73,8 @@ export class ExecutiveController {
     description: 'List of applications for the specified committee or role.',
   })
   getApplications(
-    @Query('committeeId') committeeId?: string,
+    @Query('committeeId', new ParseIntPipe({ optional: true }))
+    committeeId?: number,
     @Query('status') status?: string,
   ) {
     return this.executiveService.getApplications(committeeId, status);
@@ -89,7 +92,7 @@ export class ExecutiveController {
     description: 'Application accepted for Phase 1.',
   })
   @ApiResponse({ status: 404, description: 'Application not found.' })
-  acceptPhase1(@Param('id') id: string) {
+  acceptPhase1(@Param('id', ParseIntIdPipe) id: number) {
     return this.executiveService.acceptPhase1(id);
   }
 
@@ -105,7 +108,7 @@ export class ExecutiveController {
     description: 'Application rejected during Phase 1.',
   })
   @ApiResponse({ status: 404, description: 'Application not found.' })
-  rejectPhase1(@Param('id') id: string) {
+  rejectPhase1(@Param('id', ParseIntIdPipe) id: number) {
     return this.executiveService.rejectPhase1(id);
   }
 
@@ -137,7 +140,7 @@ export class ExecutiveController {
     description: 'Interview scheduled successfully.',
   })
   @ApiResponse({ status: 404, description: 'Application not found.' })
-  scheduleInterview(@Param('id') id: string, @Body() payload: any) {
+  scheduleInterview(@Param('id', ParseIntIdPipe) id: number, @Body() payload: any) {
     return this.executiveService.scheduleInterview(id, payload);
   }
 
@@ -153,7 +156,7 @@ export class ExecutiveController {
     description: 'Application accepted for Phase 2.',
   })
   @ApiResponse({ status: 404, description: 'Application not found.' })
-  acceptPhase2(@Param('id') id: string) {
+  acceptPhase2(@Param('id', ParseIntIdPipe) id: number) {
     return this.executiveService.acceptPhase2(id);
   }
 
@@ -169,7 +172,7 @@ export class ExecutiveController {
     description: 'Application rejected during Phase 2.',
   })
   @ApiResponse({ status: 404, description: 'Application not found.' })
-  rejectPhase2(@Param('id') id: string) {
+  rejectPhase2(@Param('id', ParseIntIdPipe) id: number) {
     return this.executiveService.rejectPhase2(id);
   }
 }

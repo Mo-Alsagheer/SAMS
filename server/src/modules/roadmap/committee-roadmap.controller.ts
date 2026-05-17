@@ -1,5 +1,6 @@
 import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { RoadmapService } from './roadmap.service';
+import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
 
 @Controller('committees')
 export class CommitteeRoadmapController {
@@ -10,7 +11,7 @@ export class CommitteeRoadmapController {
 	 * Purpose: expose the committee-scoped public read endpoint.
 	 */
 	@Get(':committeeId/roadmap')
-	findByCommitteeId(@Param('committeeId') committeeId: string) {
+	findByCommitteeId(@Param('committeeId', ParseIntIdPipe) committeeId: number) {
 		return this.roadmapService.findByCommitteeId(committeeId);
 	}
 

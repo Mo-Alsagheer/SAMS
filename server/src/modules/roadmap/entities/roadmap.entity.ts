@@ -11,11 +11,11 @@ export class Roadmap {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'text', nullable: true })
-  directorId: string | null;
+  @Column({ type: 'int', nullable: true })
+  directorId: number | null;
 
-  @Column({ type: 'text', nullable: true })
-  committeeId: string | null;
+  @Column({ type: 'int', nullable: true })
+  committeeId: number | null;
 
   @Column({ length: 300 })
   title: string;

@@ -50,14 +50,14 @@ export class CreateCommitteeDto {
   planID?: string;
 
   @ApiPropertyOptional({
-    type: [String],
-    example: ['01HRGZ...', '01HRGZ...'],
+    type: [Number],
+    example: [1, 2],
     description: 'List of director user IDs managing this committee',
   })
   @IsArray()
-  @IsString({ each: true })
+  @IsInt({ each: true })
   @IsOptional()
-  directorIDs?: string[];
+  directorIDs?: number[];
 
   @ApiPropertyOptional({
     example: 10,

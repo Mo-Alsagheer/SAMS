@@ -17,4 +17,4 @@ import { AuditLogModule } from '../audit-log/audit-log.module';
   providers: [CommitteesService],
   exports: [CommitteesService],
 })
-export class CommitteesModule {}
+export class CommitteesModule { }

@@ -37,12 +37,9 @@ export class DirectorService {
     private readonly configService: ConfigService,
     private readonly aiService: AiService,
     private readonly audit: AuditLogService,
-  ) {}
+  ) { }
 
-  async getApplications(committeeId: string, status?: string) {
-    this.audit
-      .log({ action: 'DirectorService.getApplications', body: { committeeId, status } })
-      .catch(() => undefined);
+  async getApplications(committeeId: number, status?: string) {
     const query = this.applicationRepository
       .createQueryBuilder('application')
       .where('application.committeeId = :committeeId', { committeeId })
@@ -107,10 +104,7 @@ export class DirectorService {
     return applications;
   }
 
-  async acceptPhase1(applicationId: string) {
-    this.audit
-      .log({ action: 'DirectorService.acceptPhase1', body: { applicationId } })
-      .catch(() => undefined);
+  async acceptPhase1(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: { id: applicationId, targetRole: Role.MEMBER },
     });
@@ -121,10 +115,7 @@ export class DirectorService {
     return this.applicationRepository.save(application);
   }
 
-  async rejectPhase1(applicationId: string) {
-    this.audit
-      .log({ action: 'DirectorService.rejectPhase1', body: { applicationId } })
-      .catch(() => undefined);
+  async rejectPhase1(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: { id: applicationId, targetRole: Role.MEMBER },
     });
@@ -135,10 +126,7 @@ export class DirectorService {
     return this.applicationRepository.save(application);
   }
 
-  async scheduleInterview(applicationId: string, payload: any) {
-    this.audit
-      .log({ action: 'DirectorService.scheduleInterview', body: { applicationId, payload } })
-      .catch(() => undefined);
+  async scheduleInterview(applicationId: number, payload: any) {
     const application = await this.applicationRepository.findOne({
       where: { id: applicationId, targetRole: Role.MEMBER },
     });
@@ -150,10 +138,7 @@ export class DirectorService {
     return { ...application, ...payload };
   }
 
-  async acceptPhase2(applicationId: string) {
-    this.audit
-      .log({ action: 'DirectorService.acceptPhase2', body: { applicationId } })
-      .catch(() => undefined);
+  async acceptPhase2(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: { id: applicationId, targetRole: Role.MEMBER },
     });
@@ -229,10 +214,7 @@ export class DirectorService {
     return application;
   }
 
-  async rejectPhase2(applicationId: string) {
-    this.audit
-      .log({ action: 'DirectorService.rejectPhase2', body: { applicationId } })
-      .catch(() => undefined);
+  async rejectPhase2(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: { id: applicationId, targetRole: Role.MEMBER },
     });

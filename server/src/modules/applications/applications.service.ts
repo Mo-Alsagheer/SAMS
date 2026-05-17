@@ -5,7 +5,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull } from 'typeorm';
+import { Repository, IsNull, In } from 'typeorm';
 import { Role } from '../../common/constants/role.enum';
 import { Application, ApplicationStatus } from './entities/application.entity';
 import {
@@ -28,7 +28,7 @@ export class ApplicationsService {
     private committeeRepository: Repository<Committee>,
     private aiService: AiService,
     private readonly audit: AuditLogService,
-  ) {}
+  ) { }
 
   async createApplication(dto: CreateApplicationDto) {
     this.audit.log({ action: 'ApplicationsService.createApplication', body: { dto } }).catch(() => undefined);
@@ -84,7 +84,7 @@ export class ApplicationsService {
     return this.applicationRepository.save(application);
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     this.audit.log({ action: 'ApplicationsService.findOne', body: { id } }).catch(() => undefined);
     const application = await this.applicationRepository.findOne({
       where: { id },
@@ -105,7 +105,9 @@ export class ApplicationsService {
     const committeeIds = [
       ...new Set(applications.map((app) => app.committeeId).filter((id) => id)),
     ];
-    const committees = await this.committeeRepository.findByIds(committeeIds);
+    const committees = await this.committeeRepository.findBy({
+      id: In(committeeIds as number[]),
+    });
     const committeeMap = new Map(committees.map((c) => [c.id, c]));
 
     const cvsToEvaluate = applications

@@ -1,14 +1,12 @@
 import {
-  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ulid } from 'ulid';
 import { Role } from '../../../common/constants/role.enum';
 import { Committee } from '../../committees/entities/committee.entity';
 
@@ -20,15 +18,8 @@ export enum UserStatus {
 
 @Entity('users')
 export class User {
-  @PrimaryColumn({ type: 'text' })
-  id: string;
-
-  @BeforeInsert()
-  generateId() {
-    if (!this.id) {
-      this.id = ulid();
-    }
-  }
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ type: 'text' })
   name: string;
@@ -42,8 +33,8 @@ export class User {
   @Column({ type: 'enum', enum: Role, default: Role.MEMBER })
   role: Role;
 
-  @Column({ type: 'text', nullable: true })
-  committeeId: string | null;
+  @Column({ type: 'int', nullable: true })
+  committeeId: number | null;
 
   @ManyToOne(() => Committee, { nullable: true })
   @JoinColumn({ name: 'committeeId' })

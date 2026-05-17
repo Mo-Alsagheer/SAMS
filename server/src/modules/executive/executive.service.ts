@@ -37,10 +37,9 @@ export class ExecutiveService {
     private readonly configService: ConfigService,
     private readonly aiService: AiService,
     private readonly audit: AuditLogService,
-  ) {}
+  ) { }
 
-  async getDirectorsByCommittee(committeeId: string): Promise<User[]> {
-    this.audit.log({ action: 'ExecutiveService.getDirectorsByCommittee', body: { committeeId } }).catch(() => undefined);
+  async getDirectorsByCommittee(committeeId: number): Promise<User[]> {
     return this.userRepository.find({
       where: {
         committeeId: committeeId,
@@ -60,8 +59,7 @@ export class ExecutiveService {
     });
   }
 
-  async getMembersByCommittee(committeeId: string): Promise<User[]> {
-    this.audit.log({ action: 'ExecutiveService.getMembersByCommittee', body: { committeeId } }).catch(() => undefined);
+  async getMembersByCommittee(committeeId: number): Promise<User[]> {
     return this.userRepository.find({
       where: {
         committeeId: committeeId,
@@ -81,8 +79,7 @@ export class ExecutiveService {
     });
   }
 
-  async getApplications(committeeId?: string, status?: string) {
-    this.audit.log({ action: 'ExecutiveService.getApplications', body: { committeeId, status } }).catch(() => undefined);
+  async getApplications(committeeId?: number, status?: string) {
     const query = this.applicationRepository.createQueryBuilder('application');
 
     if (committeeId) {
@@ -115,7 +112,9 @@ export class ExecutiveService {
     ];
     let committeeMap = new Map();
     if (committeeIds.length > 0) {
-      const committees = await this.committeeRepository.findByIds(committeeIds);
+      const committees = await this.committeeRepository.findBy({
+        id: In(committeeIds as number[]),
+      });
       committeeMap = new Map(committees.map((c) => [c.id, c]));
     }
 
@@ -166,8 +165,7 @@ export class ExecutiveService {
     return applications;
   }
 
-  async acceptPhase1(applicationId: string) {
-    this.audit.log({ action: 'ExecutiveService.acceptPhase1', body: { applicationId } }).catch(() => undefined);
+  async acceptPhase1(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: {
         id: applicationId,
@@ -181,8 +179,7 @@ export class ExecutiveService {
     return this.applicationRepository.save(application);
   }
 
-  async rejectPhase1(applicationId: string) {
-    this.audit.log({ action: 'ExecutiveService.rejectPhase1', body: { applicationId } }).catch(() => undefined);
+  async rejectPhase1(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: {
         id: applicationId,
@@ -196,8 +193,7 @@ export class ExecutiveService {
     return this.applicationRepository.save(application);
   }
 
-  async scheduleInterview(applicationId: string, payload: any) {
-    this.audit.log({ action: 'ExecutiveService.scheduleInterview', body: { applicationId, payload } }).catch(() => undefined);
+  async scheduleInterview(applicationId: number, payload: any) {
     const application = await this.applicationRepository.findOne({
       where: { id: applicationId },
     });
@@ -209,8 +205,7 @@ export class ExecutiveService {
     return { ...application, ...payload };
   }
 
-  async acceptPhase2(applicationId: string) {
-    this.audit.log({ action: 'ExecutiveService.acceptPhase2', body: { applicationId } }).catch(() => undefined);
+  async acceptPhase2(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: {
         id: applicationId,
@@ -225,15 +220,15 @@ export class ExecutiveService {
     const recruitmentWhere =
       application.targetRole === Role.EXECUTIVE
         ? {
-            role: Role.EXECUTIVE,
-            committeeId: IsNull(),
-            status: RecruitmentStatus.OPEN,
-          }
+          role: Role.EXECUTIVE,
+          committeeId: IsNull(),
+          status: RecruitmentStatus.OPEN,
+        }
         : {
-            role: Role.DIRECTOR,
-            committeeId: application.committeeId,
-            status: RecruitmentStatus.OPEN,
-          };
+          role: Role.DIRECTOR,
+          committeeId: application.committeeId,
+          status: RecruitmentStatus.OPEN,
+        };
 
     const recruitment = await this.recruitmentRepository.findOne({
       where: recruitmentWhere,
@@ -306,8 +301,7 @@ export class ExecutiveService {
     return application;
   }
 
-  async rejectPhase2(applicationId: string) {
-    this.audit.log({ action: 'ExecutiveService.rejectPhase2', body: { applicationId } }).catch(() => undefined);
+  async rejectPhase2(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: {
         id: applicationId,

@@ -1,28 +1,29 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateRoadmapDto {
-	@ApiProperty({
-		description: 'ULID of the director creating this roadmap',
-		example: '01KJZDXEV4YDQJ0JQP11GDRHW2',
-	})
-	@IsString()
-	@IsNotEmpty()
-	directorId: string;
+  @ApiProperty({
+    description: 'Numeric ID of the director creating this roadmap',
+    example: 1,
+  })
+  @Type(() => Number)
+  @IsInt()
+  directorId: number;
 
-	@ApiProperty({
-		description: 'Roadmap title',
-		example: 'Intro to JavaScript',
-	})
-	@IsString()
-	@IsNotEmpty()
-	title: string;
+  @ApiProperty({
+    description: 'Roadmap title',
+    example: 'Intro to JavaScript',
+  })
+  @IsString()
+  @IsNotEmpty()
+  title: string;
 
-	@ApiPropertyOptional({
-		description: 'Optional roadmap description',
-		example: 'Fundamentals and practical sessions',
-	})
-	@IsString()
-	@IsOptional()
-	description?: string;
+  @ApiPropertyOptional({
+    description: 'Optional roadmap description',
+    example: 'Fundamentals and practical sessions',
+  })
+  @IsString()
+  @IsOptional()
+  description?: string;
 }
