@@ -1,27 +1,15 @@
 import { Controller, Get, Req, UseGuards, NotFoundException } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { AttendaceService } from '../attendace/attendace.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Request } from 'express';
-import { AuthUser } from '../auth/auth.types';
 
 @ApiTags('users')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly attendaceService: AttendaceService,
-  ) {}
-
-  @Get('me/score')
-  @ApiOperation({ summary: 'Get total score (attendance + tasks)' })
-  @ApiResponse({ status: 200, description: 'Score breakdown returned.' })
-  getMyScore(@Req() req: Request & { user: AuthUser }) {
-    return this.attendaceService.getUserScore(req.user.id);
-  }
+  constructor(private readonly usersService: UsersService) {}
 
   @Get('profile')
   @ApiOperation({ summary: 'Get current logged-in user profile' })

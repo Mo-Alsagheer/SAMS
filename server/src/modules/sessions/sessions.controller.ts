@@ -29,7 +29,7 @@ import { UpdateSessionDto } from './dto/update-session.dto';
 @Controller('sessions')
 @UseGuards(JwtAuthGuard)
 export class SessionsController {
-  constructor(private readonly sessionsService: SessionsService) {}
+  constructor(private readonly sessionsService: SessionsService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create a new session' })

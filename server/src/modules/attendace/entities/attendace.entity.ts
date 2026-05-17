@@ -1,16 +1,18 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   Unique,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Committee } from '../../committees/entities/committee.entity';
 import { Session } from '../../sessions/entities/session.entity';
 import { User } from '../../users/entities/user.entity';
 
-/** One row per member per session; the same user may have many rows across sessions. */
+/** One row per member per session; attended is set by the director after each session. */
 @Entity('attendance')
 @Unique(['sessionId', 'userId'])
 export class Attendace {
@@ -38,6 +40,22 @@ export class Attendace {
   @JoinColumn({ name: 'committeeId' })
   committee: Committee;
 
+  /** Legacy column; 5 when attended, 0 when marked absent. Prefer `attended` for scoring. */
+  @Column({ type: 'int', nullable: true })
+  score: number | null;
+
   @Column({ type: 'boolean', default: false })
   attended: boolean;
+
+  @Column({ type: 'int', nullable: true })
+  createdBy: number | null;
+
+  @Column({ type: 'int', nullable: true })
+  updatedBy: number | null;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

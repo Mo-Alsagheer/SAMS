@@ -33,8 +33,8 @@ export class RecruitmentProcess {
   })
   status: RecruitmentStatus;
 
-  @Column({ type: 'int' })
-  createdBy: number;
+  @Column({ type: 'int', nullable: true })
+  createdBy: number | null;
 
   @Column({ type: 'timestamp', nullable: true })
   openedAt: Date | null;

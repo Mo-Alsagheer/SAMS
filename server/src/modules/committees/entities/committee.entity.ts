@@ -36,8 +36,8 @@ export class Committee {
   @Column({ type: 'text', nullable: true })
   imageUrl: string | null;
 
-  @Column({ type: 'int' })
-  createdBy: number;
+  @Column({ type: 'int', nullable: true })
+  createdBy: number | null;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -1,0 +1,155 @@
+{
+  "info": {
+    "name": "SAMS Attendance API",
+    "description": "Postman collection to test the attendance and scoring endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Sessions",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/sessions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "sessions"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Session Attendance (Director)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/director/sessions/1/attendance",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "director",
+            "sessions",
+            "1",
+            "attendance"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Mark Session Attendance (Director)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"members\": [\n    {\n      \"userId\": 1,\n      \"score\": 5\n    },\n    {\n      \"userId\": 2,\n      \"score\": 0\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/director/sessions/1/attendance",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "director",
+            "sessions",
+            "1",
+            "attendance"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get My Score (User)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/me/score",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "me",
+            "score"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Committee Scoreboard (Director)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/committees/1/scoreboard",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "committees",
+            "1",
+            "scoreboard"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "YOUR_JWT_TOKEN",
+      "type": "string"
+    }
+  ]
+}

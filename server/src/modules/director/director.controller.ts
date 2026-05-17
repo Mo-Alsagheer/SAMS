@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Param,
-  Patch,
   Post,
   Query,
   UseGuards,
@@ -20,8 +19,6 @@ import {
 } from '@nestjs/swagger';
 import { DirectorService } from './director.service';
 import { SessionsService } from '../sessions/sessions.service';
-import { AttendaceService } from '../attendace/attendace.service';
-import { MarkAttendanceDto } from '../attendace/dto/mark-attendance.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -37,7 +34,6 @@ export class DirectorController {
   constructor(
     private readonly directorService: DirectorService,
     private readonly sessionsService: SessionsService,
-    private readonly attendaceService: AttendaceService,
   ) {}
 
   @Get('applications')
@@ -159,33 +155,6 @@ export class DirectorController {
   @ApiResponse({ status: 404, description: 'Application not found.' })
   rejectPhase2(@Param('id', ParseIntIdPipe) id: number) {
     return this.directorService.rejectPhase2(id);
-  }
-
-  @Get('sessions/:sessionId/attendance')
-  @ApiOperation({
-    summary: 'List committee members and attendance status for a session',
-  })
-  @ApiParam({ name: 'sessionId', description: 'Numeric session ID' })
-  @ApiResponse({ status: 200, description: 'Attendance roster returned.' })
-  @ApiResponse({ status: 404, description: 'Session or roadmap not found.' })
-  getSessionAttendance(@Param('sessionId', ParseIntIdPipe) sessionId: number) {
-    return this.attendaceService.getSessionAttendance(sessionId);
-  }
-
-  @Patch('sessions/:sessionId/attendance')
-  @ApiOperation({ summary: 'Mark attendance for committee members' })
-  @ApiParam({ name: 'sessionId', description: 'Numeric session ID' })
-  @ApiBody({ type: MarkAttendanceDto })
-  @ApiResponse({ status: 200, description: 'Attendance updated.' })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid user IDs or session not linked to a roadmap.',
-  })
-  markSessionAttendance(
-    @Param('sessionId', ParseIntIdPipe) sessionId: number,
-    @Body() dto: MarkAttendanceDto,
-  ) {
-    return this.attendaceService.markAttendance(sessionId, dto.userIds);
   }
 
   @Post('sessions/:sessionId/meeting/create')
