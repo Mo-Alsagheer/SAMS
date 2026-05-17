@@ -174,40 +174,27 @@ export class DirectorService {
     application.status = ApplicationStatus.PHASE2_ACCEPTED;
     await this.applicationRepository.save(application);
 
-    // Generate a random temporary password
-    const plainPassword = this.generatePassword();
-    const hashedPassword = await bcrypt.hash(plainPassword, 10);
-
-    // Check if a User account already exists
+    // The user already exists because they signed up as APPLICANT
     let user = await this.userRepository.findOne({
-      where: { email: application.email },
+      where: { id: application.userId },
     });
     if (user) {
-      user.name = application.name;
-      user.phone = application.phone;
-      user.password = hashedPassword;
       user.role = Role.MEMBER;
       user.committeeId = application.committeeId;
+      await this.userRepository.save(user);
     } else {
-      user = this.userRepository.create({
-        name: application.name,
-        email: application.email,
-        phone: application.phone,
-        password: hashedPassword,
-        role: Role.MEMBER,
-        committeeId: application.committeeId,
-      });
+      // Fallback
+      throw new BadRequestException('Applicant user account not found');
     }
-    await this.userRepository.save(user);
 
-    // Send welcome email with credentials
+    // Send welcome email without a new password
     const loginUrl =
       this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:5173';
     await this.emailService.sendWelcomeEmail({
       to: application.email,
       name: application.name,
       role: 'Member',
-      password: plainPassword,
+      password: 'Your existing account password',
       loginUrl,
     });
 

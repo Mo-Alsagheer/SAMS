@@ -10,6 +10,7 @@ import { TaskSubmission } from './entities/task-submission.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { SubmitTaskDto } from './dto/submit-task.dto';
 import { SessionsService } from '../sessions/sessions.service';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class TasksService {
@@ -19,6 +20,7 @@ export class TasksService {
     @InjectRepository(TaskSubmission)
     private readonly submissionRepo: Repository<TaskSubmission>,
     private readonly sessionsService: SessionsService,
+    private readonly audit: AuditLogService,
   ) {}
 
   async createForSession(sessionId: number, dto: CreateTaskDto): Promise<Task> {
@@ -30,6 +32,14 @@ export class TasksService {
       description: dto.description ?? null,
       dueDate: new Date(dto.dueDate),
     });
+    
+    this.audit
+      .log({
+        action: 'TasksService.createForSession',
+        body: { sessionId, dto },
+      })
+      .catch(() => undefined);
+
     return this.taskRepo.save(task);
   }
 
@@ -69,6 +79,15 @@ export class TasksService {
     if (existing) {
       existing.content = dto.content?.trim() ?? null;
       existing.fileUrl = dto.fileUrl?.trim() ?? null;
+      
+      this.audit
+        .log({
+          action: 'TasksService.updateSubmission',
+          userId: String(userId),
+          body: { taskId, dto },
+        })
+        .catch(() => undefined);
+        
       return this.submissionRepo.save(existing);
     }
 
@@ -79,6 +98,15 @@ export class TasksService {
       fileUrl: dto.fileUrl?.trim() ?? null,
       score: null,
     });
+    
+    this.audit
+      .log({
+        action: 'TasksService.createSubmission',
+        userId: String(userId),
+        body: { taskId, dto },
+      })
+      .catch(() => undefined);
+
     return this.submissionRepo.save(submission);
   }
 
@@ -103,9 +131,19 @@ export class TasksService {
   async gradeSubmission(
     submissionId: number,
     score: number,
+    directorId: number,
   ): Promise<TaskSubmission> {
     const submission = await this.findSubmissionById(submissionId);
     submission.score = score;
+    
+    this.audit
+      .log({
+        action: 'TasksService.gradeSubmission',
+        userId: String(directorId),
+        body: { submissionId, score },
+      })
+      .catch(() => undefined);
+
     return this.submissionRepo.save(submission);
   }
 }

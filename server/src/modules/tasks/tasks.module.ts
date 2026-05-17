@@ -6,11 +6,15 @@ import { TasksService } from './tasks.service';
 import { TasksController } from './tasks.controller';
 import { DirectorTasksController } from './director-tasks.controller';
 import { SessionsModule } from '../sessions/sessions.module';
+import { CloudinaryModule } from '../../integrations/cloudinary/cloudinary.module';
+import { AuditLogModule } from '../audit-log/audit-log.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Task, TaskSubmission]),
     SessionsModule,
+    CloudinaryModule,
+    AuditLogModule,
   ],
   controllers: [TasksController, DirectorTasksController],
   providers: [TasksService],

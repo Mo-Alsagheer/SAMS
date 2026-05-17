@@ -2,6 +2,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -17,10 +19,19 @@ export enum ApplicationStatus {
   PHASE2_REJECTED = 'PHASE2_REJECTED',
 }
 
+import { User } from '../../users/entities/user.entity';
+
 @Entity('applications')
 export class Application {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ type: 'int', nullable: true })
+  userId: number | null;
+
+  @ManyToOne(() => User, { onDelete: 'CASCADE', nullable: true })
+  @JoinColumn({ name: 'userId' })
+  user: User | null;
 
   @Column({ type: 'int', nullable: true })
   committeeId: number | null;

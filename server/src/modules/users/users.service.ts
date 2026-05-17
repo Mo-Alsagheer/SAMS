@@ -22,6 +22,12 @@ export class UsersService {
     return this.userRepository.findOne({ where: { id } });
   }
 
+  createApplicant(data: Partial<User>): Promise<User> {
+    this.audit.log({ action: 'UsersService.createApplicant', body: { email: data.email } }).catch(() => undefined);
+    const user = this.userRepository.create(data);
+    return this.userRepository.save(user);
+  }
+
   list(): Promise<User[]> {
     this.audit.log({ action: 'UsersService.list' }).catch(() => undefined);
     return this.userRepository.find();

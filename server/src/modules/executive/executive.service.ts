@@ -257,44 +257,35 @@ export class ExecutiveService {
     application.status = ApplicationStatus.PHASE2_ACCEPTED;
     await this.applicationRepository.save(application);
 
-    // Generate a random temporary password
-    const plainPassword = this.generatePassword();
-    const hashedPassword = await bcrypt.hash(plainPassword, 10);
-
     // Determine the role label for the email
     const roleLabel =
-      application.targetRole === Role.EXECUTIVE ? 'Executive' : 'Director';
+      application.targetRole === Role.EXECUTIVE ? 'Executive' : 
+      application.targetRole === Role.DIRECTOR ? 'Director' : 'Member';
 
-    // Check if a User account already exists
+    // The user already exists because they signed up as APPLICANT
     let user = await this.userRepository.findOne({
-      where: { email: application.email },
+      where: { id: application.userId },
     });
     if (user) {
-      user.name = application.name;
-      user.phone = application.phone;
-      user.password = hashedPassword;
       user.role = application.targetRole;
       user.committeeId = application.committeeId ?? null;
+      await this.userRepository.save(user);
     } else {
-      user = this.userRepository.create({
-        name: application.name,
-        email: application.email,
-        phone: application.phone,
-        password: hashedPassword,
-        role: application.targetRole,
-        committeeId: application.committeeId ?? null,
-      });
+      // Fallback just in case user was not linked correctly
+      throw new BadRequestException('Applicant user account not found');
     }
-    await this.userRepository.save(user);
 
-    // Send welcome email with credentials
+    // Send welcome email without password, just saying they got accepted
     const loginUrl =
       this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:5173';
+    
+    // We modify sendWelcomeEmail to not require password, or just send it without it
+    // If EmailService.sendWelcomeEmail requires password, we can pass 'Your existing password'
     await this.emailService.sendWelcomeEmail({
       to: application.email,
       name: application.name,
       role: roleLabel,
-      password: plainPassword,
+      password: 'Your existing account password',
       loginUrl,
     });
 

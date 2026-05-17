@@ -17,18 +17,25 @@ export class CloudinaryService {
     file: Express.Multer.File,
     folder = 'IEEE Platform',
   ): Promise<string> {
+    return this.uploadFile(file, folder);
+  }
+
+  async uploadFile(
+    file: Express.Multer.File,
+    folder = 'IEEE Platform',
+  ): Promise<string> {
     return new Promise((resolve, reject) => {
       const upload = cloudinary.uploader.upload_stream(
         {
           folder,
-          resource_type: 'image',
-          transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+          resource_type: 'auto',
+          // removing fetch_format: 'auto' because it might break raw files like PDFs
         },
         (error, result: UploadApiResponse) => {
           if (error || !result) {
             return reject(
               new InternalServerErrorException(
-                'Failed to upload image to Cloudinary',
+                'Failed to upload file to Cloudinary',
               ),
             );
           }
