@@ -58,6 +58,16 @@ export class MaterialsService {
     });
   }
 
+  async findByCommittee(committeeId: number): Promise<Material[]> {
+    return this.materialRepo
+      .createQueryBuilder('material')
+      .innerJoin('material.session', 'session')
+      .innerJoin('roadmaps', 'roadmap', 'roadmap.id = session.roadmapId')
+      .where('roadmap.committeeId = :committeeId', { committeeId })
+      .orderBy('material.createdAt', 'ASC')
+      .getMany();
+  }
+
   async remove(materialId: number, directorId: number): Promise<void> {
     const material = await this.materialRepo.findOne({
       where: { id: materialId },
