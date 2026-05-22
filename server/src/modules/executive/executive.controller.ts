@@ -7,6 +7,7 @@ import {
   Query,
   UseGuards,
   ParseIntPipe,
+  Request,
 } from '@nestjs/common';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
 import {

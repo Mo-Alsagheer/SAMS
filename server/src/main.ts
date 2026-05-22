@@ -3,6 +3,10 @@ import { AppModule } from './app.module';
 import { setupSwagger } from './config/swagger.config';
 import { setupApp } from './config/app.config';
 
+import { setDefaultResultOrder } from 'node:dns';
+
+setDefaultResultOrder('ipv4first');
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['log', 'error', 'warn', 'debug', 'verbose'],

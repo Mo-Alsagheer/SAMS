@@ -1,0 +1,137 @@
+{
+  "info": {
+    "name": "Email API",
+    "description": "Endpoints for sending emails via Resend in SAMS.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Send Test Email",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"to\": \"delivered@resend.dev\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/email/test",
+          "host": ["{{baseUrl}}"],
+          "path": ["email", "test"]
+        }
+      }
+    },
+    {
+      "name": "Send Application Status Email",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"to\": \"applicant@example.com\",\n  \"name\": \"John Doe\",\n  \"status\": \"Application Received\",\n  \"role\": \"Member\",\n  \"details\": \"We have successfully received your application.\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/email/status",
+          "host": ["{{baseUrl}}"],
+          "path": ["email", "status"]
+        }
+      }
+    },
+    {
+      "name": "Broadcast Global (Executive)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"subject\": \"Important System Announcement\",\n  \"message\": \"Please update your profile information.\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/email/broadcast/global",
+          "host": ["{{baseUrl}}"],
+          "path": ["email", "broadcast", "global"]
+        }
+      }
+    },
+    {
+      "name": "Broadcast Committee (Director/Executive)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"subject\": \"Weekly Committee Meeting\",\n  \"message\": \"Our meeting this week is moved to Friday.\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/email/broadcast/committee/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["email", "broadcast", "committee", "1"]
+        }
+      }
+    },
+    {
+      "name": "Terminate User (Executive)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/email/terminate/5",
+          "host": ["{{baseUrl}}"],
+          "path": ["email", "terminate", "5"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "YOUR_JWT_TOKEN",
+      "type": "string"
+    }
+  ]
+}

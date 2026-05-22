@@ -20,6 +20,7 @@ import { SessionsModule } from './modules/sessions/sessions.module';
 import { AttendaceModule } from './modules/attendace/attendace.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { MaterialsModule } from './modules/materials/materials.module';
+import { EmailModule } from './modules/email/email.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { MaterialsModule } from './modules/materials/materials.module';
     TasksModule,
     AuditLogModule,
     MaterialsModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [

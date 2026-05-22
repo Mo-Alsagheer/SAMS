@@ -8,11 +8,14 @@ import { Committee } from '../committees/entities/committee.entity';
 import { AiModule } from '../../integrations/ai-service/ai.module';
 import { AuditLogModule } from '../audit-log/audit-log.module';
 
+import { EmailModule } from '../email/email.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Application, RecruitmentProcess, Committee]),
     AiModule,
     AuditLogModule,
+    EmailModule,
   ],
   controllers: [ApplicationsController],
   providers: [ApplicationsService],

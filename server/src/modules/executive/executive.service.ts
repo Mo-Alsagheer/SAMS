@@ -21,6 +21,7 @@ import {
 import { Committee } from '../committees/entities/committee.entity';
 import { AiService } from '../../integrations/ai-service/ai.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { EmailMessages } from '../email/constants/email-messages.constant';
 
 @Injectable()
 export class ExecutiveService {
@@ -176,7 +177,17 @@ export class ExecutiveService {
       throw new NotFoundException('Application not found');
     }
     application.status = ApplicationStatus.PHASE1_ACCEPTED;
-    return this.applicationRepository.save(application);
+    const savedApplication = await this.applicationRepository.save(application);
+
+    this.emailService.sendApplicationStatusEmail({
+      to: savedApplication.email,
+      name: savedApplication.name,
+      status: EmailMessages.PHASE1_ACCEPTED.status,
+      role: savedApplication.targetRole,
+      details: EmailMessages.PHASE1_ACCEPTED.getDetails(),
+    }).catch(err => console.error('Failed to send Phase 1 Accepted email', err));
+
+    return savedApplication;
   }
 
   async rejectPhase1(applicationId: number) {
@@ -190,7 +201,17 @@ export class ExecutiveService {
       throw new NotFoundException('Application not found');
     }
     application.status = ApplicationStatus.PHASE1_REJECTED;
-    return this.applicationRepository.save(application);
+    const savedApplication = await this.applicationRepository.save(application);
+
+    this.emailService.sendApplicationStatusEmail({
+      to: savedApplication.email,
+      name: savedApplication.name,
+      status: EmailMessages.PHASE1_REJECTED.status,
+      role: savedApplication.targetRole,
+      details: EmailMessages.PHASE1_REJECTED.getDetails(),
+    }).catch(err => console.error('Failed to send Phase 1 Rejected email', err));
+
+    return savedApplication;
   }
 
   async scheduleInterview(applicationId: number, payload: any) {
@@ -201,8 +222,17 @@ export class ExecutiveService {
       throw new NotFoundException('Application not found');
     }
     application.status = ApplicationStatus.INTERVIEW_SCHEDULED;
-    await this.applicationRepository.save(application);
-    return { ...application, ...payload };
+    const savedApplication = await this.applicationRepository.save(application);
+
+    this.emailService.sendApplicationStatusEmail({
+      to: savedApplication.email,
+      name: savedApplication.name,
+      status: EmailMessages.INTERVIEW_SCHEDULED.status,
+      role: savedApplication.targetRole,
+      details: EmailMessages.INTERVIEW_SCHEDULED.getDetails(payload),
+    }).catch(err => console.error('Failed to send Interview Scheduled email', err));
+
+    return { ...savedApplication, ...payload };
   }
 
   async acceptPhase2(applicationId: number) {
@@ -314,7 +344,17 @@ export class ExecutiveService {
       throw new NotFoundException('Application not found');
     }
     application.status = ApplicationStatus.PHASE2_REJECTED;
-    return this.applicationRepository.save(application);
+    const savedApplication = await this.applicationRepository.save(application);
+
+    this.emailService.sendApplicationStatusEmail({
+      to: savedApplication.email,
+      name: savedApplication.name,
+      status: EmailMessages.PHASE2_REJECTED.status,
+      role: savedApplication.targetRole,
+      details: EmailMessages.PHASE2_REJECTED.getDetails(),
+    }).catch(err => console.error('Failed to send Phase 2 Rejected email', err));
+
+    return savedApplication;
   }
 
   private generatePassword(length = 12): string {

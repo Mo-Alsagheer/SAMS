@@ -16,6 +16,8 @@ import { Committee } from '../committees/entities/committee.entity';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { AiService } from '../../integrations/ai-service/ai.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { EmailService } from '../email/email.service';
+import { EmailMessages } from '../email/constants/email-messages.constant';
 
 @Injectable()
 export class ApplicationsService {
@@ -28,6 +30,7 @@ export class ApplicationsService {
     private committeeRepository: Repository<Committee>,
     private aiService: AiService,
     private readonly audit: AuditLogService,
+    private readonly emailService: EmailService,
   ) {}
 
   async createApplication(dto: CreateApplicationDto) {
@@ -83,7 +86,17 @@ export class ApplicationsService {
       targetRole: dto.targetRole,
     });
 
-    return this.applicationRepository.save(application);
+    const savedApplication = await this.applicationRepository.save(application);
+
+    this.emailService.sendApplicationStatusEmail({
+      to: savedApplication.email,
+      name: savedApplication.name,
+      status: EmailMessages.APPLICATION_RECEIVED.status,
+      role: savedApplication.targetRole,
+      details: EmailMessages.APPLICATION_RECEIVED.getDetails(),
+    }).catch(err => console.error('Failed to send confirmation email', err));
+
+    return savedApplication;
   }
 
   async findOne(id: number) {

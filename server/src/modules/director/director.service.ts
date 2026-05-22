@@ -14,6 +14,7 @@ import {
 import { User } from '../users/entities/user.entity';
 import { Role } from '../../common/constants/role.enum';
 import { EmailService } from '../email/email.service';
+import { EmailMessages } from '../email/constants/email-messages.constant';
 import {
   RecruitmentProcess,
   RecruitmentStatus,
@@ -33,10 +34,10 @@ export class DirectorService {
     private recruitmentRepository: Repository<RecruitmentProcess>,
     @InjectRepository(Committee)
     private committeeRepository: Repository<Committee>,
-    private readonly emailService: EmailService,
     private readonly configService: ConfigService,
     private readonly aiService: AiService,
     private readonly audit: AuditLogService,
+    private readonly emailService: EmailService,
   ) {}
 
   async getApplications(committeeId: number, status?: string) {
@@ -112,7 +113,17 @@ export class DirectorService {
       throw new NotFoundException('Application not found');
     }
     application.status = ApplicationStatus.PHASE1_ACCEPTED;
-    return this.applicationRepository.save(application);
+    const savedApplication = await this.applicationRepository.save(application);
+
+    this.emailService.sendApplicationStatusEmail({
+      to: savedApplication.email,
+      name: savedApplication.name,
+      status: EmailMessages.PHASE1_ACCEPTED.status,
+      role: Role.MEMBER,
+      details: EmailMessages.PHASE1_ACCEPTED.getDetails(),
+    }).catch(err => console.error('Failed to send Phase 1 Accepted email', err));
+
+    return savedApplication;
   }
 
   async rejectPhase1(applicationId: number) {
@@ -123,7 +134,9 @@ export class DirectorService {
       throw new NotFoundException('Application not found');
     }
     application.status = ApplicationStatus.PHASE1_REJECTED;
-    return this.applicationRepository.save(application);
+    const savedApplication = await this.applicationRepository.save(application);
+
+    return savedApplication;
   }
 
   async scheduleInterview(applicationId: number, payload: any) {
@@ -134,8 +147,9 @@ export class DirectorService {
       throw new NotFoundException('Application not found');
     }
     application.status = ApplicationStatus.INTERVIEW_SCHEDULED;
-    await this.applicationRepository.save(application);
-    return { ...application, ...payload };
+    const savedApplication = await this.applicationRepository.save(application);
+
+    return { ...savedApplication, ...payload };
   }
 
   async acceptPhase2(applicationId: number) {
@@ -198,17 +212,7 @@ export class DirectorService {
       await this.userRepository.save(user);
     }
 
-    const loginUrl =
-      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:5173';
-    await this.emailService.sendWelcomeEmail({
-      to: application.email,
-      name: application.name,
-      role: 'Member',
-      password,
-      loginUrl,
-    });
-
-    return application;
+    return { ...application, password };
   }
 
   async rejectPhase2(applicationId: number) {
@@ -219,7 +223,9 @@ export class DirectorService {
       throw new NotFoundException('Application not found');
     }
     application.status = ApplicationStatus.PHASE2_REJECTED;
-    return this.applicationRepository.save(application);
+    const savedApplication = await this.applicationRepository.save(application);
+
+    return savedApplication;
   }
 
   private generatePassword(length = 12): string {
@@ -231,4 +237,5 @@ export class DirectorService {
     }
     return password;
   }
+
 }

@@ -30,4 +30,14 @@ export class UsersService {
     this.audit.log({ action: 'UsersService.list' }).catch(() => undefined);
     return this.userRepository.find();
   }
+
+  async updatePassword(id: number, hashedPassword: string): Promise<void> {
+    this.audit.log({ action: 'UsersService.updatePassword', body: { id } }).catch(() => undefined);
+    await this.userRepository.update(id, { password: hashedPassword });
+  }
+
+  async remove(id: number): Promise<void> {
+    this.audit.log({ action: 'UsersService.remove', body: { id } }).catch(() => undefined);
+    await this.userRepository.delete(id);
+  }
 }

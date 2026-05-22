@@ -2,6 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { getWelcomeTemplate } from './templates/welcome.template';
+import { getStatusTemplate } from './templates/status.template';
+import { getBroadcastTemplate } from './templates/broadcast.template';
+import { getTerminationTemplate } from './templates/termination.template';
+import { getPasswordResetTemplate } from './templates/password-reset.template';
+import { getTestTemplate } from './templates/test.template';
 
 @Injectable()
 export class EmailService {
@@ -29,85 +35,132 @@ export class EmailService {
   }): Promise<void> {
     const { to, name, role, password, loginUrl } = opts;
 
-    const html = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Welcome to SAMS</title>
-  <style>
-    body { margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6fb; }
-    .wrapper { max-width: 560px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
-    .header { background: linear-gradient(135deg, #1a1f3c 0%, #2d3580 100%); padding: 40px 32px; text-align: center; }
-    .header h1 { margin: 0; color: #ffffff; font-size: 26px; letter-spacing: 1px; }
-    .header p { margin: 6px 0 0; color: #a8b4e8; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; }
-    .body { padding: 36px 32px; }
-    .greeting { font-size: 18px; color: #1a1f3c; font-weight: 600; margin-bottom: 12px; }
-    .text { font-size: 15px; color: #555; line-height: 1.7; margin-bottom: 24px; }
-    .credentials { background: #f0f3ff; border-left: 4px solid #2d3580; border-radius: 8px; padding: 20px 24px; margin-bottom: 28px; }
-    .credentials p { margin: 0 0 10px; font-size: 14px; color: #444; }
-    .credentials p:last-child { margin: 0; }
-    .credentials strong { color: #1a1f3c; }
-    .credentials .value { font-family: monospace; font-size: 15px; background: #e8ecff; padding: 2px 8px; border-radius: 4px; color: #2d3580; }
-    .btn-wrap { text-align: center; margin-bottom: 28px; }
-    .btn { display: inline-block; background: linear-gradient(135deg, #2d3580, #4a54c4); color: #ffffff !important; text-decoration: none; padding: 14px 36px; border-radius: 8px; font-size: 15px; font-weight: 600; letter-spacing: 0.5px; }
-    .notice { font-size: 13px; color: #888; text-align: center; line-height: 1.6; }
-    .footer { background: #f8f9fe; padding: 20px 32px; text-align: center; font-size: 12px; color: #aaa; border-top: 1px solid #eee; }
-  </style>
-</head>
-<body>
-  <div class="wrapper">
-    <div class="header">
-      <h1>SAMS</h1>
-      <p>Student Activity Management System</p>
-    </div>
-    <div class="body">
-      <div class="greeting">Welcome aboard, ${name}! 🎉</div>
-      <p class="text">
-        Congratulations! Your application has been <strong>accepted</strong> and you have been officially assigned as a <strong>${role}</strong>.
-        Your account is now active and ready to use.
-      </p>
-      <div class="credentials">
-        <p><strong>Email:</strong> <span class="value">${to}</span></p>
-        <p><strong>Temporary Password:</strong> <span class="value">${password}</span></p>
-      </div>
-      <p class="text">Use the button below to sign in, then change your password from your profile settings.</p>
-      <div class="btn-wrap">
-        <a href="${loginUrl}" class="btn">Sign in to SAMS</a>
-      </div>
-      <p class="notice">
-        If you didn't expect this email, please contact your administrator immediately.
-      </p>
-    </div>
-    <div class="footer">
-      &copy; ${new Date().getFullYear()} SAMS — Student Activity Management System. All rights reserved.
-    </div>
-  </div>
-</body>
-</html>
-    `.trim();
+    const html = getWelcomeTemplate(name, role, to, password, loginUrl);
 
-    try {
-      await this.resend.emails.send({
-        from: this.fromAddress,
-        to,
-        subject: '🎉 Welcome to SAMS — Your Account is Ready',
-        html,
-      });
-      this.logger.log(`Welcome email sent to ${to}`);
-      this.audit
-        .log({ action: 'EmailService.sendWelcomeEmail', body: { to, role } })
-        .catch(() => undefined);
-    } catch (error) {
+    const { data, error } = await this.resend.emails.send({
+      from: this.fromAddress,
+      to,
+      subject: '🎉 Welcome to SAMS — Your Account is Ready',
+      html,
+    });
+
+    if (error) {
       this.logger.error(`Failed to send welcome email to ${to}`, error);
       this.audit
         .log({
           action: 'EmailService.sendWelcomeEmailFailed',
-          body: { to, errorMessage: String(error) },
+          body: { to, errorMessage: error.message },
         })
         .catch(() => undefined);
-      // Do not rethrow — email failure should not block the acceptance response
+      return;
     }
+
+    this.logger.log(`Welcome email sent to ${to} with ID ${data?.id}`);
+    this.audit
+      .log({ action: 'EmailService.sendWelcomeEmail', body: { to, role, emailId: data?.id } })
+      .catch(() => undefined);
+  }
+
+  async sendTestEmail(to: string): Promise<any> {
+    const html = getTestTemplate();
+
+    const { data, error } = await this.resend.emails.send({
+      from: this.fromAddress,
+      to,
+      subject: '🧪 SAMS Test Email',
+      html,
+    });
+
+    if (error) {
+      this.logger.error(`Failed to send test email to ${to}`, error);
+      this.audit
+        .log({
+          action: 'EmailService.sendTestEmailFailed',
+          body: { to, errorMessage: error.message },
+        })
+        .catch(() => undefined);
+      return { success: false, error: error.message };
+    }
+
+    this.logger.log(`Test email sent to ${to} with ID ${data?.id}`);
+    this.audit
+      .log({ action: 'EmailService.sendTestEmail', body: { to, emailId: data?.id } })
+      .catch(() => undefined);
+    return { success: true, data };
+  }
+
+  async sendApplicationStatusEmail(opts: { to: string; name: string; status: string; role: string; details?: string }): Promise<void> {
+    const { to, name, status, role, details } = opts;
+    const html = getStatusTemplate(name, status, role, details);
+
+    const { data, error } = await this.resend.emails.send({
+      from: this.fromAddress,
+      to,
+      subject: `SAMS Application Update: ${status}`,
+      html,
+    });
+
+    if (error) {
+      this.logger.error(`Failed to send status email to ${to}`, error);
+      this.audit.log({ action: 'EmailService.sendStatusFailed', body: { to, error: error.message } }).catch(() => {});
+      return;
+    }
+    this.audit.log({ action: 'EmailService.sendStatus', body: { to, status, emailId: data?.id } }).catch(() => {});
+  }
+
+  async sendBroadcastEmail(opts: { to: string[]; subject: string; message: string; senderName?: string }): Promise<void> {
+    const { to, subject, message, senderName } = opts;
+    const html = getBroadcastTemplate(subject, message, senderName);
+
+    const { data, error } = await this.resend.emails.send({
+      from: this.fromAddress,
+      to: this.fromAddress, // Resend SDK requires the 'to' field. We send to ourselves and BCC the list.
+      bcc: to, // Use BCC for broadcasts to protect privacy
+      subject: `📢 ${subject}`,
+      html,
+    });
+
+    if (error) {
+      this.logger.error(`Failed to send broadcast email`, error);
+      this.audit.log({ action: 'EmailService.sendBroadcastFailed', body: { error: error.message } }).catch(() => {});
+      return;
+    }
+    this.audit.log({ action: 'EmailService.sendBroadcast', body: { count: to.length, emailId: data?.id } }).catch(() => {});
+  }
+
+  async sendTerminationEmail(to: string, name: string): Promise<void> {
+    const html = getTerminationTemplate(name);
+
+    const { data, error } = await this.resend.emails.send({
+      from: this.fromAddress,
+      to,
+      subject: 'Important Notice Regarding Your SAMS Account',
+      html,
+    });
+
+    if (error) {
+      this.logger.error(`Failed to send termination email to ${to}`, error);
+      this.audit.log({ action: 'EmailService.sendTerminationFailed', body: { to, error: error.message } }).catch(() => {});
+      return;
+    }
+    this.audit.log({ action: 'EmailService.sendTermination', body: { to, emailId: data?.id } }).catch(() => {});
+  }
+
+  async sendPasswordResetEmail(to: string, name: string, resetLink: string): Promise<void> {
+    const html = getPasswordResetTemplate(name, resetLink);
+
+    const { data, error } = await this.resend.emails.send({
+      from: this.fromAddress,
+      to,
+      subject: 'SAMS Password Reset',
+      html,
+    });
+
+    if (error) {
+      this.logger.error(`Failed to send password reset email to ${to}`, error);
+      this.audit.log({ action: 'EmailService.sendPasswordResetFailed', body: { to, error: error.message } }).catch(() => {});
+      return;
+    }
+    this.audit.log({ action: 'EmailService.sendPasswordReset', body: { to, emailId: data?.id } }).catch(() => {});
   }
 }
