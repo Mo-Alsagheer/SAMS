@@ -58,7 +58,9 @@ export class AttendaceService {
     session: Session;
     committeeId: number;
   }> {
-    const session = await this.sessionRepo.findOne({ where: { id: sessionId } });
+    const session = await this.sessionRepo.findOne({
+      where: { id: sessionId },
+    });
     if (!session) {
       throw new NotFoundException('Session not found');
     }
@@ -126,7 +128,7 @@ export class AttendaceService {
     const { committeeId } = await this.resolveCommitteeIdForSession(sessionId);
     const members = await this.getCommitteeMembers(committeeId);
     const memberIds = new Set(members.map((m) => m.id));
-    
+
     const inputUserIds = membersData.map((m) => m.userId);
     const invalid = inputUserIds.filter((id) => !memberIds.has(id));
     if (invalid.length > 0) {
@@ -151,7 +153,7 @@ export class AttendaceService {
     for (const memberData of membersData) {
       const score = memberData.score;
       const attended = score > 0;
-      
+
       const existing = existingMap.get(memberData.userId);
 
       if (existing) {
@@ -169,7 +171,7 @@ export class AttendaceService {
             score,
             createdBy: directorId,
             updatedBy: directorId,
-          })
+          }),
         );
       }
     }

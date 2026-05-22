@@ -104,7 +104,9 @@ export class CommitteesService {
         'Cannot delete committee with an open recruitment process',
       );
     }
-    this.audit.log({ action: 'CommitteesService.delete', body: { id } }).catch(() => undefined);
+    this.audit
+      .log({ action: 'CommitteesService.delete', body: { id } })
+      .catch(() => undefined);
     await this.committeesRepo.remove(committee);
   }
 }

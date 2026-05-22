@@ -6,9 +6,13 @@ import {
   Post,
   Req,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -20,13 +24,17 @@ import { SubmitTaskDto } from './dto/submit-task.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
 import { AuthUser } from '../auth/auth.types';
+import { CloudinaryService } from '../../integrations/cloudinary/cloudinary.service';
 
 @ApiTags('tasks')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller()
 export class TasksController {
-  constructor(private readonly tasksService: TasksService) {}
+  constructor(
+    private readonly tasksService: TasksService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Get('sessions/:sessionId/tasks')
   @ApiOperation({ summary: 'List tasks for a session' })
@@ -39,12 +47,22 @@ export class TasksController {
   @Post('tasks/:taskId/submissions')
   @ApiOperation({ summary: 'Submit a task (member)' })
   @ApiParam({ name: 'taskId', description: 'Numeric task ID' })
+  @ApiConsumes('multipart/form-data', 'application/json')
+  @UseInterceptors(FileInterceptor('file'))
   @ApiResponse({ status: 201, description: 'Submission saved.' })
-  submit(
+  async submit(
     @Param('taskId', ParseIntIdPipe) taskId: number,
     @Body() dto: SubmitTaskDto,
     @Req() req: Request & { user: AuthUser },
+    @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.tasksService.submit(taskId, req.user.id, dto);
+    let fileUrl = dto.fileUrl;
+    if (file) {
+      fileUrl = await this.cloudinaryService.uploadFile(
+        file,
+        'Task_Submissions',
+      );
+    }
+    return this.tasksService.submit(taskId, req.user.id, { ...dto, fileUrl });
   }
 }

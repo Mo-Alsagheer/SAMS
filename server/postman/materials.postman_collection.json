@@ -1,0 +1,168 @@
+{
+  "info": {
+    "name": "Materials API",
+    "description": "Endpoints for managing session materials.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Materials by Session",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/sessions/:sessionId/materials",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "sessions",
+            ":sessionId",
+            "materials"
+          ],
+          "variable": [
+            {
+              "key": "sessionId",
+              "value": "1",
+              "description": "Numeric ID of the session"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Materials by Committee",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/committees/:committeeId/materials",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "committees",
+            ":committeeId",
+            "materials"
+          ],
+          "variable": [
+            {
+              "key": "committeeId",
+              "value": "1",
+              "description": "Numeric ID of the committee"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Upload Material to Session (Director)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "title",
+              "value": "Sample Presentation",
+              "type": "text"
+            },
+            {
+              "key": "fileUrl",
+              "value": "https://example.com/material.pdf",
+              "type": "text",
+              "description": "Optional if file is attached"
+            },
+            {
+              "key": "file",
+              "type": "file",
+              "src": [],
+              "description": "Optional if fileUrl is provided"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/director/sessions/:sessionId/materials",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "director",
+            "sessions",
+            ":sessionId",
+            "materials"
+          ],
+          "variable": [
+            {
+              "key": "sessionId",
+              "value": "1",
+              "description": "Numeric ID of the session"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Material (Director)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/director/materials/:materialId",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "director",
+            "materials",
+            ":materialId"
+          ],
+          "variable": [
+            {
+              "key": "materialId",
+              "value": "1",
+              "description": "Numeric ID of the material"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "YOUR_JWT_TOKEN",
+      "type": "string"
+    }
+  ]
+}

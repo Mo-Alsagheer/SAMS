@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuditLog } from './entities/audit-log.entity';
 
 @Injectable()
 export class AuditLogService {
+  private readonly logger = new Logger(AuditLogService.name);
+
   constructor(
     @InjectRepository(AuditLog)
     private readonly repo: Repository<AuditLog>,
@@ -32,12 +34,21 @@ export class AuditLogService {
       query: this.redact(entry.query),
       body: this.redact(entry.body),
     };
+
+    // Print to console so developers can see it happening live
+    this.logger.log(
+      `[AUDIT] Action: ${toSave.action} | UserID: ${toSave.userId || 'Guest'} | Path: ${toSave.path || 'N/A'}`,
+    );
+
     return this.repo.save(this.repo.create(toSave as AuditLog));
   }
 
-  async findAll(options: { page?: number; limit?: number; filter?: Partial<AuditLog> } = {}) {
+  async findAll(
+    options: { page?: number; limit?: number; filter?: Partial<AuditLog> } = {},
+  ) {
     const page = options.page && options.page > 0 ? options.page : 1;
-    const limit = options.limit && options.limit > 0 ? Math.min(options.limit, 100) : 20;
+    const limit =
+      options.limit && options.limit > 0 ? Math.min(options.limit, 100) : 20;
     const skip = (page - 1) * limit;
 
     const where: any = {};

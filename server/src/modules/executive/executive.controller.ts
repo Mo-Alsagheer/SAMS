@@ -39,7 +39,9 @@ export class ExecutiveController {
     status: 403,
     description: 'Forbidden. Requires Executive role.',
   })
-  getDirectorsByCommittee(@Param('committeeId', ParseIntIdPipe) committeeId: number) {
+  getDirectorsByCommittee(
+    @Param('committeeId', ParseIntIdPipe) committeeId: number,
+  ) {
     return this.executiveService.getDirectorsByCommittee(committeeId);
   }
 
@@ -50,7 +52,9 @@ export class ExecutiveController {
     status: 403,
     description: 'Forbidden. Requires Executive role.',
   })
-  getMembersByCommittee(@Param('committeeId', ParseIntIdPipe) committeeId: number) {
+  getMembersByCommittee(
+    @Param('committeeId', ParseIntIdPipe) committeeId: number,
+  ) {
     return this.executiveService.getMembersByCommittee(committeeId);
   }
 
@@ -140,7 +144,10 @@ export class ExecutiveController {
     description: 'Interview scheduled successfully.',
   })
   @ApiResponse({ status: 404, description: 'Application not found.' })
-  scheduleInterview(@Param('id', ParseIntIdPipe) id: number, @Body() payload: any) {
+  scheduleInterview(
+    @Param('id', ParseIntIdPipe) id: number,
+    @Body() payload: any,
+  ) {
     return this.executiveService.scheduleInterview(id, payload);
   }
 

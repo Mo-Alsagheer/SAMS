@@ -19,6 +19,7 @@ import { RoadmapModule } from './modules/roadmap/roadmap.module';
 import { SessionsModule } from './modules/sessions/sessions.module';
 import { AttendaceModule } from './modules/attendace/attendace.module';
 import { TasksModule } from './modules/tasks/tasks.module';
+import { MaterialsModule } from './modules/materials/materials.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { TasksModule } from './modules/tasks/tasks.module';
     AttendaceModule,
     TasksModule,
     AuditLogModule,
+    MaterialsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -57,4 +59,4 @@ import { TasksModule } from './modules/tasks/tasks.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

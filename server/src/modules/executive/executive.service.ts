@@ -37,7 +37,7 @@ export class ExecutiveService {
     private readonly configService: ConfigService,
     private readonly aiService: AiService,
     private readonly audit: AuditLogService,
-  ) { }
+  ) {}
 
   async getDirectorsByCommittee(committeeId: number): Promise<User[]> {
     return this.userRepository.find({
@@ -220,15 +220,15 @@ export class ExecutiveService {
     const recruitmentWhere =
       application.targetRole === Role.EXECUTIVE
         ? {
-          role: Role.EXECUTIVE,
-          committeeId: IsNull(),
-          status: RecruitmentStatus.OPEN,
-        }
+            role: Role.EXECUTIVE,
+            committeeId: IsNull(),
+            status: RecruitmentStatus.OPEN,
+          }
         : {
-          role: Role.DIRECTOR,
-          committeeId: application.committeeId,
-          status: RecruitmentStatus.OPEN,
-        };
+            role: Role.DIRECTOR,
+            committeeId: application.committeeId,
+            status: RecruitmentStatus.OPEN,
+          };
 
     const recruitment = await this.recruitmentRepository.findOne({
       where: recruitmentWhere,
@@ -257,24 +257,26 @@ export class ExecutiveService {
     application.status = ApplicationStatus.PHASE2_ACCEPTED;
     await this.applicationRepository.save(application);
 
-    // Generate a random temporary password
-    const plainPassword = this.generatePassword();
-    const hashedPassword = await bcrypt.hash(plainPassword, 10);
-
     // Determine the role label for the email
     const roleLabel =
-      application.targetRole === Role.EXECUTIVE ? 'Executive' : 'Director';
+      application.targetRole === Role.EXECUTIVE
+        ? 'Executive'
+        : application.targetRole === Role.DIRECTOR
+          ? 'Director'
+          : 'Member';
 
-    // Check if a User account already exists
     let user = await this.userRepository.findOne({
       where: { email: application.email },
     });
+
+    const password = this.generatePassword();
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     if (user) {
-      user.name = application.name;
-      user.phone = application.phone;
-      user.password = hashedPassword;
       user.role = application.targetRole;
       user.committeeId = application.committeeId ?? null;
+      user.password = hashedPassword;
+      await this.userRepository.save(user);
     } else {
       user = this.userRepository.create({
         name: application.name,
@@ -284,17 +286,17 @@ export class ExecutiveService {
         role: application.targetRole,
         committeeId: application.committeeId ?? null,
       });
+      await this.userRepository.save(user);
     }
-    await this.userRepository.save(user);
 
-    // Send welcome email with credentials
     const loginUrl =
       this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:5173';
+
     await this.emailService.sendWelcomeEmail({
       to: application.email,
       name: application.name,
       role: roleLabel,
-      password: plainPassword,
+      password,
       loginUrl,
     });
 

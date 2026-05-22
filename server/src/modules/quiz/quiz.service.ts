@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import * as quizDataRaw from './data/committee_quiz.json';
 
@@ -14,7 +18,9 @@ export class QuizService {
   constructor(private readonly audit: AuditLogService) {}
 
   getQuestionsByCategory(category: string) {
-    this.audit.log({ action: 'QuizService.getQuestionsByCategory', body: { category } }).catch(() => undefined);
+    this.audit
+      .log({ action: 'QuizService.getQuestionsByCategory', body: { category } })
+      .catch(() => undefined);
     if (!quizData || !quizData.quizLists) {
       throw new BadRequestException('Quiz data not available');
     }
@@ -33,16 +39,25 @@ export class QuizService {
   }
 
   calculateRecommendation(category: string, answers: AnswerPayload[]) {
-    this.audit.log({ action: 'QuizService.calculateRecommendation', body: { category, answers } }).catch(() => undefined);
+    this.audit
+      .log({
+        action: 'QuizService.calculateRecommendation',
+        body: { category, answers },
+      })
+      .catch(() => undefined);
     const quizList = this.getQuestionsByCategory(category);
 
     const scores: Record<string, number> = {};
 
     for (const answer of answers) {
-      const question = quizList.questions.find((q: any) => q.id === answer.questionId);
+      const question = quizList.questions.find(
+        (q: any) => q.id === answer.questionId,
+      );
       if (!question) continue;
 
-      const selectedAnswer = question.answers.find((a: any) => a.id === answer.answerId);
+      const selectedAnswer = question.answers.find(
+        (a: any) => a.id === answer.answerId,
+      );
       if (!selectedAnswer || !selectedAnswer.weight) continue;
 
       for (const [key, value] of Object.entries(selectedAnswer.weight)) {
@@ -62,7 +77,9 @@ export class QuizService {
     }
 
     if (!recommendedKey) {
-      throw new BadRequestException('No valid answers matched, could not determine recommendation');
+      throw new BadRequestException(
+        'No valid answers matched, could not determine recommendation',
+      );
     }
 
     // Map back to full committee name since keys in JSON don't exactly match the `committees` list visually

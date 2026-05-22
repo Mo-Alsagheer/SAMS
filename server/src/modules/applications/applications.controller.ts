@@ -3,7 +3,6 @@ import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
-
 @ApiTags('applications')
 @Controller('applications')
 export class ApplicationsController {

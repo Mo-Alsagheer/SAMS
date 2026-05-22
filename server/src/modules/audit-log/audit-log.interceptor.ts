@@ -1,4 +1,9 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+} from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
 import { AuditLogService } from './audit-log.service';
 
@@ -26,10 +31,12 @@ export class AuditLogInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap({
         next: (res) => {
-          this.audit.log({
-            ...entryBase,
-            statusCode: context.switchToHttp().getResponse().statusCode,
-          }).catch(() => undefined);
+          this.audit
+            .log({
+              ...entryBase,
+              statusCode: context.switchToHttp().getResponse().statusCode,
+            })
+            .catch(() => undefined);
         },
       }),
     );

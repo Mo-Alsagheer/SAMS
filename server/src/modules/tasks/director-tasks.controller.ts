@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -23,6 +24,8 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/role.enum';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { Request } from 'express';
+import { AuthUser } from '../auth/auth.types';
 
 @ApiTags('director')
 @ApiBearerAuth()
@@ -60,7 +63,12 @@ export class DirectorTasksController {
   gradeSubmission(
     @Param('submissionId', ParseIntIdPipe) submissionId: number,
     @Body() dto: GradeSubmissionDto,
+    @Req() req: Request & { user: AuthUser },
   ) {
-    return this.tasksService.gradeSubmission(submissionId, dto.score);
+    return this.tasksService.gradeSubmission(
+      submissionId,
+      dto.score,
+      req.user.id,
+    );
   }
 }

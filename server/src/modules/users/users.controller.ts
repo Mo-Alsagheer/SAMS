@@ -1,5 +1,16 @@
-import { Controller, Get, Req, UseGuards, NotFoundException } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Req,
+  UseGuards,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Request } from 'express';
@@ -17,12 +28,12 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'User not found in database' })
   async getProfile(@Req() req: Request) {
     const userId = req.user.id;
-    
+
     const user = await this.usersService.findById(userId);
     if (!user) {
-        throw new NotFoundException('User profile could not be found');
+      throw new NotFoundException('User profile could not be found');
     }
-    
+
     // stripping the password out before returning safely
     const { password, ...safeUser } = user;
     return safeUser;

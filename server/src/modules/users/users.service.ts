@@ -10,15 +10,19 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly audit: AuditLogService,
-  ) { }
+  ) {}
 
   findByEmail(email: string): Promise<User | null> {
-    this.audit.log({ action: 'UsersService.findByEmail', body: { email } }).catch(() => undefined);
+    this.audit
+      .log({ action: 'UsersService.findByEmail', body: { email } })
+      .catch(() => undefined);
     return this.userRepository.findOne({ where: { email } });
   }
 
   findById(id: number): Promise<User | null> {
-    this.audit.log({ action: 'UsersService.findById', body: { id } }).catch(() => undefined);
+    this.audit
+      .log({ action: 'UsersService.findById', body: { id } })
+      .catch(() => undefined);
     return this.userRepository.findOne({ where: { id } });
   }
 

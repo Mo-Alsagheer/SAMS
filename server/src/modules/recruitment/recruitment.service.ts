@@ -22,7 +22,7 @@ export class RecruitmentService {
     @InjectRepository(Committee)
     private committeeRepository: Repository<Committee>,
     private readonly audit: AuditLogService,
-  ) { }
+  ) {}
 
   async openProcess(
     executiveId: number,
