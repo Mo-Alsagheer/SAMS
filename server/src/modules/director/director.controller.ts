@@ -121,7 +121,10 @@ export class DirectorController {
     description: 'Interview scheduled successfully.',
   })
   @ApiResponse({ status: 404, description: 'Application not found.' })
-  scheduleInterview(@Param('id', ParseIntIdPipe) id: number, @Body() payload: any) {
+  scheduleInterview(
+    @Param('id', ParseIntIdPipe) id: number,
+    @Body() payload: any,
+  ) {
     return this.directorService.scheduleInterview(id, payload);
   }
 

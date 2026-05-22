@@ -38,7 +38,7 @@ export class MaterialsService {
       fileUrl: finalFileUrl,
       uploadedBy: directorId,
     });
-    
+
     this.audit
       .log({
         action: 'MaterialsService.createForSession',
@@ -59,11 +59,13 @@ export class MaterialsService {
   }
 
   async remove(materialId: number, directorId: number): Promise<void> {
-    const material = await this.materialRepo.findOne({ where: { id: materialId } });
+    const material = await this.materialRepo.findOne({
+      where: { id: materialId },
+    });
     if (!material) {
       throw new NotFoundException('Material not found');
     }
-    
+
     this.audit
       .log({
         action: 'MaterialsService.remove',

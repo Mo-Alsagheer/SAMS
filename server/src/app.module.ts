@@ -59,4 +59,4 @@ import { MaterialsModule } from './modules/materials/materials.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

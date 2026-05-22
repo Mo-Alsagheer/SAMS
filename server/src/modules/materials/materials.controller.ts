@@ -64,9 +64,17 @@ export class MaterialsController {
   ) {
     let fileUrl: string | undefined;
     if (file) {
-      fileUrl = await this.cloudinaryService.uploadFile(file, 'Session_Materials');
+      fileUrl = await this.cloudinaryService.uploadFile(
+        file,
+        'Session_Materials',
+      );
     }
-    return this.materialsService.createForSession(sessionId, dto, fileUrl, req.user.id);
+    return this.materialsService.createForSession(
+      sessionId,
+      dto,
+      fileUrl,
+      req.user.id,
+    );
   }
 
   @Delete('director/materials/:materialId')

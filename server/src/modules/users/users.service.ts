@@ -10,22 +10,20 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly audit: AuditLogService,
-  ) { }
+  ) {}
 
   findByEmail(email: string): Promise<User | null> {
-    this.audit.log({ action: 'UsersService.findByEmail', body: { email } }).catch(() => undefined);
+    this.audit
+      .log({ action: 'UsersService.findByEmail', body: { email } })
+      .catch(() => undefined);
     return this.userRepository.findOne({ where: { email } });
   }
 
   findById(id: number): Promise<User | null> {
-    this.audit.log({ action: 'UsersService.findById', body: { id } }).catch(() => undefined);
+    this.audit
+      .log({ action: 'UsersService.findById', body: { id } })
+      .catch(() => undefined);
     return this.userRepository.findOne({ where: { id } });
-  }
-
-  createApplicant(data: Partial<User>): Promise<User> {
-    this.audit.log({ action: 'UsersService.createApplicant', body: { email: data.email } }).catch(() => undefined);
-    const user = this.userRepository.create(data);
-    return this.userRepository.save(user);
   }
 
   list(): Promise<User[]> {

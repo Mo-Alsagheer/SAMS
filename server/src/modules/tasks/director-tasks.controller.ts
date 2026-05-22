@@ -65,6 +65,10 @@ export class DirectorTasksController {
     @Body() dto: GradeSubmissionDto,
     @Req() req: Request & { user: AuthUser },
   ) {
-    return this.tasksService.gradeSubmission(submissionId, dto.score, req.user.id);
+    return this.tasksService.gradeSubmission(
+      submissionId,
+      dto.score,
+      req.user.id,
+    );
   }
 }

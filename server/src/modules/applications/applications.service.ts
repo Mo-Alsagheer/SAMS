@@ -28,10 +28,12 @@ export class ApplicationsService {
     private committeeRepository: Repository<Committee>,
     private aiService: AiService,
     private readonly audit: AuditLogService,
-  ) { }
+  ) {}
 
-  async createApplication(dto: CreateApplicationDto, userId: number) {
-    this.audit.log({ action: 'ApplicationsService.createApplication', userId: String(userId), body: { dto } }).catch(() => undefined);
+  async createApplication(dto: CreateApplicationDto) {
+    this.audit
+      .log({ action: 'ApplicationsService.createApplication', body: { dto } })
+      .catch(() => undefined);
     if (dto.targetRole === Role.EXECUTIVE) {
       if (dto.committeeId) {
         throw new BadRequestException(
@@ -72,7 +74,6 @@ export class ApplicationsService {
 
     const application = this.applicationRepository.create({
       committeeId: dto.committeeId || null,
-      userId,
       name: dto.name,
       email: dto.email,
       phone: dto.phone,
@@ -85,15 +86,10 @@ export class ApplicationsService {
     return this.applicationRepository.save(application);
   }
 
-  async findByUserId(userId: number) {
-    return this.applicationRepository.find({
-      where: { userId },
-      order: { createdAt: 'DESC' },
-    });
-  }
-
   async findOne(id: number) {
-    this.audit.log({ action: 'ApplicationsService.findOne', body: { id } }).catch(() => undefined);
+    this.audit
+      .log({ action: 'ApplicationsService.findOne', body: { id } })
+      .catch(() => undefined);
     const application = await this.applicationRepository.findOne({
       where: { id },
     });
@@ -104,7 +100,9 @@ export class ApplicationsService {
   }
 
   async evaluatePendingApplications() {
-    this.audit.log({ action: 'ApplicationsService.evaluatePendingApplications' }).catch(() => undefined);
+    this.audit
+      .log({ action: 'ApplicationsService.evaluatePendingApplications' })
+      .catch(() => undefined);
     const applications = await this.applicationRepository.find({
       where: { status: ApplicationStatus.SUBMITTED },
     });

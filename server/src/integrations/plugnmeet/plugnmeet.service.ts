@@ -1,7 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PlugNmeet, createRequest } from 'plugnmeet-sdk-js';
-import { CreateRoomReqSchema, GenerateTokenReqSchema, FetchRecordingsReqSchema, IsRoomActiveReqSchema, RoomEndReqSchema } from 'plugnmeet-protocol-js';
+import {
+  CreateRoomReqSchema,
+  GenerateTokenReqSchema,
+  FetchRecordingsReqSchema,
+  IsRoomActiveReqSchema,
+  RoomEndReqSchema,
+} from 'plugnmeet-protocol-js';
 
 @Injectable()
 export class PlugnmeetService {
@@ -113,7 +119,11 @@ export class PlugnmeetService {
   /**
    * Generates a join token for a user
    */
-  async getJoinToken(roomId: string, user: { id: string; name: string }, isDirector: boolean) {
+  async getJoinToken(
+    roomId: string,
+    user: { id: string; name: string },
+    isDirector: boolean,
+  ) {
     try {
       const req = createRequest(GenerateTokenReqSchema, {
         roomId: roomId,
@@ -146,7 +156,9 @@ export class PlugnmeetService {
       const response = await this.plugnmeetClient.fetchRecordings(req);
       return response;
     } catch (error) {
-      this.logger.error(`Error fetching plugNmeet recordings: ${error.message}`);
+      this.logger.error(
+        `Error fetching plugNmeet recordings: ${error.message}`,
+      );
       throw error;
     }
   }

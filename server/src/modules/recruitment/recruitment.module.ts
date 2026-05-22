@@ -7,7 +7,10 @@ import { Committee } from '../committees/entities/committee.entity';
 import { AuditLogModule } from '../audit-log/audit-log.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([RecruitmentProcess, Committee]), AuditLogModule],
+  imports: [
+    TypeOrmModule.forFeature([RecruitmentProcess, Committee]),
+    AuditLogModule,
+  ],
   controllers: [RecruitmentController],
   providers: [RecruitmentService],
 })

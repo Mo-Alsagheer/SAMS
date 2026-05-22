@@ -10,4 +10,4 @@ import { AuditLogModule } from '../audit-log/audit-log.module';
   providers: [UsersService],
   exports: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}

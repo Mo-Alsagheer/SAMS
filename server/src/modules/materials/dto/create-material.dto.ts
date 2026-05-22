@@ -7,7 +7,9 @@ export class CreateMaterialDto {
   @IsString()
   title: string;
 
-  @ApiPropertyOptional({ description: 'File URL if already uploaded externally' })
+  @ApiPropertyOptional({
+    description: 'File URL if already uploaded externally',
+  })
   @IsOptional()
   @IsString()
   fileUrl?: string;

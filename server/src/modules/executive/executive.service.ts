@@ -37,7 +37,7 @@ export class ExecutiveService {
     private readonly configService: ConfigService,
     private readonly aiService: AiService,
     private readonly audit: AuditLogService,
-  ) { }
+  ) {}
 
   async getDirectorsByCommittee(committeeId: number): Promise<User[]> {
     return this.userRepository.find({
@@ -220,15 +220,15 @@ export class ExecutiveService {
     const recruitmentWhere =
       application.targetRole === Role.EXECUTIVE
         ? {
-          role: Role.EXECUTIVE,
-          committeeId: IsNull(),
-          status: RecruitmentStatus.OPEN,
-        }
+            role: Role.EXECUTIVE,
+            committeeId: IsNull(),
+            status: RecruitmentStatus.OPEN,
+          }
         : {
-          role: Role.DIRECTOR,
-          committeeId: application.committeeId,
-          status: RecruitmentStatus.OPEN,
-        };
+            role: Role.DIRECTOR,
+            committeeId: application.committeeId,
+            status: RecruitmentStatus.OPEN,
+          };
 
     const recruitment = await this.recruitmentRepository.findOne({
       where: recruitmentWhere,
@@ -259,33 +259,44 @@ export class ExecutiveService {
 
     // Determine the role label for the email
     const roleLabel =
-      application.targetRole === Role.EXECUTIVE ? 'Executive' : 
-      application.targetRole === Role.DIRECTOR ? 'Director' : 'Member';
+      application.targetRole === Role.EXECUTIVE
+        ? 'Executive'
+        : application.targetRole === Role.DIRECTOR
+          ? 'Director'
+          : 'Member';
 
-    // The user already exists because they signed up as APPLICANT
     let user = await this.userRepository.findOne({
-      where: { id: application.userId },
+      where: { email: application.email },
     });
+
+    const password = this.generatePassword();
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     if (user) {
       user.role = application.targetRole;
       user.committeeId = application.committeeId ?? null;
+      user.password = hashedPassword;
       await this.userRepository.save(user);
     } else {
-      // Fallback just in case user was not linked correctly
-      throw new BadRequestException('Applicant user account not found');
+      user = this.userRepository.create({
+        name: application.name,
+        email: application.email,
+        phone: application.phone,
+        password: hashedPassword,
+        role: application.targetRole,
+        committeeId: application.committeeId ?? null,
+      });
+      await this.userRepository.save(user);
     }
 
-    // Send welcome email without password, just saying they got accepted
     const loginUrl =
       this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:5173';
-    
-    // We modify sendWelcomeEmail to not require password, or just send it without it
-    // If EmailService.sendWelcomeEmail requires password, we can pass 'Your existing password'
+
     await this.emailService.sendWelcomeEmail({
       to: application.email,
       name: application.name,
       role: roleLabel,
-      password: 'Your existing account password',
+      password,
       loginUrl,
     });
 

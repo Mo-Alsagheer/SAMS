@@ -16,10 +16,12 @@ export class SessionsService {
     private readonly sessionsRepository: Repository<Session>,
     private readonly meetingsService: MeetingsService,
     private readonly audit: AuditLogService,
-  ) { }
+  ) {}
 
   async create(createSessionDto: CreateSessionDto): Promise<Session> {
-    this.audit.log({ action: 'SessionsService.create', body: { createSessionDto } }).catch(() => undefined);
+    this.audit
+      .log({ action: 'SessionsService.create', body: { createSessionDto } })
+      .catch(() => undefined);
     const session = this.sessionsRepository.create({
       ...createSessionDto,
       scheduledAt: new Date(createSessionDto.scheduledAt),
@@ -32,7 +34,10 @@ export class SessionsService {
     return this.sessionsRepository.find();
   }
 
-  async update(id: number, updateSessionDto: UpdateSessionDto): Promise<Session> {
+  async update(
+    id: number,
+    updateSessionDto: UpdateSessionDto,
+  ): Promise<Session> {
     const session = await this.findById(id);
     Object.assign(session, {
       ...updateSessionDto,
@@ -59,7 +64,8 @@ export class SessionsService {
   async getJoinToken(sessionId: number, user: AuthUser) {
     const session = await this.findById(sessionId);
 
-    const isDirector = user.role === Role.DIRECTOR || user.role === Role.EXECUTIVE;
+    const isDirector =
+      user.role === Role.DIRECTOR || user.role === Role.EXECUTIVE;
 
     if (!session.plugnmeetRoomId) {
       throw new NotFoundException(

@@ -58,7 +58,10 @@ export class TasksController {
   ) {
     let fileUrl = dto.fileUrl;
     if (file) {
-      fileUrl = await this.cloudinaryService.uploadFile(file, 'Task_Submissions');
+      fileUrl = await this.cloudinaryService.uploadFile(
+        file,
+        'Task_Submissions',
+      );
     }
     return this.tasksService.submit(taskId, req.user.id, { ...dto, fileUrl });
   }

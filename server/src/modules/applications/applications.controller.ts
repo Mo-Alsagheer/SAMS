@@ -1,12 +1,8 @@
-import { Controller, Post, Get, Param, Body, UseGuards, Req } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Controller, Post, Get, Param, Body } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { AuthUser } from '../auth/auth.types';
-
 @ApiTags('applications')
 @Controller('applications')
 export class ApplicationsController {
@@ -24,8 +20,6 @@ export class ApplicationsController {
     return this.applicationsService.evaluatePendingApplications();
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @Post('submit')
   @ApiOperation({ summary: 'Submit an application directly' })
   @ApiResponse({
@@ -40,20 +34,8 @@ export class ApplicationsController {
     status: 409,
     description: 'An application with this email has already been submitted.',
   })
-  createApplication(
-    @Body() dto: CreateApplicationDto,
-    @Req() req: Request & { user: AuthUser },
-  ) {
-    return this.applicationsService.createApplication(dto, req.user.id);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @Get('me')
-  @ApiOperation({ summary: 'Get current user applications' })
-  @ApiResponse({ status: 200, description: 'Applications retrieved.' })
-  findMyApplications(@Req() req: Request & { user: AuthUser }) {
-    return this.applicationsService.findByUserId(req.user.id);
+  createApplication(@Body() dto: CreateApplicationDto) {
+    return this.applicationsService.createApplication(dto);
   }
 
   @Get(':id')

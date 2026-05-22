@@ -13,7 +13,12 @@ import { AuditLogModule } from '../audit-log/audit-log.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Application, RecruitmentProcess, Committee]),
+    TypeOrmModule.forFeature([
+      User,
+      Application,
+      RecruitmentProcess,
+      Committee,
+    ]),
     ConfigModule,
     EmailModule,
     AiModule,

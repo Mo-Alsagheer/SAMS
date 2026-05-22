@@ -32,7 +32,7 @@ export class TasksService {
       description: dto.description ?? null,
       dueDate: new Date(dto.dueDate),
     });
-    
+
     this.audit
       .log({
         action: 'TasksService.createForSession',
@@ -79,7 +79,7 @@ export class TasksService {
     if (existing) {
       existing.content = dto.content?.trim() ?? null;
       existing.fileUrl = dto.fileUrl?.trim() ?? null;
-      
+
       this.audit
         .log({
           action: 'TasksService.updateSubmission',
@@ -87,7 +87,7 @@ export class TasksService {
           body: { taskId, dto },
         })
         .catch(() => undefined);
-        
+
       return this.submissionRepo.save(existing);
     }
 
@@ -98,7 +98,7 @@ export class TasksService {
       fileUrl: dto.fileUrl?.trim() ?? null,
       score: null,
     });
-    
+
     this.audit
       .log({
         action: 'TasksService.createSubmission',
@@ -135,7 +135,7 @@ export class TasksService {
   ): Promise<TaskSubmission> {
     const submission = await this.findSubmissionById(submissionId);
     submission.score = score;
-    
+
     this.audit
       .log({
         action: 'TasksService.gradeSubmission',

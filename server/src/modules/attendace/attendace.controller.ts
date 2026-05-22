@@ -30,7 +30,7 @@ import { AuthUser } from '../auth/auth.types';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller()
 export class AttendaceController {
-  constructor(private readonly attendaceService: AttendaceService) { }
+  constructor(private readonly attendaceService: AttendaceService) {}
 
   @Get('director/sessions/:sessionId/attendance')
   @Roles(Role.DIRECTOR)
@@ -62,7 +62,11 @@ export class AttendaceController {
     @Req() req: Request & { user?: AuthUser },
   ) {
     const directorId = req.user?.id ?? 1; // Default to 1 for testing
-    return this.attendaceService.markAttendance(sessionId, dto.members, directorId);
+    return this.attendaceService.markAttendance(
+      sessionId,
+      dto.members,
+      directorId,
+    );
   }
 
   @Get('users/me/score')

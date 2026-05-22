@@ -3,7 +3,6 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { AuthUser } from './auth.types';
-import { Role } from '../../common/constants/role.enum';
 import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
@@ -18,9 +17,11 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<AuthUser | null> {
-    this.audit.log({ action: 'AuthService.validateUser', body: { email } }).catch(() => undefined);
+    this.audit
+      .log({ action: 'AuthService.validateUser', body: { email } })
+      .catch(() => undefined);
     const user = await this.usersService.findByEmail(email);
-    
+
     let isMatch = false;
     if (user) {
       isMatch = await bcrypt.compare(password, user.password);
@@ -47,10 +48,14 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
-    this.audit.log({ action: 'AuthService.loginAttempt', body: { email } }).catch(() => undefined);
+    this.audit
+      .log({ action: 'AuthService.loginAttempt', body: { email } })
+      .catch(() => undefined);
     const user = await this.validateUser(email, password);
     if (!user) {
-      this.audit.log({ action: 'AuthService.loginFailed', body: { email } }).catch(() => undefined);
+      this.audit
+        .log({ action: 'AuthService.loginFailed', body: { email } })
+        .catch(() => undefined);
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -65,26 +70,5 @@ export class AuthService {
       accessToken: await this.jwtService.signAsync(payload),
       user,
     };
-  }
-
-  async signup(name: string, email: string, phone: string, pass: string) {
-    this.audit.log({ action: 'AuthService.signupAttempt', body: { email } }).catch(() => undefined);
-    
-    const existingUser = await this.usersService.findByEmail(email);
-    if (existingUser) {
-      this.audit.log({ action: 'AuthService.signupFailed', body: { email, reason: 'Email already exists' } }).catch(() => undefined);
-      throw new UnauthorizedException('Email already in use');
-    }
-
-    const hashedPassword = await bcrypt.hash(pass, 10);
-    await this.usersService.createApplicant({
-      name,
-      email,
-      phone,
-      password: hashedPassword,
-      role: Role.APPLICANT,
-    });
-    
-    return this.login(email, pass);
   }
 }

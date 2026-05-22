@@ -32,7 +32,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       `[FAILED] ${request.method} ${request.originalUrl} - Status: ${status}`,
       exception instanceof Error ? exception.stack : String(exception),
     );
-    
+
     // Also log body/query for easier debugging, being careful not to log passwords
     const safeBody = { ...request.body };
     if (safeBody.password) safeBody.password = '[REDACTED]';

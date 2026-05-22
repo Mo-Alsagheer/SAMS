@@ -36,14 +36,19 @@ export class AuditLogService {
     };
 
     // Print to console so developers can see it happening live
-    this.logger.log(`[AUDIT] Action: ${toSave.action} | UserID: ${toSave.userId || 'Guest'} | Path: ${toSave.path || 'N/A'}`);
+    this.logger.log(
+      `[AUDIT] Action: ${toSave.action} | UserID: ${toSave.userId || 'Guest'} | Path: ${toSave.path || 'N/A'}`,
+    );
 
     return this.repo.save(this.repo.create(toSave as AuditLog));
   }
 
-  async findAll(options: { page?: number; limit?: number; filter?: Partial<AuditLog> } = {}) {
+  async findAll(
+    options: { page?: number; limit?: number; filter?: Partial<AuditLog> } = {},
+  ) {
     const page = options.page && options.page > 0 ? options.page : 1;
-    const limit = options.limit && options.limit > 0 ? Math.min(options.limit, 100) : 20;
+    const limit =
+      options.limit && options.limit > 0 ? Math.min(options.limit, 100) : 20;
     const skip = (page - 1) * limit;
 
     const where: any = {};
