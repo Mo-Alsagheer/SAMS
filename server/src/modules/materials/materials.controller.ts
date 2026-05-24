@@ -38,7 +38,7 @@ export class MaterialsController {
   constructor(
     private readonly materialsService: MaterialsService,
     private readonly cloudinaryService: CloudinaryService,
-  ) { }
+  ) {}
 
   @Get('sessions/:sessionId/materials')
   @ApiOperation({ summary: 'List materials for a session' })

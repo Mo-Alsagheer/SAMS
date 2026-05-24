@@ -109,19 +109,21 @@ export class ApplicationsService {
     }
 
     try {
-      const evaluationResponse = await this.aiService.evaluateBatchApplications({
-        cvs: [
-          {
-            id: application.id,
-            type: 'gdrive',
-            link: application.cvLink,
-            committee_name: committee ? committee.name : 'General',
-            committee_focus: committee?.description
-              ? committee.description
-              : 'General community operations',
-          },
-        ],
-      });
+      const evaluationResponse = await this.aiService.evaluateBatchApplications(
+        {
+          cvs: [
+            {
+              id: application.id,
+              type: 'gdrive',
+              link: application.cvLink,
+              committee_name: committee ? committee.name : 'General',
+              committee_focus: committee?.description
+                ? committee.description
+                : 'General community operations',
+            },
+          ],
+        },
+      );
 
       let aiScore = null;
       if (
