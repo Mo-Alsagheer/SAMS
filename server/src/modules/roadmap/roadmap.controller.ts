@@ -13,10 +13,10 @@ import { RoadmapService } from './roadmap.service';
 import { CreateRoadmapDto } from './dto/create-roadmap.dto';
 import { UpdateRoadmapDto } from './dto/update-roadmap.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Role } from 'src/common/constants/role.enum';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Role } from '../../common/constants/role.enum';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
 
 @ApiTags('roadmap')
