@@ -96,7 +96,53 @@ export class ApplicationsService {
     if (!application) {
       throw new NotFoundException('Application not found');
     }
-    return application;
+
+    let committee = null;
+    if (application.committeeId) {
+      committee = await this.committeeRepository.findOne({
+        where: { id: application.committeeId },
+      });
+    }
+
+    if (!application.cvLink) {
+      return { ...application, aiScore: null };
+    }
+
+    try {
+      const evaluationResponse = await this.aiService.evaluateBatchApplications({
+        cvs: [
+          {
+            id: application.id,
+            type: 'gdrive',
+            link: application.cvLink,
+            committee_name: committee ? committee.name : 'General',
+            committee_focus: committee?.description
+              ? committee.description
+              : 'General community operations',
+          },
+        ],
+      });
+
+      let aiScore = null;
+      if (
+        evaluationResponse &&
+        evaluationResponse.results &&
+        evaluationResponse.results.length > 0
+      ) {
+        aiScore = evaluationResponse.results[0];
+      }
+
+      return {
+        ...application,
+        aiScore: aiScore || null,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        ...application,
+        aiScore: null,
+      };
+    }
   }
 
   async evaluatePendingApplications() {
