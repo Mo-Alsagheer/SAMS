@@ -14,6 +14,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { ForgetPasswordDto } from './dto/forget-password.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @ApiTags('auth')
@@ -30,6 +31,16 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid email or password.' })
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto.email, dto.password);
+  }
+
+  @Post('forget-password')
+  @ApiOperation({ summary: 'Request a password reset email' })
+  @ApiResponse({
+    status: 200,
+    description: 'If the email exists, a password reset link is sent.',
+  })
+  async forgetPassword(@Body() dto: ForgetPasswordDto) {
+    return this.authService.forgetPassword(dto.email);
   }
 
   @UseGuards(JwtAuthGuard)

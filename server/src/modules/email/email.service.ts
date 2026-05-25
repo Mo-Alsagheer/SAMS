@@ -110,4 +110,79 @@ export class EmailService {
       // Do not rethrow — email failure should not block the acceptance response
     }
   }
+
+  async sendForgetPasswordEmail(opts: {
+    to: string;
+    resetToken: string;
+    resetUrl: string;
+  }): Promise<void> {
+    const { to, resetToken, resetUrl } = opts;
+    const finalUrl = `${resetUrl}?token=${resetToken}`;
+
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reset Password</title>
+  <style>
+    body { margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6fb; }
+    .wrapper { max-width: 560px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .header { background: linear-gradient(135deg, #1a1f3c 0%, #2d3580 100%); padding: 40px 32px; text-align: center; }
+    .header h1 { margin: 0; color: #ffffff; font-size: 26px; letter-spacing: 1px; }
+    .body { padding: 36px 32px; }
+    .text { font-size: 15px; color: #555; line-height: 1.7; margin-bottom: 24px; }
+    .btn-wrap { text-align: center; margin-bottom: 28px; }
+    .btn { display: inline-block; background: linear-gradient(135deg, #2d3580, #4a54c4); color: #ffffff !important; text-decoration: none; padding: 14px 36px; border-radius: 8px; font-size: 15px; font-weight: 600; letter-spacing: 0.5px; }
+    .notice { font-size: 13px; color: #888; text-align: center; line-height: 1.6; }
+    .footer { background: #f8f9fe; padding: 20px 32px; text-align: center; font-size: 12px; color: #aaa; border-top: 1px solid #eee; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1>SAMS</h1>
+    </div>
+    <div class="body">
+      <p class="text">
+        We received a request to reset your password. If you didn't make this request, you can safely ignore this email.
+      </p>
+      <p class="text">Click the button below to reset your password:</p>
+      <div class="btn-wrap">
+        <a href="${finalUrl}" class="btn">Reset Password</a>
+      </div>
+      <p class="notice">
+        This link will expire in 15 minutes.
+      </p>
+    </div>
+    <div class="footer">
+      &copy; ${new Date().getFullYear()} SAMS. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>
+    `.trim();
+
+    try {
+      await this.resend.emails.send({
+        from: this.fromAddress,
+        to,
+        subject: '🔒 Reset Your SAMS Password',
+        html,
+      });
+      this.logger.log(`Forget password email sent to ${to}`);
+      this.audit
+        .log({ action: 'EmailService.sendForgetPasswordEmail', body: { to } })
+        .catch(() => undefined);
+    } catch (error) {
+      this.logger.error(`Failed to send forget password email to ${to}`, error);
+      this.audit
+        .log({
+          action: 'EmailService.sendForgetPasswordEmailFailed',
+          body: { to, errorMessage: String(error) },
+        })
+        .catch(() => undefined);
+    }
+  }
 }

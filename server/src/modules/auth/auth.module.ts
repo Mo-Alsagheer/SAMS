@@ -6,9 +6,11 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { AuditLogModule } from '../audit-log/audit-log.module';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
+    EmailModule,
     UsersModule,
     PassportModule,
     AuditLogModule,
