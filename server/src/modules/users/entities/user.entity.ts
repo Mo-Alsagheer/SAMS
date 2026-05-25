@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { Role } from '../../../common/constants/role.enum';
 import { Committee } from '../../committees/entities/committee.entity';
 
@@ -27,8 +28,9 @@ export class User {
   @Column({ type: 'text', unique: true })
   email: string;
 
+  @Exclude()
   @Column({ type: 'text', nullable: true })
-  password?: string;
+  password: string;
 
   @Column({ type: 'enum', enum: Role, default: Role.MEMBER })
   role: Role;
