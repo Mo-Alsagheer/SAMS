@@ -52,6 +52,9 @@ def extract_gdrive_text(gdrive_url: str) -> str:
         return extract_docx_text(file_bytes)
     else:
         try:
-            return file_bytes.decode('utf-8')
+            decoded_text = file_bytes.decode('utf-8')
+            if "<html" in decoded_text.lower() and "sign in" in decoded_text.lower():
+                return "[Error: Google Drive link is private or requires sign-in. Please ensure the link is set to 'Anyone with the link can view'.]"
+            return decoded_text
         except:
             return "[Unsupported file format or unreadable text]"

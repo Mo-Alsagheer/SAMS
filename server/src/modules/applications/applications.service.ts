@@ -109,34 +109,19 @@ export class ApplicationsService {
     }
 
     try {
-      const evaluationResponse = await this.aiService.evaluateBatchApplications(
-        {
-          cvs: [
-            {
-              id: application.id,
-              type: 'gdrive',
-              link: application.cvLink,
-              committee_name: committee ? committee.name : 'General',
-              committee_focus: committee?.description
-                ? committee.description
-                : 'General community operations',
-            },
-          ],
-        },
-      );
-
-      let aiScore = null;
-      if (
-        evaluationResponse &&
-        evaluationResponse.results &&
-        evaluationResponse.results.length > 0
-      ) {
-        aiScore = evaluationResponse.results[0];
-      }
+      const evaluationResponse = await this.aiService.evaluateApplication({
+        id: application.id,
+        type: 'gdrive',
+        link: application.cvLink,
+        committee_name: committee ? committee.name : 'General',
+        committee_focus: committee?.description
+          ? committee.description
+          : 'General community operations',
+      });
 
       return {
         ...application,
-        aiScore: aiScore || null,
+        aiScore: evaluationResponse || null,
       };
     } catch (error) {
       console.log(error);
