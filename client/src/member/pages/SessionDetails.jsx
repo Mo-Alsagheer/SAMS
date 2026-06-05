@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useParams, Link } from "react-router-dom";
-import { getSession } from "@/data/mock-data";
+import { getSession } from "@/features/sessions/sessions";
+import { getTasks } from "@/features/tasks/tasks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,8 +19,10 @@ import {
   Video,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { joinMeeting } from "@/features/meetings/meetings";
+import { getMaterials } from "@/features/materials/materials";
 
 function formatDateTime(date) {
   return new Date(date).toLocaleString("en-US", {
@@ -32,33 +35,72 @@ function formatDateTime(date) {
 }
 
 function resourceIcon(type) {
-  if (type === "video") return Video;
-  if (type === "link") return LinkIcon;
+  const val = type || "";
+  const url = String(val);
+  const ext = url.split(".").pop()?.split("?")[0]?.toLowerCase();
+  if (["mp4", "mov", "webm", "m4v"].includes(ext)) return Video;
+  if (url.startsWith("http") && url.includes("youtube")) return LinkIcon;
   return FileText;
 }
 
 export default function SessionDetails() {
-  function handleJoin() {
-    toast.success("Redirecting to meeting...");
-
-    // mock redirect
-    setTimeout(() => {
-      window.location.href = "https://your-plugnmeet-url.com";
-    }, 800);
+  async function handleJoin() {
+    try {
+      toast("Joining meeting...");
+      const res = await joinMeeting(sessionId);
+      // possible response shapes: { token }, { token: '...' }, or nested
+      const token =
+        res?.token ??
+        res?.data?.token ??
+        res?.access_token ??
+        res?.token?.token;
+      if (!token) {
+        console.error("Join meeting response:", res);
+        toast.error("Could not obtain meeting token.");
+        return;
+      }
+      const url = `https://demo.plugnmeet.com?access_token=${encodeURIComponent(token)}`;
+      // small delay so toast is visible before redirect
+      setTimeout(() => (window.location.href = url), 300);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to join meeting.");
+    }
   }
+
   const { sessionId } = useParams();
-  const session = getSession(sessionId);
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!session) {
-    return <div>Session not found</div>;
-  }
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      try {
+        const s = await getSession(sessionId);
+        const tasks = await getTasks(sessionId);
+        const materials = await getMaterials(sessionId);
+        if (mounted) setSession({ ...s, tasks, materials });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [sessionId]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!session) return <div>Session not found</div>;
+
   const isLive = session.status === "live";
   const canJoin = isLive && session.meetingActive;
-  // useEffect(() => {
-  //   fetch(`/api/sessions/${sessionId}`)
-  // })
+  const canOpen = canJoin || Boolean(session.plugnmeetRoomId || session.meetingId);
+
   return (
-    <div className="mx-auto max-w-5xl px-4  md:px-8">
+    <div className="mx-auto max-w-5xl px-4 md:px-8">
       {/* <Button asChild variant="ghost" size="sm" className="mb-4 -ml-2">
         <Link to="..">
           <ArrowLeft className="mr-1 h-4 w-4" />
@@ -68,7 +110,7 @@ export default function SessionDetails() {
 
       {/* Hero card */}
       <Card className="overflow-hidden border-0 shadow-elegant">
-        <div className="relative bg-gradient-primary p-6 text-primary-foreground md:p-8">
+        <div className="relative p-6 text-muted-foreground md:p-8">
           <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
           <div className="relative">
             <div className="flex flex-wrap items-center gap-2">
@@ -84,7 +126,7 @@ export default function SessionDetails() {
             <h1 className="mt-3 text-2xl font-bold tracking-tight md:text-3xl">
               {session.title}
             </h1>
-            <p className="mt-2 max-w-2xl text-primary-foreground/85">
+            <p className="mt-2 max-w-2xl text-muted-foreground">
               {session.description}
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-5 text-sm">
@@ -109,14 +151,25 @@ export default function SessionDetails() {
                 {canJoin
                   ? "Join meeting"
                   : isLive
-                    ? "Meeting starting..."
-                    : "Meeting not started"}
+                    ? "Meeting not started"
+                    : "Not Live"}
               </Button>
+
+              <Button
+                size="lg"
+                variant="ghost"
+                onClick={handleJoin}
+                disabled={!canOpen}
+                className="text-primary hover:bg-white/5"
+              >
+                Open meeting
+              </Button>
+
               {session.recordingUrl && (
                 <Button
                   size="lg"
                   variant="outline"
-                  className="bg-transparent border-white/30 text-primary-foreground hover:bg-white/10 hover:text-primary-foreground"
+                  className="bg-transparent border-white/30 text-muted-foreground hover:bg-white/10 hover:text-muted-foreground"
                 >
                   <Video className="mr-2 h-5 w-5" />
                   Watch recording
@@ -135,16 +188,16 @@ export default function SessionDetails() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Tasks</span>
-                <Badge variant="secondary">{session.tasks.length}</Badge>
+                <Badge variant="secondary">{session.tasks?.length || 0}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {session.tasks.length === 0 && (
+              {(!session.tasks || session.tasks.length === 0) && (
                 <p className="text-sm text-muted-foreground">
                   No tasks assigned for this session.
                 </p>
               )}
-              {session.tasks.map((task) => (
+              {session.tasks?.map((task) => (
                 <TaskItem key={task.id} task={task} />
               ))}
             </CardContent>
@@ -155,20 +208,20 @@ export default function SessionDetails() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Resources</CardTitle>
+              <CardTitle>Materials</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {session.resources.length === 0 && (
+              {(!session.materials || session.materials.length === 0) && (
                 <p className="text-sm text-muted-foreground">
                   No materials uploaded.
                 </p>
               )}
-              {session.resources.map((r) => {
+              {session.materials?.map((r) => {
                 const Icon = resourceIcon(r.type);
                 return (
                   <a
                     key={r.id}
-                    href={r.url}
+                    href={r.fileUrl}
                     className="group flex items-center gap-3 rounded-lg border border-border p-3 transition-smooth hover:border-primary/40 hover:bg-accent/50"
                   >
                     <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary">
@@ -176,7 +229,7 @@ export default function SessionDetails() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-medium">
-                        {r.name}
+                        {r.title}
                       </div>
                       {r.size && (
                         <div className="text-xs text-muted-foreground">
@@ -184,7 +237,7 @@ export default function SessionDetails() {
                         </div>
                       )}
                     </div>
-                    {r.type === "link" ? (
+                    {r.type === "fileUrl" ? (
                       <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     ) : (
                       <Download className="h-4 w-4 text-muted-foreground" />
@@ -204,6 +257,7 @@ function TaskItem({ task }) {
   const [open, setOpen] = useState(task.status === "pending");
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
+
   const statusMap = {
     pending: {
       label: "Pending",
@@ -218,7 +272,7 @@ function TaskItem({ task }) {
       className: "bg-success/15 text-success border-success/30",
     },
   };
-  const cfg = statusMap[task.status];
+  const cfg = statusMap[task.status] || { label: "Unknown", className: "" };
 
   function submit() {
     if (!text && !file) {
@@ -244,7 +298,7 @@ function TaskItem({ task }) {
               {cfg.label}
             </Badge>
             {task.status === "graded" && (
-              <Badge className="bg-gradient-primary text-primary-foreground border-0">
+              <Badge className="bg-gradient-primary text-muted-foreground border-0">
                 {task.score}/{task.maxScore} pts
               </Badge>
             )}

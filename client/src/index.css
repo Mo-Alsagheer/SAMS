@@ -59,7 +59,7 @@
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
     --primary:#3656f4c5;
-    --primary-foreground: oklch(30.221% 0.00143 15.911);
+    --primary-foreground: oklch(100% 0.00011 271.152);
     --secondary:#000755;
     --secondary-foreground: #ffffff;
     --muted: oklch(0.97 0 0);
@@ -98,7 +98,7 @@
     --popover: oklch(0.205 0 0);
     --popover-foreground: oklch(0.985 0 0);
     --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(92.191% 0.0001 271.152);
+    --primary-foreground: oklch(0% 0 0);
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
     --muted: oklch(0.269 0 0);

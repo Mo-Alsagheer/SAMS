@@ -63,7 +63,7 @@ function App() {
           </Route>
         </Route>
         {/* Member Protected Routes */}
-        <Route element={<ProtectedRoute allowedRoles={["DIRECTOR"]} />}>
+        <Route element={<ProtectedRoute allowedRoles={["MEMBER"]} />}>
           <Route path="/member" element={<MemberLayout />}>
             <Route index element={<MemberDashboard />} />
             <Route path="roadmap" element={<Roadmap />} />
