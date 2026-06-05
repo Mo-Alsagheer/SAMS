@@ -59,10 +59,10 @@ const committees = [
 ];
 
 const statusColor = {
-  pending: "bg-warning/10 text-warning border-warning/20",
-  interviewing: "bg-info/10 text-info border-info/20",
-  accepted: "bg-success/10 text-success border-success/20",
-  rejected: "bg-destructive/10 text-destructive border-destructive/20",
+  pending: "bg-warning/15 text-warning-foreground border border-warning/30",
+  interviewing: "bg-info/15 text-info border border-info/30",
+  accepted: "bg-success/15 text-success border border-success/30",
+  rejected: "bg-destructive/15 text-destructive border border-destructive/30",
 };
 
 const Dashboard = () => (
