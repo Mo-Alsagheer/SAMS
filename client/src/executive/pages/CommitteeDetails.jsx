@@ -11,12 +11,7 @@ import { getInitials } from "@/utils/getInitials";
 import { ArrowLeft } from "lucide-react";
 import TabButton from "../components/TabButton";
 import InfoCard from "../components/InfoCard";
-
-/* ---------------- Skeleton Components ---------------- */
-
-function Skeleton({ className }) {
-  return <div className={`animate-pulse bg-muted rounded-md ${className}`} />;
-}
+import { Skeleton } from "@/components/ui/skeleton";
 
 function CommitteeDetails() {
   const { committeeId } = useParams();
@@ -218,6 +213,5 @@ function CommitteeDetails() {
     </div>
   );
 }
-
 
 export default CommitteeDetails;

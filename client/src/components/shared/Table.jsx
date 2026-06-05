@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { ArrowUpDown } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function Table({
   columns,
@@ -82,14 +83,24 @@ function Table({
 
           <tbody>
             {loading ? (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="text-center p-6 text-gray-400"
-                >
-                  Loading...
-                </td>
-              </tr>
+              Array(rowsPerPage)
+                .fill(0)
+                .map((_, rIdx) => (
+                  <tr key={`skeleton-${rIdx}`} className="border-b">
+                    {columns.map((_, cIdx) => (
+                      <td key={cIdx} className="p-2 sm:p-4">
+                        {cIdx === 0 ? (
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <Skeleton className="h-4 w-40" />
+                          </div>
+                        ) : (
+                          <Skeleton className="h-4 w-full" />
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))
             ) : data.length === 0 ? (
               <tr>
                 <td
@@ -108,7 +119,7 @@ function Table({
                   {columns.map((col) => (
                     <td
                       key={`${row.id}-${col.accessor || col.header}`}
-                      className="p-2 sm:p-4 break-words"
+                      className="p-2 sm:p-4 wrap-break-word"
                     >
                       {col.render ? col.render(row) : row[col.accessor]}
                     </td>
