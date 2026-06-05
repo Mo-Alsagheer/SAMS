@@ -14,6 +14,8 @@ import ViewCommittee from "./user/committees/components/ViewCommittee";
 import UserCommitteeDetails from "./user/committees/components/CommitteeDetails";
 
 import Login from "./auth/Login";
+import ForgotPassword from "./auth/ForgotPassword";
+import ResetPassword from "./auth/ResetPassword";
 import { Toaster } from "sonner";
 import ExecutiveLayout from "./executive/pages/ExecutiveLayout";
 import ExecutiveDashboard from "./executive/pages/DashBoard";
@@ -39,6 +41,8 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/result" element={<QuizResult />} />
 
