@@ -57,7 +57,7 @@ function Table({
   const totalPages = Math.ceil(data.length / rowsPerPage);
 
   return (
-    <div className="bg-white shadow rounded-xl overflow-hidden">
+    <div className="bg-card text-foreground shadow rounded-xl overflow-hidden">
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead className="border-b text-gray-500 text-sm">
@@ -66,14 +66,17 @@ function Table({
                 <th
                   key={col.accessor || col.header}
                   onClick={() => col.accessor && requestSort(col.accessor)}
-                  className={`p-2 sm:p-4 text-left ${
+                  className={`h-10 px-2 sm:px-4 text-left align-middle font-medium whitespace-nowrap text-foreground ${
                     col.accessor ? "cursor-pointer select-none" : ""
                   }`}
                 >
                   <div className="flex items-center gap-1">
                     {col.header}
                     {col.accessor && (
-                      <ArrowUpDown size={14} className="text-gray-400" />
+                      <ArrowUpDown
+                        size={14}
+                        className="text-muted-foreground"
+                      />
                     )}
                   </div>
                 </th>
@@ -105,7 +108,7 @@ function Table({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="text-center p-6 text-gray-400"
+                  className="text-center p-6 text-muted-foreground"
                 >
                   No data
                 </td>
@@ -114,12 +117,12 @@ function Table({
               paginatedData.map((row) => (
                 <tr
                   key={row.id}
-                  className="border-b hover:bg-gray-50 transition"
+                  className="border-b transition-colors hover:bg-muted/50"
                 >
                   {columns.map((col) => (
                     <td
                       key={`${row.id}-${col.accessor || col.header}`}
-                      className="p-2 sm:p-4 wrap-break-word"
+                      className="p-2 sm:p-4 align-middle break-words text-foreground"
                     >
                       {col.render ? col.render(row) : row[col.accessor]}
                     </td>
@@ -133,10 +136,10 @@ function Table({
 
       {/* Pagination */}
       {data.length > rowsPerPage && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 p-4 text-sm">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 p-4 text-sm text-foreground">
           <button
             onClick={() => setPage((p) => Math.max(p - 1, 1))}
-            className="px-3 py-1 border rounded hover:bg-gray-50"
+            className="px-3 py-1 border border-border rounded hover:bg-muted/50"
           >
             Prev
           </button>
@@ -149,7 +152,7 @@ function Table({
             onClick={() =>
               setPage((p) => (start + rowsPerPage < data.length ? p + 1 : p))
             }
-            className="px-3 py-1 border rounded hover:bg-gray-50"
+            className="px-3 py-1 border border-border rounded hover:bg-muted/50"
           >
             Next
           </button>

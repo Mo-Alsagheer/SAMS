@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { getApplication } from "@/features/applications/applications";
 import {
@@ -62,7 +63,47 @@ const ApplicationDetails = () => {
     fetchApp();
   }, [id]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <div className="">
+        <div className="space-y-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <Skeleton className="h-6 w-32 rounded-full" />
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-8 w-20 rounded-md" />
+              <Skeleton className="h-8 w-20 rounded-md" />
+              <Skeleton className="h-8 w-20 rounded-md" />
+            </div>
+          </div>
+
+          <Card>
+            <CardContent className="pt-5">
+              <div className="flex flex-col md:flex-row gap-5">
+                <Skeleton className="h-20 w-20 rounded-full shrink-0" />
+                <div className="flex-1 space-y-3">
+                  <Skeleton className="h-6 w-48" />
+                  <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-40" />
+                  </div>
+                  <Skeleton className="h-4 w-full" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-8 w-24 rounded-md" />
+                    <Skeleton className="h-8 w-24 rounded-md" />
+                  </div>
+                </div>
+                <div className="flex gap-4 md:flex-col md:items-end shrink-0">
+                  <div className="text-center">
+                    <Skeleton className="h-5 w-20 mb-1" />
+                    <Skeleton className="h-10 w-20" />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
   if (!app) return <div>Application not found</div>;
   return (
     <div className="">
@@ -93,10 +134,6 @@ const ApplicationDetails = () => {
               className="text-destructive border-destructive/30 hover:bg-destructive/10 gap-1.5"
             >
               <XCircle className="h-4 w-4" /> Reject
-            </Button>
-
-            <Button size="sm" variant="outline" className="gap-1.5">
-              <User className="h-4 w-4" /> Request Human Interview
             </Button>
           </div>
         </div>
