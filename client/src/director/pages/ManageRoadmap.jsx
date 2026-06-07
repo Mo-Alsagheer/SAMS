@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { PopupForm } from '../../components/shared/PopupForm'
-import { Plus, Layout, GripVertical, Edit3, Trash2, Upload, FileText, X } from 'lucide-react'
+import { Plus, Layout, GripVertical, Edit3, Trash2, Upload, FileText, X, Eye } from 'lucide-react' // ضفت أيقونة Eye
 import { toast } from 'sonner'
 import * as z from "zod"
+import { Link } from 'react-router-dom' // استيراد Link للنتنقل
 
 
 const sessionSchema = z.object({
@@ -17,7 +18,7 @@ export default function ManageRoadmap() {
   const [sessions, setSessions] = useState([]);
   const [editingSession, setEditingSession] = useState(null);
 
- 
+  
   const roadmapFields = [
     { name: "sessionNumber", label: "Session Number", placeholder: "#", className: "col-span-2 md:col-span-1" },
     { name: "title", label: "Session Title", placeholder: "Topic name...", className: "col-span-2 md:col-span-1" },
@@ -41,7 +42,7 @@ export default function ManageRoadmap() {
 
     return (
       <div className="space-y-2 md:space-y-3">
-       
+        
         <div 
           onClick={() => document.getElementById('roadmap-upload').click()}
           className="group cursor-pointer border-2 border-dashed border-gray-200 rounded-xl md:rounded-2xl p-4 md:p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-blue-50/50 transition-all"
@@ -121,17 +122,26 @@ export default function ManageRoadmap() {
                   <span className="text-[9px] md:text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-tight">Session {s.sessionNumber}</span>
                   <h3 className="font-bold text-blue-900 text-base md:text-lg leading-none truncate">{s.title}</h3>
                 </div>
-               
+                
                 {s.outline && (
                   <p className="text-xs md:text-sm text-gray-500 mb-2 md:mb-3 line-clamp-2 leading-relaxed">
                     {s.outline}
                   </p>
                 )}
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-4">
                   <span className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-gray-400">
                     <FileText size={14} className="text-blue-400" />
                     {s.sessionFile?.length || 0} Resources
                   </span>
+                  
+                
+                  <Link 
+                   to={`/director/attendance/${s.sessionNumber}`} 
+                    className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors bg-blue-50/50 px-2 py-1 rounded-md"
+                  >
+                    <Eye size={14} />
+                    Manage Attendance
+                  </Link>
                 </div>
               </div>
             </div>
@@ -154,7 +164,7 @@ export default function ManageRoadmap() {
         onSubmit={handleSaveSession}
         submitLabel="Save"
         
-       
+        
         className="max-w-2xl w-[94%] max-h-[90vh] flex flex-col overflow-hidden rounded-[24px] md:rounded-[32px]" 
         gridClassName="grid grid-cols-2 gap-3 md:gap-4 overflow-y-auto p-1 pr-2 max-h-full custom-scrollbar" 
         
@@ -162,7 +172,7 @@ export default function ManageRoadmap() {
         titleColor="text-blue-900 font-black text-xl md:text-2xl pt-2"
         labelColor="text-[11px] md:text-sm font-bold text-blue-900/70 mb-1 block"
         
-       
+        
         inputClassName="w-full px-3 py-2.5 md:px-4 md:py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-sm text-gray-700 font-medium placeholder:text-gray-300"
         submitClassName='text-base p-5'
           renderCustomField={(field, watch, setValue) => renderUploadField(field, watch, setValue)}
