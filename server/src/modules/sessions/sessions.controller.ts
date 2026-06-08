@@ -18,6 +18,9 @@ import {
 } from '@nestjs/swagger';
 import { SessionsService } from './sessions.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Role } from '../../common/constants/role.enum';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
 import { Request } from 'express';
 import { AuthUser } from '../auth/auth.types';
@@ -27,18 +30,22 @@ import { UpdateSessionDto } from './dto/update-session.dto';
 @ApiTags('sessions')
 @ApiBearerAuth()
 @Controller('sessions')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class SessionsController {
   constructor(private readonly sessionsService: SessionsService) {}
 
   @Post()
+  @Roles(Role.DIRECTOR)
   @ApiOperation({ summary: 'Create a new session' })
   @ApiResponse({
     status: 201,
     description: 'The session has been successfully created.',
   })
-  create(@Body() createSessionDto: CreateSessionDto) {
-    return this.sessionsService.create(createSessionDto);
+  create(
+    @Body() createSessionDto: CreateSessionDto,
+    @Req() req: Request & { user: AuthUser },
+  ) {
+    return this.sessionsService.create(createSessionDto, req.user);
   }
 
   @Get()
@@ -46,6 +53,16 @@ export class SessionsController {
   @ApiResponse({ status: 200, description: 'Return all sessions.' })
   findAll() {
     return this.sessionsService.findAll();
+  }
+
+  @Get('my-meetings')
+  @ApiOperation({ summary: 'Get all scheduled meetings for the current user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return all scheduled meetings for the current user.',
+  })
+  findMyMeetings(@Req() req: Request & { user: AuthUser }) {
+    return this.sessionsService.findMyMeetings(req.user);
   }
 
   @Get(':id')
@@ -58,6 +75,7 @@ export class SessionsController {
   }
 
   @Patch(':id')
+  @Roles(Role.DIRECTOR)
   @ApiOperation({ summary: 'Update a session' })
   @ApiParam({ name: 'id', description: 'Numeric session ID' })
   @ApiResponse({
@@ -68,11 +86,13 @@ export class SessionsController {
   update(
     @Param('id', ParseIntIdPipe) id: number,
     @Body() updateSessionDto: UpdateSessionDto,
+    @Req() req: Request & { user: AuthUser },
   ) {
-    return this.sessionsService.update(id, updateSessionDto);
+    return this.sessionsService.update(id, updateSessionDto, req.user);
   }
 
   @Delete(':id')
+  @Roles(Role.DIRECTOR)
   @ApiOperation({ summary: 'Delete a session' })
   @ApiParam({ name: 'id', description: 'Numeric session ID' })
   @ApiResponse({
@@ -80,8 +100,11 @@ export class SessionsController {
     description: 'The session has been successfully deleted.',
   })
   @ApiResponse({ status: 404, description: 'Session not found.' })
-  remove(@Param('id', ParseIntIdPipe) id: number) {
-    return this.sessionsService.remove(id);
+  remove(
+    @Param('id', ParseIntIdPipe) id: number,
+    @Req() req: Request & { user: AuthUser },
+  ) {
+    return this.sessionsService.remove(id, req.user);
   }
 
   @Get(':sessionId/meeting/join')

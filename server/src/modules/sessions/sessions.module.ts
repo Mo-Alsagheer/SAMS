@@ -5,12 +5,14 @@ import { SessionsController } from './sessions.controller';
 import { SessionsService } from './sessions.service';
 import { MeetingsModule } from '../meetings/meetings.module';
 import { AuditLogModule } from '../audit-log/audit-log.module';
+import { RoadmapModule } from '../roadmap/roadmap.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Session]),
     MeetingsModule,
     AuditLogModule,
+    RoadmapModule,
   ],
   controllers: [SessionsController],
   providers: [SessionsService],
