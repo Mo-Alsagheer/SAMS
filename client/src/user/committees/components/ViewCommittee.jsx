@@ -8,6 +8,7 @@ import Footer from "@/components/layout/Footer";
 import { getCommittees } from "@/features/committee/committee";
 import { getCommitteeRecruitmentStatus } from "@/features/recruitment/recruitment";
 import { toast } from "sonner";
+import { Sparkles } from "lucide-react"; 
 
 function ViewCommittee() {
   const [data, setData] = useState([]);
@@ -77,20 +78,32 @@ function ViewCommittee() {
       <Navbar />
 
       <main className="flex-grow pt-16">
-        <section className="relative min-h-[35vh] flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 via-blue-800 to-blue-900/70"></div>
-          <div className="relative z-10 container mx-auto px-6 text-center">
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-4 tracking-tighter uppercase italic">
-              Our{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
-                Committees
-              </span>
+        <section className="relative bg-gradient-to-r from-blue-950 via-blue-900 to-blue-950 py-10 overflow-hidden text-center">
+        
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[180px] bg-blue-500/10 blur-[80px] rounded-full pointer-events-none"></div>
+
+          <div className="relative z-10 container mx-auto px-6 max-w-2xl space-y-4">
+            <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight uppercase leading-tight">
+              Not sure which <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">committee</span> fits you?
             </h1>
-            <div className="h-1.5 w-24 bg-blue-400 mx-auto rounded-full"></div>
+            
+            <p className="text-slate-300 text-xs md:text-sm max-w-md mx-auto font-medium leading-relaxed">
+              Take our quick compatibility quiz to discover your strengths and find the perfect team.
+            </p>
+
+            <div className="pt-1">
+              <Button
+                onClick={() => navigate("/quiz")}
+                className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white text-xs md:text-sm font-bold px-7 py-5 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2 mx-auto"
+              >
+                <Sparkles size={15} className="animate-pulse" />
+                Take Compatibility Quiz
+              </Button>
+            </div>
           </div>
         </section>
 
-        <div className="max-w-[1400px] mx-auto px-6 py-16" dir="ltr">
+        <div className="max-w-[1400px] mx-auto px-6 py-12" dir="ltr">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 justify-items-center">
             {data.length > 0 ? (
               data.map((item) => (

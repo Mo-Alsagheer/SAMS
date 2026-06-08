@@ -29,6 +29,12 @@ export class Session {
   @Column({ type: 'boolean', default: false })
   isRecorded: boolean;
 
+  @Column({ type: 'int', nullable: true })
+  committeeId: number | null;
+
+  @Column({ type: 'int', nullable: true })
+  creatorId: number | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

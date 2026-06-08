@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useParams, Link } from "react-router-dom";
 import { getSession } from "@/features/sessions/sessions";
-import { getTasks } from "@/features/tasks/tasks";
+import { getSessionTasks } from "@/features/tasks/tasks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -77,7 +77,7 @@ export default function SessionDetails() {
     async function load() {
       try {
         const s = await getSession(sessionId);
-        const tasks = await getTasks(sessionId);
+        const tasks = await getSessionTasks(sessionId);
         const materials = await getMaterials(sessionId);
         if (mounted) setSession({ ...s, tasks, materials });
       } catch (err) {

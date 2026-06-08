@@ -36,11 +36,7 @@ export const directormenu = [
     path: "applications",
     name: "Applications",
   },
-  {
-    icon: File,
-    path: "workspace",
-    name: "WorkSpace",
-  },
+
   {
     icon: ListTodo,
     path: "taskManagement",
