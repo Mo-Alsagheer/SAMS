@@ -5,6 +5,26 @@ export async function getSessionTasks(sessionId) {
   return res.data;
 }
 
+export async function createTaskSubmission(taskId, submissionData) {
+  const formData = new FormData();
+
+  if (submissionData.file) {
+    formData.append("file", submissionData.file);
+  }
+
+  if (submissionData.content) {
+    formData.append("content", submissionData.content);
+  }
+
+  const res = await api.post(`/tasks/${taskId}/submissions`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return res.data;
+}
+
 export async function createTask(sessionId, taskData) {
   const res = await api.post(`/director/sessions/${sessionId}/tasks`, {
     title: taskData.title,
@@ -17,21 +37,25 @@ export async function createTask(sessionId, taskData) {
 export async function uploadSessionMaterial(sessionId, materialData) {
   const formData = new FormData();
   formData.append("title", materialData.title);
-  
+
   if (materialData.file) {
-    formData.append("file", materialData.file); 
+    formData.append("file", materialData.file);
   }
-  
+
   if (materialData.fileUrl) {
     formData.append("fileUrl", materialData.fileUrl);
   }
 
-  const res = await api.post(`/director/sessions/${sessionId}/materials`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
+  const res = await api.post(
+    `/director/sessions/${sessionId}/materials`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
     },
-  });
-  
+  );
+
   return res.data;
 }
 

@@ -6,6 +6,10 @@ import Table from "@/components/shared/Table";
 import { PopupForm } from "@/components/shared/PopupForm";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import SearchBar from "@/components/shared/SearchBar";
+import { Spinner } from "@/components/ui/spinner";
+import { Badge } from "@/components/ui/badge";
+
 import {
   updateCommittee,
   getCommittee,
@@ -40,6 +44,7 @@ const fields = [
 function Committees() {
   const [committees, setCommittees] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [editingCommittee, setEditingCommittee] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -115,6 +120,17 @@ function Committees() {
   useEffect(() => {
     fetchCommittees();
   }, []);
+
+  const filteredCommittees = React.useMemo(() => {
+    if (!search) return committees;
+    const q = search.toLowerCase();
+    return committees.filter(
+      (c) =>
+        (c.name || "").toLowerCase().includes(q) ||
+        (c.type || "").toLowerCase().includes(q) ||
+        (c.description || "").toLowerCase().includes(q),
+    );
+  }, [committees, search]);
   const columns = React.useMemo(
     () => [
       { header: "Name", accessor: "name" },
@@ -132,13 +148,9 @@ function Committees() {
             >
               View
             </Button>
-
-
             <Button size="sm" onClick={() => handleEdit(row)}>
               Edit
             </Button>
-
-            
             <Button
               size="sm"
               variant="destructive"
@@ -154,15 +166,48 @@ function Committees() {
     [actionLoading, handleEdit, openDeletePopup],
   );
 
-  if (loading) return <div>Loading committees...</div>;
-
+  if (loading)
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Spinner className="w-8 h-8 text-primary" />
+      </div>
+    );
+  if (loading)
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Spinner className="w-8 h-8 text-primary" />
+      </div>
+    );
   return (
     <>
-      <div className="mb-4 w-1/4">
-        <AddCommittee onAdded={fetchCommittees} />
+      <div className="mb-6 flex flex-col  justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-semibold">Manage Committees</h1>
+          <Badge>{committees.length}</Badge>
+        </div>
+
+        <div className="flex items-center gap-4 w-2/3">
+          <SearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Search committees..."
+          />
+          <div className="ml-auto">
+            <AddCommittee onAdded={fetchCommittees} />
+          </div>
+        </div>
       </div>
 
-      <Table columns={columns} data={committees} />
+      {filteredCommittees.length === 0 ? (
+        <div className="py-12 text-center text-muted-foreground">
+          No committees found.
+          <div className="mt-4">
+            <AddCommittee onAdded={fetchCommittees} />
+          </div>
+        </div>
+      ) : (
+        <Table columns={columns} data={filteredCommittees} />
+      )}
 
       <PopupForm
         key={editingCommittee?.id}
