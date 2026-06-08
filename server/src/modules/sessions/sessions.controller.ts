@@ -66,6 +66,13 @@ export class SessionsController {
     return this.sessionsService.findMyMeetings(req.user);
   }
 
+  @Get('member-experience')
+  @ApiOperation({ summary: 'Get the member dashboard experience data' })
+  @ApiResponse({ status: 200, description: 'Return member experience data.' })
+  getMemberExperience(@Req() req: Request & { user: AuthUser }) {
+    return this.sessionsService.getMemberExperience(req.user);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a session by ID' })
   @ApiParam({ name: 'id', description: 'Numeric session ID' })
