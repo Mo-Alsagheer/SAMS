@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { login } from "@/features/auth/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   getCurrentUser,
   getHomeRouteForRole,
@@ -166,6 +166,15 @@ export default function Login() {
                   )}
                 />
               </FieldGroup>
+
+              <div className="flex justify-end">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
 
               <div className="space-y-4 pt-2">
                 <Button

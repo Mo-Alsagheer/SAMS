@@ -316,6 +316,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getSessions } from "@/features/sessions/sessions";
+import { Spinner } from "@/components/ui/spinner";
 
 function formatDate(date) {
   return new Date(date).toLocaleDateString("en-US", {
@@ -347,7 +348,7 @@ export default function Roadmap() {
   if (loading) {
     return (
       <div className="flex justify-center py-10">
-        Loading sessions...
+        <Spinner/>
       </div>
     );
   }

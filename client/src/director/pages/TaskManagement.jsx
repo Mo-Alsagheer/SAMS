@@ -1,17 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PopupForm } from "../../components/shared/PopupForm";
+import { Button } from "@/components/ui/button"; 
 import {
   Plus,
-  Edit3,
-  Trash2,
-  Upload,
   FileText,
   X,
+  Upload,
   ClipboardList,
+  Trash2,
+  Filter,
+  ChevronDown // 🌟 استيراد السهم هنا
 } from "lucide-react";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { 
+  getSessionTasks, 
+  createTask, 
+} from "@/features/tasks/tasks"; 
+import { 
+  getSessions 
+} from "@/features/sessions/sessions"; 
 
 const taskSchema = z.object({
   title: z.string().min(3, "Title is too short"),
@@ -24,8 +33,75 @@ const taskSchema = z.object({
 export default function TaskManagement() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [tasks, setTasks] = useState([]);
-  const [editingTask, setEditingTask] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [dbSessions, setDbSessions] = useState([]);
+  
+  // State لتخزين السيشين المختارة في الفلتر
+  const [selectedSessionFilter, setSelectedSessionFilter] = useState("all");
 
+  // 1️⃣ جلب البيانات وحل مشكلة الـ id
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      const sessionsData = await getSessions();
+      setDbSessions(sessionsData);
+
+      if (!sessionsData || sessionsData.length === 0) {
+        setTasks([]);
+        return;
+      }
+
+      const allResponses = await Promise.all(
+        sessionsData.map(async (session) => {
+          try {
+            const sId = session.id || session._id;
+            const data = await getSessionTasks(sId);
+            
+            const tasksArray = Array.isArray(data) ? data : [];
+            
+            return tasksArray.map(task => ({
+              ...task,
+              actualSessionId: sId,
+              sessionName: session.name || `Session ${sId}` 
+            }));
+          } catch (err) {
+            console.warn(`Could not fetch tasks for session`, err);
+            return [];
+          }
+        })
+      );
+
+      const combinedTasks = allResponses.flat();
+
+      const formattedTasks = combinedTasks.map((task, index) => ({
+        id: task.id || task._id || `task-fallback-${index}`, 
+        title: task.title || "Untitled Task",
+        description: task.description || "",
+        sessionNumber: task.sessionId || task.sessionNumber || task.actualSessionId,
+        sessionLabel: task.sessionName,
+        deadline: task.dueDate ? task.dueDate.split("T")[0] : "",
+        taskFile: null, 
+      }));
+
+      formattedTasks.sort((a, b) => Number(a.sessionNumber) - Number(b.sessionNumber));
+      setTasks(formattedTasks);
+    } catch (error) {
+      console.error("Error loading system data:", error);
+      toast.error("Failed to sync data with database");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllData();
+  }, []);
+
+  // 2️⃣ فلترة التأسكات بناءً على الـ Dropdown المختار في الصفحة
+  const filteredTasks = tasks.filter((task) => {
+    if (selectedSessionFilter === "all") return true;
+    return String(task.sessionNumber) === String(selectedSessionFilter);
+  });
 
   const taskFields = [
     {
@@ -36,9 +112,9 @@ export default function TaskManagement() {
     },
     {
       name: "sessionNumber",
-      label: "Session Number",
+      label: "Session Assignment",
       type: "select",
-      options: ["1", "2", "3", "4", "5"], 
+      options: dbSessions.map(session => String(session.id || session._id)),
       className: "col-span-2 md:col-span-1",
     },
     {
@@ -62,7 +138,30 @@ export default function TaskManagement() {
     },
   ];
 
- 
+  const handleSaveTask = async (data) => {
+    const targetSessionId = Number(data.sessionNumber);
+    try {
+      toast.loading("Publishing task to server...", { id: "task-api-action" });
+      await createTask(targetSessionId, data);
+      toast.success("Task published and synchronized!", { id: "task-api-action" });
+      setIsFormOpen(false);
+      await fetchAllData();
+    } catch (error) {
+      console.error("Error saving task:", error);
+      toast.error(error?.response?.data?.message || "Server Error: Failed to save task", { id: "task-api-action" });
+    }
+  };
+
+  const handleDeleteTask = (taskId) => {
+    try {
+      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+      toast.success("Task removed from view (Frontend Only)");
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      toast.error("Failed to delete task");
+    }
+  };
+
   const renderUploadField = (field, watch, setValue) => {
     const fileValue = watch(field.name);
     const selectedFiles = fileValue ? Array.from(fileValue) : [];
@@ -71,12 +170,12 @@ export default function TaskManagement() {
       <div className="space-y-2">
         <div
           onClick={() => document.getElementById("task-file-input").click()}
-          className="group cursor-pointer border-2 border-dashed border-gray-200 rounded-2xl p-4 md:p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-blue-50/50 transition-all"
+          className="group cursor-pointer border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-2xl p-4 md:p-6 flex flex-col items-center justify-center bg-gray-50 dark:bg-slate-900/50 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 transition-all"
         >
-          <div className="p-2 bg-white rounded-full shadow-sm mb-2">
-            <Upload className="text-blue-600 w-5 h-5" />
+          <div className="p-2 bg-white dark:bg-slate-800 rounded-full shadow-sm mb-2">
+            <Upload className="text-blue-600 dark:text-blue-400 w-4 h-4" />
           </div>
-          <span className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest text-center">
+          <span className="text-[10px] md:text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest text-center">
             {selectedFiles.length > 0 ? "Add more materials" : "Click to upload material"}
           </span>
           <input
@@ -92,16 +191,18 @@ export default function TaskManagement() {
 
         <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto custom-scrollbar">
           {selectedFiles.map((file, index) => (
-            <div key={index} className="flex items-center gap-2 p-2 bg-white rounded-lg border border-gray-100 shadow-sm">
-              <FileText className="text-blue-600 shrink-0" size={12} />
-              <span className="text-[10px] font-bold text-gray-700 flex-1 truncate">{file.name}</span>
-              <button
+            <div key={index} className="flex items-center gap-2 p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-100 dark:border-slate-700 shadow-sm">
+              <FileText className="text-blue-600 dark:text-blue-400 shrink-0" size={12} />
+              <span className="text-[10px] font-bold text-gray-700 dark:text-slate-200 flex-1 truncate">{file.name}</span>
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-xs"
                 onClick={() => setValue(field.name, selectedFiles.filter((_, i) => i !== index))}
-                className="p-1 text-gray-400 hover:text-red-500"
+                className="text-gray-400 hover:text-red-500"
               >
                 <X size={12} strokeWidth={3} />
-              </button>
+              </Button>
             </div>
           ))}
         </div>
@@ -109,100 +210,125 @@ export default function TaskManagement() {
     );
   };
 
-
-  const handleSaveTask = (data) => {
-    if (editingTask !== null) {
-      const updated = [...tasks];
-      updated[editingTask] = data;
-      setTasks(updated);
-      setEditingTask(null);
-      toast.success("Task updated successfully");
-    } else {
-      setTasks([...tasks, data]);
-      toast.success("New task created");
-    }
-    setIsFormOpen(false);
-  };
-
   return (
-    <div className="p-4 md:p-10 bg-[#f8f9fa] min-h-screen">
-    
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 mb-8 md:mb-12">
+    <div className="p-4 md:p-10 bg-[#f8f9fa] dark:bg-transparent min-h-screen">
+      
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mb-8 md:mb-12">
         <div>
-          <h1 className="text-2xl md:text-4xl font-black text-blue-900 mb-2">Task Management</h1>
-          <p className="text-sm md:text-base text-gray-500 font-medium">Assign tasks and set deadlines for your team members.</p>
+          <h1 className="text-2xl md:text-3xl font-black text-blue-900 dark:text-blue-400 mb-2">Task Management</h1>
+          <p className="text-sm md:text-base text-gray-500 dark:text-slate-400 font-medium">Viewing all synchronized tasks dynamically mapped by active database sessions.</p>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            setEditingTask(null);
-            setIsFormOpen(true);
-          }}
-          className="flex items-center justify-center gap-2 bg-primary hover:bg-blue-900 text-white px-6 py-3 md:px-8 md:py-4 rounded-xl md:rounded-2xl font-bold shadow-xl shadow-blue-200 transition-all active:scale-95 shrink-0"
-        >
-          <Plus size={18} strokeWidth={3} /> <span className="text-sm md:text-base">Add New Task</span>
-        </button>
+        
+        {/* Action Buttons & Dropdown Filter */}
+        <div className="flex flex-wrap items-center gap-3">
+          
+          {/* الـ Dropdown Menu مع علامة السهم المخصصة 🌟 */}
+          <div className="relative flex items-center bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 shadow-sm min-w-[220px]">
+            <Filter size={16} className="text-gray-400 mr-2 shrink-0" />
+            <select
+              value={selectedSessionFilter}
+              onChange={(e) => setSelectedSessionFilter(e.target.value)}
+              className="bg-transparent text-sm font-bold text-gray-700 dark:text-slate-200 outline-none w-full cursor-pointer appearance-none pr-8"
+            >
+              <option value="all">All Active Sessions</option>
+              {dbSessions.map((session) => (
+                <option key={session.id || session._id} value={String(session.id || session._id)}>
+                  {session.name || `Session ${session.id || session._id}`}
+                </option>
+              ))}
+            </select>
+            {/* السهم المضاف في أقصى اليمين 🌟 */}
+            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400">
+              <ChevronDown size={16} strokeWidth={2.5} />
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            size="lg"
+            onClick={() => setIsFormOpen(true)}
+            className="flex items-center justify-center gap-1.5 bg-primary hover:bg-blue-900 dark:bg-blue-700 dark:hover:bg-blue-600 text-white font-bold shadow-xl shadow-blue-100 dark:shadow-none transition-all active:scale-95 shrink-0 rounded-xl px-5 py-2.5"
+          >
+            <Plus size={16} strokeWidth={3} /> 
+            <span className="text-sm">Add New Task</span>
+          </Button>
+        </div>
       </div>
 
-    
-      <div className="grid grid-cols-1 gap-4">
-        {tasks.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 border-4 border-dashed border-gray-400 rounded-[40px] opacity-40">
-            <ClipboardList size={48} className="mb-4 text-blue-900" />
-            <h3 className="font-black text-xl text-blue-900 uppercase">No Tasks Yet</h3>
-          </div>
-        )}
+      {/* Tasks List */}
+      {loading ? (
+        <div className="flex justify-center items-center py-20 text-blue-900 dark:text-blue-400 font-bold text-sm animate-pulse">
+          Syncing dashboard with backend database...
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4">
+          {filteredTasks.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 border-4 border-dashed border-gray-400 dark:border-slate-700 rounded-[40px] opacity-40">
+              <ClipboardList size={48} className="mb-4 text-blue-900 dark:text-blue-400" />
+              <h3 className="font-black text-xl text-blue-900 dark:text-blue-400 uppercase">No Tasks for this view</h3>
+            </div>
+          )}
 
-        {tasks.map((task, index) => (
-          <div key={index} className="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-4 transition-all hover:shadow-md group">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-start md:items-center gap-4 flex-1">
-                <div className="p-3 bg-gray-50 rounded-xl group-hover:bg-blue-50 transition-colors">
-                  <ClipboardList className="text-gray-300 group-hover:text-blue-500 shrink-0" size={24} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                    <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase">Session {task.sessionNumber}</span>
-                    <span className="text-[10px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded uppercase italic">Deadline: {task.deadline}</span>
+          {filteredTasks.map((task) => (
+            <div key={task.id} className="bg-white dark:bg-slate-900 p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col gap-4 transition-all hover:shadow-md hover:border-blue-100 dark:hover:border-blue-900 group">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-start md:items-center gap-4 flex-1 min-w-0">
+                  <div className="p-3 bg-gray-50 dark:bg-slate-800 rounded-xl group-hover:bg-blue-50 dark:group-hover:bg-slate-700 transition-colors shrink-0">
+                    <ClipboardList className="text-gray-300 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" size={24} />
                   </div>
-                  <h3 className="font-bold text-blue-900 text-base md:text-lg leading-tight truncate">{task.title}</h3>
-                  <p className="text-xs text-gray-500 line-clamp-1 mt-1">{task.description}</p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                      <span className="text-[9px] md:text-[10px] font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded uppercase tracking-tight">
+                        {task.sessionLabel || `Session ${task.sessionNumber}`}
+                      </span>
+                      <span className="text-[9px] md:text-[10px] font-black text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/50 px-2 py-0.5 rounded uppercase italic">Deadline: {task.deadline}</span>
+                    </div>
+                    <h3 className="font-bold text-blue-900 dark:text-slate-100 text-base md:text-lg leading-tight truncate">{task.title}</h3>
+                    <p className="text-xs md:text-sm text-gray-500 dark:text-slate-400 line-clamp-1 mt-1">{task.description}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center justify-end gap-2 border-t md:border-t-0 pt-3 md:pt-0 border-gray-50">
-                <button onClick={() => { setEditingTask(index); setIsFormOpen(true); }} className="p-2 text-gray-400 hover:text-blue-600 transition-all"><Edit3 size={18} /></button>
-                <button onClick={() => setTasks(tasks.filter((_, i) => i !== index))} className="p-2 text-gray-400 hover:text-red-500 transition-all"><Trash2 size={18} /></button>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDeleteTask(task.id)}
+                  className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl shrink-0 transition-all active:scale-90"
+                >
+                  <Trash2 size={18} />
+                </Button>
               </div>
             </div>
-
-       
-            {task.taskFile && Array.from(task.taskFile).length > 0 && (
-              <div className="flex items-center gap-2 pt-3 border-t border-gray-50">
-                <div className="flex items-center gap-1.5 bg-blue-50 px-3 py-1 rounded-full">
-                   <FileText className="text-blue-600" size={12} />
-                   <span className="text-[10px] font-black text-blue-700 uppercase tracking-wider">
-                     {Array.from(task.taskFile).length} Materials
-                   </span>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <PopupForm
         open={isFormOpen}
         onClose={() => setIsFormOpen(false)}
-        title={editingTask !== null ? "Update Task" : "Add New Task"}
+        title="Add New Task"
         schema={taskSchema}
         fields={taskFields}
-        defaultValues={
-          editingTask !== null ? tasks[editingTask] : { title: "", sessionNumber: "", deadline: "", description: "", taskFile: null }
-        }
+        defaultValues={{ 
+          title: "", 
+          sessionNumber: dbSessions.length > 0 ? String(dbSessions[0].id || dbSessions[0]._id) : "", 
+          deadline: "", 
+          description: "", 
+          taskFile: null 
+        }}
         onSubmit={handleSaveTask}
         submitLabel="Save Task"
-        titleColor="text-blue-900 font-black text-2xl pt-2"
-        labelColor="text-sm font-bold text-blue-900/70 mb-1 block"
+        
+        className="max-w-2xl w-[94%] max-h-[90vh] flex flex-col overflow-hidden rounded-[24px] md:rounded-[32px]" 
+        gridClassName="grid grid-cols-2 gap-3 md:gap-4 overflow-y-auto p-1 pr-2 max-h-full custom-scrollbar" 
+        
+        bgColor="bg-white dark:bg-slate-900"
+        titleColor="text-blue-900 dark:text-slate-100 font-black text-xl md:text-2xl pt-2"
+        labelColor="text-[11px] md:text-sm font-bold text-blue-900/70 dark:text-slate-300 mb-1 block"
+        
+        inputClassName="w-full px-3 py-2.5 md:px-4 md:py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-transparent text-sm text-gray-700 dark:text-slate-200 font-medium placeholder:text-gray-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
+        submitClassName='text-base p-5'
         renderCustomField={(field, watch, setValue) => renderUploadField(field, watch, setValue)}
       />
     </div>

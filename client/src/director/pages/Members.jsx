@@ -156,7 +156,7 @@ export default function Members() {
   ];
 
   return (
-    <div className="p-4 md:p-8 bg-slate-50 min-h-screen font-sans">
+    <div className="p-4 md:p-8 min-h-screen font-sans">
       <div className="mb-8">
         <h1 className="text-3xl font-black text-blue-900 tracking-tight">
           Members

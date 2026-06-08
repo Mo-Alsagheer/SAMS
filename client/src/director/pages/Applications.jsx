@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
-
 import SearchBar from "../../components/shared/SearchBar";
 import FilterDropdown from "../../components/shared/FilterDropdown";
 import Table from "../../components/shared/Table";
@@ -83,55 +82,71 @@ function Applications() {
     loadApplications();
   }, [loadApplications]);
 
-  const accept = useCallback(
-    async (row) => {
-      setActionLoadingId(row.id);
+  const accept = useCallback(async (row) => {
+    setActionLoadingId(row.id);
 
-      try {
-        if (row.status === "INTERVIEW_SCHEDULED") {
-          await acceptMemberPhase2(row.id);
-
-          toast.success("Final accepted");
-        } else {
-          await acceptMemberPhase1(row.id);
-
-          toast.success("Accepted");
-        }
-
-        await loadApplications();
-      } catch {
-        toast.error("Failed to accept");
-      } finally {
-        setActionLoadingId(null);
+    try {
+      if (row.status === "INTERVIEW_SCHEDULED") {
+        await acceptMemberPhase2(row.id);
+        toast.success("Final accepted");
+      } else {
+        await acceptMemberPhase1(row.id);
+        toast.success("Accepted");
       }
-    },
-    [loadApplications],
-  );
 
-  const reject = useCallback(
-    async (row) => {
-      setActionLoadingId(row.id);
+      // ✅ update only status locally
+      setApplications((prev) =>
+        prev.map((app) =>
+          app.id === row.id
+            ? {
+                ...app,
+                status:
+                  row.status === "INTERVIEW_SCHEDULED"
+                    ? "PHASE2_ACCEPTED"
+                    : "PHASE1_ACCEPTED",
+              }
+            : app,
+        ),
+      );
+    } catch {
+      toast.error("Failed to accept");
+    } finally {
+      setActionLoadingId(null);
+    }
+  }, []);
 
-      try {
-        if (row.status === "INTERVIEW_SCHEDULED") {
-          await rejectMemberPhase2(row.id);
+  const reject = useCallback(async (row) => {
+    setActionLoadingId(row.id);
 
-          toast.success("Final rejected");
-        } else {
-          await rejectMemberPhase1(row.id);
-
-          toast.success("Rejected");
-        }
-
-        await loadApplications();
-      } catch {
-        toast.error("Failed to reject");
-      } finally {
-        setActionLoadingId(null);
+    try {
+      if (row.status === "INTERVIEW_SCHEDULED") {
+        await rejectMemberPhase2(row.id);
+        toast.success("Final rejected");
+      } else {
+        await rejectMemberPhase1(row.id);
+        toast.success("Rejected");
       }
-    },
-    [loadApplications],
-  );
+
+      // ✅ update only status locally
+      setApplications((prev) =>
+        prev.map((app) =>
+          app.id === row.id
+            ? {
+                ...app,
+                status:
+                  row.status === "INTERVIEW_SCHEDULED"
+                    ? "PHASE2_REJECTED"
+                    : "PHASE1_REJECTED",
+              }
+            : app,
+        ),
+      );
+    } catch {
+      toast.error("Failed to reject");
+    } finally {
+      setActionLoadingId(null);
+    }
+  }, []);
 
   const openSchedule = (id) => {
     setSelectedAppId(id);

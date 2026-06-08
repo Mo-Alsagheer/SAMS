@@ -1,18 +1,10 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { sessions } from "@/data/mock-data";
+import { getSessions } from "@/features/sessions/sessions";
+import { getSessionTasks } from "@/features/tasks/tasks";
 import { CalendarClock } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// export const Route = createFileRoute("/_member/tasks")({
-//   head: () => ({
-//     meta: [
-//       { title: "My Tasks — SAMS" },
-//       { name: "description", content: "All tasks across your sessions." },
-//     ],
-//   }),
-//   component: TasksPage,
-// });
 
 const statusStyles = {
   pending: "bg-warning/15 text-warning-foreground border-warning/30",
@@ -20,8 +12,41 @@ const statusStyles = {
   graded: "bg-success/15 text-success border-success/30",
 };
 export default function Tasks() {
-  const tasks = sessions.flatMap((s) =>
-    s.tasks.map((t) => ({ ...t, sessionTitle: s.title })),
+  const [sessionsData, setSessionsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await getSessions();
+        if (!Array.isArray(data)) {
+          if (mounted) setSessionsData([]);
+        } else {
+          const sessionsWithTasks = await Promise.all(
+            data.map(async (s) => {
+              const sessionId = s.id ?? s._id;
+              try {
+                const tasks = await getSessionTasks(sessionId);
+                return { ...s, tasks: tasks || s.tasks || [] };
+              } catch (e) {
+                return { ...s, tasks: s.tasks || [] };
+              }
+            }),
+          );
+          if (mounted) setSessionsData(sessionsWithTasks);
+        }
+      } catch (err) {
+        if (mounted) setSessionsData([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => (mounted = false);
+  }, []);
+
+  const tasks = sessionsData.flatMap((s) =>
+    (s.tasks || []).map((t) => ({ ...t, sessionTitle: s.title })),
   );
 
   const groups = {
@@ -47,7 +72,9 @@ export default function Tasks() {
           </div>
           <div className="grid gap-3">
             {groups[key].length === 0 && (
-              <p className="text-sm text-muted-foreground">Nothing here yet.</p>
+              <p className="text-sm text-muted-foreground">
+                {loading ? "Loading..." : "Nothing here yet."}
+              </p>
             )}
             {groups[key].map((t) => (
               <Card
@@ -81,7 +108,6 @@ export default function Tasks() {
                       </span>
                     </div>
                   </div>
-                
                 </CardContent>
               </Card>
             ))}
