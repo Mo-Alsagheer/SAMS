@@ -23,6 +23,8 @@ import { VscRequestChanges } from "react-icons/vsc";
 import { MdOutlineManageAccounts } from "react-icons/md";
 import { MdPersonOutline } from "react-icons/md";
 import { MdOutlinePersonOutline } from "react-icons/md";
+import { RiCalendarScheduleLine } from "react-icons/ri";
+import { LuListTodo } from "react-icons/lu";
 export const directormenu = [
   {
     icon: LayoutDashboardIcon,
@@ -54,6 +56,17 @@ export const directormenu = [
     path: "members",
     name: "Members",
   },
+  {
+    icon: RiCalendarScheduleLine,
+    path: "schedule",
+    name: "Schedule Meeting",
+  },
+  {
+    icon: LuListTodo,
+    path: "taskSubmission",
+    name: "Task Submission",
+  },
+  
 ];
 
 export const executive = [
