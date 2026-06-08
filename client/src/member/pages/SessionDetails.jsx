@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useParams, Link } from "react-router-dom";
 import { getSession } from "@/features/sessions/sessions";
-import { getSessionTasks } from "@/features/tasks/tasks";
+import { getSessionTasks, createTaskSubmission } from "@/features/tasks/tasks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -97,7 +97,8 @@ export default function SessionDetails() {
 
   const isLive = session.status === "live";
   const canJoin = isLive && session.meetingActive;
-  const canOpen = canJoin || Boolean(session.plugnmeetRoomId || session.meetingId);
+  const canOpen =
+    canJoin || Boolean(session.plugnmeetRoomId || session.meetingId);
 
   return (
     <div className="mx-auto max-w-5xl px-4 md:px-8">
@@ -254,9 +255,11 @@ export default function SessionDetails() {
 }
 
 function TaskItem({ task }) {
-  const [open, setOpen] = useState(task.status === "pending");
+  const [open, setOpen] = useState((task.status || "pending") === "pending");
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [status, setStatus] = useState(task.status|| "pending");
 
   const statusMap = {
     pending: {
@@ -272,17 +275,27 @@ function TaskItem({ task }) {
       className: "bg-success/15 text-success border-success/30",
     },
   };
-  const cfg = statusMap[task.status] || { label: "Unknown", className: "" };
+  const cfg = statusMap[status] || { label: "Unknown", className: "" };
 
-  function submit() {
+  async function submit() {
     if (!text && !file) {
       toast.error("Please add text or attach a file.");
       return;
     }
-    toast.success("Submission uploaded", {
-      description: "Your work has been sent to the director.",
-    });
-    setOpen(false);
+    try {
+      setSubmitting(true);
+      await createTaskSubmission(task.id, { file, content: text });
+      toast.success("Submission uploaded", {
+        description: "Your work has been sent to the director.",
+      });
+      setOpen(false);
+      setStatus("submitted");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to upload submission.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -310,7 +323,7 @@ function TaskItem({ task }) {
             Due {new Date(task.dueDate).toLocaleDateString()}
           </div>
         </div>
-        {task.status === "pending" && (
+        {status === "pending" && (
           <Button
             size="sm"
             variant={open ? "secondary" : "default"}
@@ -321,7 +334,7 @@ function TaskItem({ task }) {
         )}
       </div>
 
-      {open && task.status === "pending" && (
+      {open && status === "pending" && (
         <div className="mt-4 space-y-3 border-t border-border pt-4">
           <Textarea
             placeholder="Notes about your submission (optional)..."
@@ -351,7 +364,9 @@ function TaskItem({ task }) {
             />
           </label>
           <div className="flex justify-end">
-            <Button onClick={submit}>Submit task</Button>
+            <Button onClick={submit} disabled={submitting}>
+              {submitting ? "Submitting..." : "Submit task"}
+            </Button>
           </div>
         </div>
       )}
