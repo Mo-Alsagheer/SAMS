@@ -4,16 +4,6 @@ import { sessions } from "@/data/mock-data";
 import { CalendarClock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// export const Route = createFileRoute("/_member/tasks")({
-//   head: () => ({
-//     meta: [
-//       { title: "My Tasks — SAMS" },
-//       { name: "description", content: "All tasks across your sessions." },
-//     ],
-//   }),
-//   component: TasksPage,
-// });
-
 const statusStyles = {
   pending: "bg-warning/15 text-warning-foreground border-warning/30",
   submitted: "bg-primary/10 text-primary border-primary/20",
