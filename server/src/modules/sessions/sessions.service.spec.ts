@@ -9,6 +9,13 @@ import { Role } from '../../common/constants/role.enum';
 import { AuthUser } from '../auth/auth.types';
 import { ForbiddenException, BadRequestException } from '@nestjs/common';
 
+import { Material } from '../materials/entities/material.entity';
+import { Task } from '../tasks/entities/task.entity';
+import { TaskSubmission } from '../tasks/entities/task-submission.entity';
+import { Attendace } from '../attendace/entities/attendace.entity';
+import { Committee } from '../committees/entities/committee.entity';
+import { User } from '../users/entities/user.entity';
+
 describe('SessionsService', () => {
   let service: SessionsService;
   let repoMock: any;
@@ -44,12 +51,43 @@ describe('SessionsService', () => {
       log: jest.fn().mockResolvedValue(undefined),
     };
 
+    const genericRepoMock = {
+      find: jest.fn().mockResolvedValue([]),
+      findOne: jest.fn().mockResolvedValue(null),
+      create: jest.fn().mockImplementation((dto) => dto),
+      save: jest.fn().mockImplementation((entity) => Promise.resolve(entity)),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SessionsService,
         {
           provide: getRepositoryToken(Session),
           useValue: repoMock,
+        },
+        {
+          provide: getRepositoryToken(Material),
+          useValue: genericRepoMock,
+        },
+        {
+          provide: getRepositoryToken(Task),
+          useValue: genericRepoMock,
+        },
+        {
+          provide: getRepositoryToken(TaskSubmission),
+          useValue: genericRepoMock,
+        },
+        {
+          provide: getRepositoryToken(Attendace),
+          useValue: genericRepoMock,
+        },
+        {
+          provide: getRepositoryToken(Committee),
+          useValue: genericRepoMock,
+        },
+        {
+          provide: getRepositoryToken(User),
+          useValue: genericRepoMock,
         },
         {
           provide: MeetingsService,
@@ -162,6 +200,21 @@ describe('SessionsService', () => {
       };
       const token = await service.getJoinToken(1, execUser);
       expect(token).toBe('token-abc');
+    });
+  });
+
+  describe('getMemberExperience', () => {
+    const memberUser: AuthUser = {
+      id: 3,
+      email: 'mem@example.com',
+      role: Role.MEMBER,
+      committeeId: 2,
+      name: 'Member Name',
+    };
+
+    it('should throw BadRequestException if user has no committeeId', async () => {
+      const userNoCommittee = { ...memberUser, committeeId: null };
+      await expect(service.getMemberExperience(userNoCommittee)).rejects.toThrow(BadRequestException);
     });
   });
 });
