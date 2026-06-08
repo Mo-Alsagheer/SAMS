@@ -48,11 +48,12 @@ export class SessionsController {
     return this.sessionsService.create(createSessionDto, req.user);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Get all sessions' })
-  @ApiResponse({ status: 200, description: 'Return all sessions.' })
-  findAll() {
-    return this.sessionsService.findAll();
+  @Get('roadmap/:roadmapId')
+  @ApiOperation({ summary: 'Get all sessions for a specific roadmap' })
+  @ApiParam({ name: 'roadmapId', description: 'Numeric Roadmap ID' })
+  @ApiResponse({ status: 200, description: 'Return all sessions for the roadmap.' })
+  findAll(@Param('roadmapId', ParseIntIdPipe) roadmapId: number) {
+    return this.sessionsService.findAll(roadmapId);
   }
 
   @Get('my-meetings')

@@ -60,8 +60,8 @@ export class SessionsService {
     return this.sessionsRepository.save(session);
   }
 
-  async findAll(): Promise<Session[]> {
-    return this.sessionsRepository.find();
+  async findAll(roadmapId: number): Promise<Session[]> {
+    return this.sessionsRepository.find({ where: { roadmapId } });
   }
 
   async update(
