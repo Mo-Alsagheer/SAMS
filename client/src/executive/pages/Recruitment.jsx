@@ -172,7 +172,14 @@ function Recruitment() {
   // ================= TABLE =================
   const columns = [
     { header: "Role", accessor: "role" },
-    { header: "Target", accessor: "targetMembers" },
+    {
+      header: "Target",
+      render: (row) => (
+        <div>
+          <p className=" text-muted-foreground">{row.targetMembers}</p>
+        </div>
+      ),
+    },
 
     {
       header: "Status",

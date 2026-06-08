@@ -201,9 +201,6 @@ function Committees() {
       {filteredCommittees.length === 0 ? (
         <div className="py-12 text-center text-muted-foreground">
           No committees found.
-          <div className="mt-4">
-            <AddCommittee onAdded={fetchCommittees} />
-          </div>
         </div>
       ) : (
         <Table columns={columns} data={filteredCommittees} />
