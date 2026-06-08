@@ -1,7 +1,7 @@
 import api from "@/features/api";
 
 export async function getSessions() {
-  const res = await api.get("/sessions");
+  const res = await api.get("/sessions/my-meetings");
   return res.data;
 }
 

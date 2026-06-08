@@ -132,7 +132,7 @@ export default function SessionDetails() {
             <div className="mt-5 flex flex-wrap items-center gap-5 text-sm">
               <span className="inline-flex items-center gap-1.5">
                 <Calendar className="h-4 w-4" />
-                {formatDateTime(session.date)}
+                {formatDateTime(session.scheduledAt)}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Clock className="h-4 w-4" />
