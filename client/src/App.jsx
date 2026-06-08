@@ -25,7 +25,9 @@ import ApplicationDetails from "./director/pages/ApplicationDetails";
 import ManageRoadmap from "./director/pages/ManageRoadmap";
 import TaskManagement from "./director/pages/TaskManagement";
 import Members from "./director/pages/Members";
-
+import Schedule from "./director/pages/Schedule";
+import Attendance from "./director/pages/Attendance";
+import TaskSubmission from "./director/pages/TaskSubmission";
 import MemberLayout from "./member/layout/MemberLayout";
 import Roadmap from "./member/pages/RoadMap";
 import MemberDashboard from "./member/pages/DashBoard";
@@ -60,6 +62,10 @@ function App() {
             <Route path="manageRoadmap" element={<ManageRoadmap />} />
             <Route path="taskManagement" element={<TaskManagement />} />
             <Route path="members" element={<Members />} />
+             <Route path="schedule" element={<Schedule />} />
+            <Route path="attendance/:sessionId" element={<Attendance />} />
+              <Route path="taskSubmission" element={<TaskSubmission />} />
+        
           </Route>
         </Route>
         {/* Member Protected Routes */}
