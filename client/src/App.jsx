@@ -43,6 +43,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/result" element={<QuizResult />} />
+        <Route path="/quiz/:category" element={<Quiz />} />
 
         {/* Committees & Applications */}
         <Route path="/committees" element={<ViewCommittee />} />

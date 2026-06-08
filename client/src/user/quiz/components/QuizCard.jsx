@@ -1,6 +1,6 @@
 import React from "react";
 
-function QuizCard({ id, question, options, onSelect, selectedOption }) {
+function QuizCard({ id, question, answers, onSelect, selectedOption }) {
   return (
     <fieldset className="space-y-4">
       {/* question */}
@@ -10,7 +10,7 @@ function QuizCard({ id, question, options, onSelect, selectedOption }) {
 
       {/* options */}
       <div className="flex flex-col gap-3">
-        {options.map((option) => {
+        {answers && answers.map((option) => {
           const isSelected = selectedOption === option.id;
 
           return (
@@ -35,7 +35,6 @@ function QuizCard({ id, question, options, onSelect, selectedOption }) {
               />
               
               <div className="flex items-center gap-3">
-                
                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
                   isSelected ? "border-blue-800 bg-blue-800" : "border-slate-300"
                 }`}>

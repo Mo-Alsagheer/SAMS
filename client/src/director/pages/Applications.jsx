@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
-
 import SearchBar from "../../components/shared/SearchBar";
 import FilterDropdown from "../../components/shared/FilterDropdown";
 import Table from "../../components/shared/Table";
