@@ -88,7 +88,7 @@ export class DirectorTasksController {
   }
 
   @Patch('submissions/:submissionId/score')
-  @ApiOperation({ summary: 'Grade a submission (0–5)' })
+  @ApiOperation({ summary: 'Grade a submission (0-10)' })
   @ApiParam({ name: 'submissionId', description: 'Numeric submission ID' })
   @ApiBody({ type: GradeSubmissionDto })
   @ApiResponse({ status: 200, description: 'Submission graded.' })
