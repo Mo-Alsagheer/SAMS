@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsInt, Max, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsEnum, IsInt, IsNotEmpty, Max, Min, ValidateNested } from 'class-validator';
+import { AttendanceStatus } from '../entities/attendace.entity';
 
 export class MemberAttendanceScoreDto {
   @ApiProperty({ description: 'User ID of the committee member', example: 1 })
@@ -17,6 +18,14 @@ export class MemberAttendanceScoreDto {
   @Min(0)
   @Max(5)
   score: number;
+
+  @ApiProperty({
+    enum: AttendanceStatus,
+    example: AttendanceStatus.PRESENT,
+  })
+  @IsEnum(AttendanceStatus)
+  @IsNotEmpty()
+  attended: AttendanceStatus;
 }
 
 export class MarkAttendanceDto {

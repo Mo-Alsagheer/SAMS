@@ -21,6 +21,12 @@ export class Task {
   @JoinColumn({ name: 'sessionId' })
   session: Session;
 
+  @Column({ type: 'int', nullable: true })
+  creatorId: number | null;
+
+  @Column({ type: 'text', nullable: true })
+  fileUrl: string | null;
+
   @Column({ type: 'text' })
   title: string;
 

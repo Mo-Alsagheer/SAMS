@@ -10,7 +10,7 @@ import { Session } from './entities/session.entity';
 import { Material } from '../materials/entities/material.entity';
 import { Task } from '../tasks/entities/task.entity';
 import { TaskSubmission } from '../tasks/entities/task-submission.entity';
-import { Attendace } from '../attendace/entities/attendace.entity';
+import { Attendace, AttendanceStatus } from '../attendace/entities/attendace.entity';
 import { Committee } from '../committees/entities/committee.entity';
 import { User } from '../users/entities/user.entity';
 import { MeetingsService } from '../meetings/meetings.service';
@@ -18,6 +18,7 @@ import { AuthUser } from '../auth/auth.types';
 import { Role } from '../../common/constants/role.enum';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
+import { CreateMeetingDto } from './dto/create-meeting.dto';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { RoadmapService } from '../roadmap/roadmap.service';
 
@@ -72,6 +73,7 @@ export class SessionsService {
       ...createSessionDto,
       scheduledAt: new Date(createSessionDto.scheduledAt),
       isRecorded: createSessionDto.isRecorded ?? false,
+      meetingType: createSessionDto.meetingType ?? null,
       committeeId: user.committeeId,
       creatorId: user.id,
     });
@@ -193,8 +195,13 @@ export class SessionsService {
     return this.meetingsService.getRecordings(session.plugnmeetRoomId);
   }
 
-  async createMeeting(sessionId: number) {
+  async createMeeting(sessionId: number, dto: CreateMeetingDto) {
     const session = await this.findById(sessionId);
+
+    session.scheduledAt = new Date(dto.scheduledAt);
+    session.meetingType = dto.meetingType;
+    await this.sessionsRepository.save(session);
+
     if (session.plugnmeetRoomId) {
       const isActive = await this.meetingsService.isRoomActive(
         session.plugnmeetRoomId,
@@ -363,7 +370,7 @@ export class SessionsService {
       }
 
       const att = attendanceList.find((a) => a.sessionId === s.id);
-      const attended = att ? att.attended : false;
+      const attended = att ? (att.attended !== null && att.attended !== AttendanceStatus.ABSENT) : false;
 
       const sessMaterials = materials.filter((m) => m.sessionId === s.id);
       const resources = sessMaterials.map((m) => {
@@ -392,7 +399,7 @@ export class SessionsService {
           dueDate: t.dueDate.toISOString(),
           status: taskStatus,
           score: sub?.score ?? undefined,
-          maxScore: 5,
+          maxScore: 10,
           submissionUrl: sub?.fileUrl || sub?.content || undefined,
         };
       });

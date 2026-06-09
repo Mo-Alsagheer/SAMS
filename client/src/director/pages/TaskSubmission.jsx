@@ -139,7 +139,7 @@ export default function TaskSubmission() {
       accessor: "date",
       render: (row) => (
         <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
-          <Clock size={12} /> {row.date ? new Date(row.date).toLocaleDateString() : "N/A"}
+          <Clock size={12} /> {row.submittedAt ? new Date(row.submittedAt).toLocaleDateString() : "N/A"}
         </div>
       ),
     },

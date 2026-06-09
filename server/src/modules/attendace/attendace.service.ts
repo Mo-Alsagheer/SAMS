@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Attendace } from './entities/attendace.entity';
+import { Attendace, AttendanceStatus } from './entities/attendace.entity';
 import { Session } from '../sessions/entities/session.entity';
 import { User, UserStatus } from '../users/entities/user.entity';
 import { TaskSubmission } from '../tasks/entities/task-submission.entity';
@@ -18,7 +18,7 @@ export interface AttendanceMemberRow {
   userId: number;
   name: string;
   email: string;
-  attended: boolean;
+  attended: AttendanceStatus | null;
   score: number;
 }
 
@@ -91,6 +91,14 @@ export class AttendaceService {
     sessionId: number;
     committeeId: number;
     members: AttendanceMemberRow[];
+    statistics: {
+      totalMembers: number;
+      presentCount: number;
+      lateCount: number;
+      absentCount: number;
+      pendingCount: number;
+      attendanceRate: number;
+    };
   }> {
     const { committeeId } = await this.resolveCommitteeIdForSession(sessionId);
     const members = await this.getCommitteeMembers(committeeId);
@@ -100,25 +108,57 @@ export class AttendaceService {
     });
     const recordByUserId = new Map(records.map((r) => [r.userId, r]));
 
+    const totalMembers = members.length;
+    let presentCount = 0;
+    let lateCount = 0;
+    let absentCount = 0;
+    let pendingCount = 0;
+
+    const mappedMembers = members.map((m) => {
+      const record = recordByUserId.get(m.id);
+      const attended = record?.attended ?? null;
+
+      if (attended === AttendanceStatus.PRESENT) {
+        presentCount++;
+      } else if (attended === AttendanceStatus.LATE) {
+        lateCount++;
+      } else if (attended === AttendanceStatus.ABSENT) {
+        absentCount++;
+      } else {
+        pendingCount++;
+      }
+
+      return {
+        userId: m.id,
+        name: m.name,
+        email: m.email,
+        attended,
+        score: record?.score ?? 0,
+      };
+    });
+
+    const attendanceRate = totalMembers > 0
+      ? Math.round(((presentCount + lateCount) / totalMembers) * 100)
+      : 0;
+
     return {
       sessionId,
       committeeId,
-      members: members.map((m) => {
-        const record = recordByUserId.get(m.id);
-        return {
-          userId: m.id,
-          name: m.name,
-          email: m.email,
-          attended: record?.attended ?? false,
-          score: record?.score ?? 0,
-        };
-      }),
+      members: mappedMembers,
+      statistics: {
+        totalMembers,
+        presentCount,
+        lateCount,
+        absentCount,
+        pendingCount,
+        attendanceRate,
+      },
     };
   }
 
   async markAttendance(
     sessionId: number,
-    membersData: { userId: number; score: number }[],
+    membersData: { userId: number; score: number; attended: AttendanceStatus }[],
     directorId: number,
   ): Promise<{
     sessionId: number;
@@ -152,7 +192,7 @@ export class AttendaceService {
 
     for (const memberData of membersData) {
       const score = memberData.score;
-      const attended = score > 0;
+      const attended = memberData.attended;
 
       const existing = existingMap.get(memberData.userId);
 
@@ -259,7 +299,7 @@ export class AttendaceService {
     return { committeeId, scores };
   }
 
-  private async buildScoreForUserCommittee(
+  async buildScoreForUserCommittee(
     user: User,
     committeeId: number,
   ): Promise<UserCommitteeScore> {
@@ -269,7 +309,9 @@ export class AttendaceService {
       .addSelect('SUM(a.score)', 'totalScore')
       .where('a.userId = :userId', { userId: user.id })
       .andWhere('a.committeeId = :committeeId', { committeeId })
-      .andWhere('a.attended = :attended', { attended: true })
+      .andWhere('a.attended IN (:...attendedStatuses)', {
+        attendedStatuses: [AttendanceStatus.PRESENT, AttendanceStatus.LATE],
+      })
       .getRawOne<{ count: string; totalScore: string }>();
 
     const attendanceCount = Number(attendanceAgg?.count ?? 0);

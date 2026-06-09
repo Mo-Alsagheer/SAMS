@@ -68,3 +68,9 @@ export async function getSessionMaterials(sessionId) {
   const res = await api.get(`/sessions/${sessionId}/materials`);
   return res.data;
 }
+
+
+export async function deleteTask(taskId) {
+  const res = await api.delete(`/director/tasks/${taskId}`);
+  return res.data;
+}
