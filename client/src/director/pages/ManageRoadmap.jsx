@@ -19,7 +19,7 @@ const sessionSchema = z.object({
 export default function ManageRoadmap() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [sessions, setSessions] = useState([]);
-  const [editingSession, setEditingSession] = useState(null);
+  const [editingSessionId, setEditingSessionId] = useState(null); // الاعتماد على الـ id بدلاً من الاندكس
   const [isLoading, setIsLoading] = useState(false);
 
   const [isMaterialsOpen, setIsMaterialsOpen] = useState(false);
@@ -180,8 +180,8 @@ export default function ManageRoadmap() {
       let savedSession;
       let targetSessionId;
 
-      if (editingSession !== null) {
-        targetSessionId = sessions[editingSession].id;
+      if (editingSessionId !== null) {
+        targetSessionId = editingSessionId;
         savedSession = await updateSession(targetSessionId, sessionPayload);
         toast.success("Session updated successfully");
       } else {
@@ -213,7 +213,7 @@ export default function ManageRoadmap() {
         toast.success("Resource processing finished");
       }
 
-      setEditingSession(null);
+      setEditingSessionId(null);
       setIsFormOpen(false);
       await fetchSessions(); 
     } catch (error) {
@@ -224,19 +224,21 @@ export default function ManageRoadmap() {
     }
   };
 
-  const handleDeleteSession = async (index) => {
-    const sessionId = sessions[index].id;
+  const handleDeleteSession = async (sessionId) => {
     if (!sessionId) return;
 
     try {
       await deleteSession(sessionId);
       toast.success("Session deleted successfully");
-      setSessions(prev => prev.filter((_, i) => i !== index));
-      fetchSessions(); 
+      setSessions(prev => prev.filter(session => session.id !== sessionId));
+      await fetchSessions(); 
     } catch {
       toast.error("Failed to delete session");
     }
   };
+
+  // جلب بيانات السيشن المراد تعديلها حالياً بالبحث عنها بالـ id
+  const currentEditingSession = sessions.find(s => s.id === editingSessionId) || null;
 
   return (
     <div className="p-4 md:p-10 dark:bg-transparent min-h-screen">
@@ -249,7 +251,7 @@ export default function ManageRoadmap() {
         <Button 
           type="button"
           size="lg"
-          onClick={() => { setEditingSession(null); setIsFormOpen(true); }}
+          onClick={() => { setEditingSessionId(null); setIsFormOpen(true); }}
           className="flex items-center justify-center gap-1.5 bg-primary hover:bg-blue-900 dark:bg-blue-700 dark:hover:bg-blue-600 text-white font-bold shadow-xl shadow-blue-100 dark:shadow-none transition-all active:scale-95 shrink-0 rounded-xl px-5 py-2.5"
         >
           <Plus size={16} strokeWidth={3} /> 
@@ -266,8 +268,8 @@ export default function ManageRoadmap() {
             <h3 className="font-black text-xl text-blue-900 dark:text-blue-400">No Sessions Yet</h3>
           </div>
         ) : (
-          sessions.map((s, index) => (
-            <div key={`session-item-${index}`} className="bg-white dark:bg-slate-900 p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:shadow-md hover:border-blue-100 dark:hover:border-blue-900 group">
+          sessions.map((s) => (
+            <div key={`session-item-${s.id}`} className="bg-white dark:bg-slate-900 p-5 md:p-6 rounded-2xl md:rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:shadow-md hover:border-blue-100 dark:hover:border-blue-900 group">
               <div className="flex items-start md:items-center gap-4 md:gap-5 flex-1">
                 <div className="mt-1 md:mt-0 p-2 bg-gray-50 dark:bg-slate-800 rounded-lg group-hover:bg-blue-50 dark:group-hover:bg-slate-700 transition-colors">
                   <GripVertical className="text-gray-300 dark:text-slate-500 group-hover:text-blue-400 dark:group-hover:text-blue-300 cursor-grab shrink-0" size={18} />
@@ -302,7 +304,7 @@ export default function ManageRoadmap() {
                 <Button 
                   variant="ghost"
                   size="icon-sm"
-                  onClick={() => { setEditingSession(index); setIsFormOpen(true); }} 
+                  onClick={() => { setEditingSessionId(s.id); setIsFormOpen(true); }} 
                   className="text-gray-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all"
                 >
                   <Edit3 size={16} />
@@ -310,7 +312,7 @@ export default function ManageRoadmap() {
                 <Button 
                   variant="ghost"
                   size="icon-sm"
-                  onClick={() => handleDeleteSession(index)} 
+                  onClick={() => handleDeleteSession(s.id)} 
                   className="text-gray-400 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-all"
                 >
                   <Trash2 size={16} />
@@ -324,14 +326,14 @@ export default function ManageRoadmap() {
       <PopupForm
         open={isFormOpen}
         onClose={() => setIsFormOpen(false)}
-        title={editingSession !== null ? "Update Session" : "Create New Session"}
+        title={editingSessionId !== null ? "Update Session" : "Create New Session"}
         schema={sessionSchema}
         fields={roadmapFields}
-        defaultValues={editingSession !== null ? {
-          sessionNumber: String(sessions[editingSession].sessionNumber),
-          title: sessions[editingSession].title,
-          outline: sessions[editingSession].description,
-          sessionFile: sessions[editingSession].materials || []
+        defaultValues={editingSessionId !== null && currentEditingSession ? {
+          sessionNumber: String(currentEditingSession.sessionNumber),
+          title: currentEditingSession.title,
+          outline: currentEditingSession.description,
+          sessionFile: currentEditingSession.materials || []
         } : { sessionNumber: String(sessions.length + 1), title: '', outline: '', sessionFile: [] }} 
         onSubmit={handleSaveSession}
         submitLabel="Save"
