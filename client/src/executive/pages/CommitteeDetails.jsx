@@ -63,7 +63,7 @@ function CommitteeDetails() {
           </div>
         ),
       },
-      { header: "Email", accessor: "email" },
+      { header: "Email", render: (row) => (<span>{row.email}</span>) },
       {
         header: "Role",
         render: (row) => (

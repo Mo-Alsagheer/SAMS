@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { PopupForm } from "@/components/shared/PopupForm";
 import StatCard from "@/components/shared/StatCard";
+import { useNavigate } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { Building2, Users, CheckCircle, XCircle } from "lucide-react";
 
@@ -23,6 +25,8 @@ const recruitmentSchema = z.object({
 function Recruitment() {
   const [groupedData, setGroupedData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("EXECUTIVE");
+  const navigate = useNavigate();
 
   const [formOpen, setFormOpen] = useState(false);
   const [activeCommittee, setActiveCommittee] = useState(null);
@@ -172,7 +176,14 @@ function Recruitment() {
   // ================= TABLE =================
   const columns = [
     { header: "Role", accessor: "role" },
-    { header: "Target", accessor: "targetMembers" },
+    {
+      header: "Target",
+      render: (row) => (
+        <div>
+          <p className=" text-muted-foreground">{row.targetMembers}</p>
+        </div>
+      ),
+    },
 
     {
       header: "Status",
@@ -219,7 +230,7 @@ function Recruitment() {
           {row.status === "CLOSED" && (
             <Button
               size="sm"
-              className="bg-gray-500 text-white"
+              className="bg-gray-500 hover:bg-gray-400 text-white"
               onClick={() => openRecruitmentForm(row, row.role)}
             >
               Reopen
@@ -230,7 +241,34 @@ function Recruitment() {
     },
   ];
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <div className="p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="p-4 bg-white rounded">
+              <Skeleton className="h-4 w-32 mb-3" />
+              <Skeleton className="h-8 w-20" />
+            </div>
+          ))}
+        </div>
+
+        <div className="border rounded-lg p-4 bg-white">
+          <Skeleton className="h-6 w-48 mb-4" />
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between">
+                <Skeleton className="h-5 w-1/3" />
+                <Skeleton className="h-5 w-1/6" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+
+  const executiveSection = groupedData[0];
+  const committeesOnly = groupedData.slice(1);
 
   return (
     <div className="p-6 space-y-6">
@@ -265,25 +303,67 @@ function Recruitment() {
       </div>
 
       <h1 className="text-xl font-semibold">Recruitment Management</h1>
+      <div className="flex items-center gap-2">
+        <button
+          className={`px-4 py-2 rounded ${activeTab === "EXECUTIVE" ? "bg-primary text-white" : "bg-gray-100"}`}
+          onClick={() => setActiveTab("EXECUTIVE")}
+        >
+          Executive
+        </button>
 
-      <div className="space-y-4">
-        {groupedData.map((committee) => (
-          <div
-            key={committee.committeeId}
-            className="border rounded-lg p-4 bg-white"
-          >
-            <h2 className="text-lg font-semibold mb-3">
-              {committee.committeeName}
-            </h2>
-
-            <Table
-              columns={columns}
-              data={committee.recruitments}
-              extraProps={committee}
-            />
-          </div>
-        ))}
+        <button
+          className={`px-4 py-2 rounded ${activeTab === "COMMITTEES" ? "bg-primary text-white" : "bg-gray-100"}`}
+          onClick={() => setActiveTab("COMMITTEES")}
+        >
+          Committees
+        </button>
       </div>
+      {activeTab === "EXECUTIVE" && (
+        <div className="space-y-4">
+          {executiveSection && (
+            <div className="border rounded-lg p-4 bg-white">
+              <h2 className="text-lg font-semibold mb-3">
+                {executiveSection.committeeName}
+              </h2>
+              <Table
+                columns={columns}
+                data={executiveSection.recruitments}
+                extraProps={executiveSection}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === "COMMITTEES" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {committeesOnly.map((committee) => (
+            <div
+              key={committee.committeeId}
+              className="border rounded-lg p-4 bg-white"
+            >
+              <h2 className="text-lg font-semibold mb-2">
+                {committee.committeeName}
+              </h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Manage recruitment for this committee
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    navigate(
+                      `/executive/recruitment/committee/${committee.committeeId}`,
+                    )
+                  }
+                >
+                  Manage
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {activeCommittee && (
         <PopupForm

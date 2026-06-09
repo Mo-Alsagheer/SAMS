@@ -13,7 +13,7 @@ function ApplicationsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1>Manage Applications </h1>
+      <h1 className="text-2xl font-semibold">Manage Applications </h1>
       {/* Tabs */}
       <div className="flex border-b gap-2">
         {TABS.map((tab) => (
