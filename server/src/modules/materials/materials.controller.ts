@@ -31,8 +31,8 @@ import { AuthUser } from '../auth/auth.types';
 import { CloudinaryService } from '../../integrations/cloudinary/cloudinary.service';
 
 @ApiTags('materials')
-// @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller()
 export class MaterialsController {
   constructor(
@@ -57,8 +57,8 @@ export class MaterialsController {
   }
 
   @Post('director/sessions/:sessionId/materials')
-  // @UseGuards(RolesGuard)
-  // @Roles(Role.DIRECTOR)
+  @UseGuards(RolesGuard)
+  @Roles(Role.DIRECTOR)
   @ApiOperation({ summary: 'Upload or attach a material to a session' })
   @ApiParam({ name: 'sessionId', description: 'Numeric session ID' })
   @ApiConsumes('multipart/form-data', 'application/json')
@@ -86,8 +86,8 @@ export class MaterialsController {
   }
 
   @Delete('director/materials/:materialId')
-  // @UseGuards(RolesGuard)
-  // @Roles(Role.DIRECTOR)
+  @UseGuards(RolesGuard)
+  @Roles(Role.DIRECTOR)
   @ApiOperation({ summary: 'Remove a material' })
   @ApiParam({ name: 'materialId', description: 'Numeric material ID' })
   @ApiResponse({ status: 200, description: 'Material removed.' })
