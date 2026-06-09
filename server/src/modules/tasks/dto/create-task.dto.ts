@@ -20,4 +20,9 @@ export class CreateTaskDto {
   @ApiProperty({ example: '2026-06-01T23:59:59.000Z' })
   @IsDateString()
   dueDate: string;
+
+  @ApiPropertyOptional({ description: 'Cloudinary URL for uploaded file' })
+  @IsOptional()
+  @IsString()
+  fileUrl?: string;
 }

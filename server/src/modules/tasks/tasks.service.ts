@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -23,14 +24,21 @@ export class TasksService {
     private readonly audit: AuditLogService,
   ) {}
 
-  async createForSession(sessionId: number, dto: CreateTaskDto): Promise<Task> {
+  async createForSession(
+    sessionId: number,
+    dto: CreateTaskDto,
+    creatorId: number,
+    fileUrl?: string,
+  ): Promise<Task> {
     await this.sessionsService.findById(sessionId);
 
     const task = this.taskRepo.create({
       sessionId,
+      creatorId,
       title: dto.title,
       description: dto.description ?? null,
       dueDate: new Date(dto.dueDate),
+      fileUrl: fileUrl || dto.fileUrl || null,
     });
 
     this.audit
@@ -57,6 +65,23 @@ export class TasksService {
       throw new NotFoundException('Task not found');
     }
     return task;
+  }
+
+  async deleteTask(taskId: number, directorId: number): Promise<void> {
+    const task = await this.findById(taskId);
+    if (task.creatorId !== directorId) {
+      throw new ForbiddenException('Only the director who created the task can delete it');
+    }
+
+    await this.taskRepo.remove(task);
+
+    this.audit
+      .log({
+        action: 'TasksService.deleteTask',
+        userId: String(directorId),
+        body: { taskId },
+      })
+      .catch(() => undefined);
   }
 
   async submit(
