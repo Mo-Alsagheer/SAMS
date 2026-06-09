@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import Table from "@/components/shared/Table";
 import { toast } from "sonner";
@@ -64,6 +65,7 @@ function CommitteeRecruitment() {
     {
       header: "Opened At",
       accessor: "openedAt",
+      sortable:true,
       render: (row) =>
         row.openedAt ? new Date(row.openedAt).toLocaleString() : "-",
     },
@@ -126,66 +128,77 @@ function CommitteeRecruitment() {
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={() => navigate(-1)}>
-          Back
-        </Button>
-        <h1 className="text-2xl font-semibold">Committee Recruitment</h1>
-        <div className="ml-auto flex gap-2">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <div className="flex items-center gap-3">
           <Button
-            size="sm"
-            onClick={() => {
-              setRole("MEMBER");
-              fetchStatus("MEMBER");
-            }}
-            className={
-              role === "MEMBER" ? "bg-secondary hover:bg-secondary/80 " : ""
-            }
+            variant="ghost"
+            onClick={() => navigate(-1)}
+            className="p-2 rounded-md"
           >
-            Member
+            <ArrowLeft className="w-5 h-5" />
           </Button>
-          <Button
-            size="sm"
-            onClick={() => {
-              setRole("DIRECTOR");
-              fetchStatus("DIRECTOR");
-            }}
-            className={
-              role === "DIRECTOR" ? "bg-secondary hover:bg-secondary/80" : ""
-            }
-          >
-            Director
-          </Button>
+
+          <div>
+            <div className="text-lg sm:text-xl font-semibold leading-tight">
+              {status?.committeeName || "Committee"}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Status:{" "}
+              <span className="font-medium">{status?.status || "-"}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
           <Button
             size="sm"
             onClick={() => setFormOpen(true)}
-            className="bg-success hover:bg-success/80 text-white"
+            className="bg-success hover:bg-success/90 text-white px-3 py-2 rounded-md"
           >
             Open Recruitment
           </Button>
         </div>
       </div>
 
+      <div className="mb-4">
+        <div className="inline-flex rounded-md bg-muted p-1">
+          <button
+            onClick={() => {
+              setRole("MEMBER");
+              fetchStatus("MEMBER");
+            }}
+            className={`px-3 py-2 rounded-md text-sm font-medium ${role === "MEMBER" ? "bg-primary text-white" : "text-foreground"}`}
+          >
+            Members
+          </button>
+          <button
+            onClick={() => {
+              setRole("DIRECTOR");
+              fetchStatus("DIRECTOR");
+            }}
+            className={`px-3 py-2 rounded-md text-sm font-medium ${role === "DIRECTOR" ? "bg-primary text-white" : "text-foreground"}`}
+          >
+            Directors
+          </button>
+        </div>
+      </div>
+
       {loading ? (
-        <div className="py-6">
-          <Spinner />
+        <div className="py-12 flex justify-center">
+          <Spinner className="w-10 h-10" />
         </div>
       ) : (
-        <div>
-          <div className="  p-4">
-            <h3 className="text-xl font-medium mb-2">
-              {status?.committeeName || "Committee"}
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Status: {status?.status || "-"} 
-            </p>
-            <Table
-              columns={getColumns()}
-              data={(status && status.processes) || []}
-              loading={loading}
-              rowsPerPage={10}
-            />
+        <div className="bg-card shadow-sm rounded-lg overflow-hidden">
+          <div className="p-4 sm:p-6">
+            <div className="overflow-x-auto">
+              <Table
+                columns={getColumns()}
+                data={(status && status.processes) || []}
+                loading={loading}
+                rowsPerPage={10}
+              />
+            </div>
           </div>
         </div>
       )}

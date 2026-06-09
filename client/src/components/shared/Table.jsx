@@ -65,14 +65,14 @@ function Table({
               {columns.map((col) => (
                 <th
                   key={col.accessor || col.header}
-                  onClick={() => col.accessor && requestSort(col.accessor)}
+                  onClick={() => col.sortable && requestSort(col.accessor)}
                   className={`h-10 px-2 sm:px-4 text-left align-middle font-medium whitespace-nowrap text-foreground ${
-                    col.accessor ? "cursor-pointer select-none" : ""
+                    col.sortable ? "cursor-pointer select-none" : ""
                   }`}
                 >
                   <div className="flex items-center gap-1">
                     {col.header}
-                    {col.accessor && (
+                    {col.sortable && (
                       <ArrowUpDown
                         size={14}
                         className="text-muted-foreground"
