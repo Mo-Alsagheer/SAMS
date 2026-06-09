@@ -173,12 +173,12 @@ function CommitteeRecruitment() {
         </div>
       ) : (
         <div>
-          <div className="bg-white border rounded p-4">
-            <h3 className="font-medium mb-2">
+          <div className="  p-4">
+            <h3 className="text-xl font-medium mb-2">
               {status?.committeeName || "Committee"}
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Status: {status?.status || "-"} — Open: {String(status?.isOpen)}
+              Status: {status?.status || "-"} 
             </p>
             <Table
               columns={getColumns()}
