@@ -1,65 +1,121 @@
 import React, { useEffect, useState } from "react";
-import { Cloud, Save, ChevronDown, Clock } from "lucide-react";
+import { useParams } from "react-router-dom"; // عشان لو الـ roadmapId في الـ URL
+import { Cloud, Save, Clock, ChevronDown, ChevronUp, Folder, BookOpen, Layers, Loader2 } from "lucide-react";
 import Table from "../../components/shared/Table";
 import { Button } from "@/components/ui/button"; 
 import { toast } from "sonner";
 
+// استيراد كافة الدوال من الـ API (بما فيها الدالة الجديدة)
+import {  getSessionTasks, getTaskSubmissions, updateSubmissionScore } from "@/features/submission/submission";
+import { getSessionsByRoadmap} from "@/features/roadmap/roadmap"
 export default function TaskSubmission() {
+  const { roadmapId: urlRoadmapId } = useParams(); // 1. محاولة قراءة الـ ID من الـ URL direct
+  
+  const [sessions, setSessions] = useState([]); 
   const [submissions, setSubmissions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedTask, setSelectedTask] = useState("42");
+  const [loadingSessions, setLoadingSessions] = useState(true);
+  const [loadingSubmissions, setLoadingSubmissions] = useState(false);
+  const [loadingTasks, setLoadingTasks] = useState(false);
   const [grades, setGrades] = useState({}); 
+  
+  const [sessionTasksData, setSessionTasksData] = useState({});
+  const [expandedSession, setExpandedSession] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
 
-  const tasks = [
-    { id: "42", title: "Final Roadmap Review" },
-    { id: "43", title: "React State Management" },
-    { id: "44", title: "Advanced CSS Layouts" },
-  ];
-
-  const mockSubmissions = [
-    {
-      id: 1,
-      name: "Johnathan Doe",
-      email: "j.doe@sams-edu.org",
-      date: "Oct 21, 2:15 PM",
-      file: "final_submission_v2.pdf",
-      grade: 8.5, 
-    },
-    {
-      id: 2,
-      name: "Sarah Chen",
-      email: "s.chen@sams-edu.org",
-      date: "Oct 22, 11:30 AM",
-      file: "Algorithm_Notes.docx",
-      grade: 7.0, 
-    },
-  ];
-
+  // 2. جلب السيشنز بناءً على الـ Roadmap ID ديناميكياً
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitialSessions = async () => {
+      // هيفترض وجود ID في الـ URL، لو مش موجود تقدري تحطي ID افتراضي مؤقتاً للتست (مثلاً: 1)
+      const currentRoadmapId = urlRoadmapId || 1; 
+
       try {
-        setLoading(true);
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        setSubmissions(mockSubmissions);
+        setLoadingSessions(true);
+        const res = await getSessionsByRoadmap(currentRoadmapId);
+        setSessions(Array.isArray(res) ? res : (res?.data || []));
+      } catch (error) {
+        const message = error?.response?.data?.message || "Failed to load sessions for this roadmap.";
+        toast.error(message);
+      } finally {
+        setLoadingSessions(false);
+      }
+    };
+    
+    fetchInitialSessions();
+  }, [urlRoadmapId]);
+
+  // 3. جلب التاسكات فور فتح كارت السيشن
+  const handleSessionToggle = async (sessionId) => {
+    if (expandedSession === sessionId) {
+      setExpandedSession(null);
+      return;
+    }
+
+    setExpandedSession(sessionId);
+
+    if (!sessionTasksData[sessionId]) {
+      try {
+        setLoadingTasks(true);
+        const tasks = await getSessionTasks(sessionId);
+        setSessionTasksData(prev => ({
+          ...prev,
+          [sessionId]: Array.isArray(tasks) ? tasks : (tasks?.data || [])
+        }));
+      } catch (taskError) { 
+        const message = taskError?.response?.data?.message || "Failed to load tasks.";
+        toast.error(message);
+      } finally {
+        setLoadingTasks(false);
+      }
+    }
+  };
+
+  // 4. جلب تسليمات الطلاب عند تغيير الـ Task المختارة
+  useEffect(() => {
+    if (!selectedTask) return;
+
+    const fetchSubmissionsData = async () => {
+      try {
+        setLoadingSubmissions(true);
+        const res = await getTaskSubmissions(selectedTask);
+        setSubmissions(Array.isArray(res) ? res : (res?.data || []));
       } catch (error) {
         const message = error?.response?.data?.message || "Failed to load submissions.";
         toast.error(message);
       } finally {
-        setLoading(false);
+        setLoadingSubmissions(false);
       }
     };
-    fetchData();
+
+    fetchSubmissionsData();
   }, [selectedTask]);
 
-  const handleSaveGrade = (id) => {
-    const score = grades[id];
+  const handleTaskSelect = (taskId) => {
+    setSelectedTask(selectedTask === taskId ? null : taskId);
+  };
+
+  // 5. حفظ الدرجة للباك إند
+  const handleSaveGrade = async (submissionId) => {
+    const score = grades[submissionId];
     
-    if (score !== undefined && (score > 10 || score < 0)) {
-      toast.error("Grade must be between 0 and 10");
+    if (score === undefined || score === "") {
+      toast.error("Please enter a score first");
       return;
     }
-  
-    toast.success(`Grade ${score || 'updated'} saved successfully!`);
+
+    if (Number(score) > 5 || Number(score) < 0) {
+      toast.error("Score must be between 0 and 5");
+      return;
+    }
+
+    try {
+      await updateSubmissionScore(submissionId, score);
+      toast.success(`Score (${score}/5) saved successfully!`);
+      
+      setSubmissions(prev => prev.map(sub => sub.id === submissionId ? { ...sub, score: Number(score) } : sub));
+    } catch (error) {
+      const msg = error?.response?.data?.message || "Failed to save score";
+      toast.error(msg);
+    }
   };
 
   const columns = [
@@ -69,11 +125,11 @@ export default function TaskSubmission() {
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-xs shrink-0">
-            {row.name.charAt(0)}
+            {row.name ? row.name.charAt(0) : "U"}
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-slate-900 dark:text-slate-200 text-sm">{row.name}</span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase">{row.email}</span>
+            <span className="font-bold text-slate-900 dark:text-slate-200 text-sm">{row.name || "Unknown Student"}</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase">{row.email || "N/A"}</span>
           </div>
         </div>
       ),
@@ -83,38 +139,42 @@ export default function TaskSubmission() {
       accessor: "date",
       render: (row) => (
         <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
-          <Clock size={12} /> {row.date}
+          <Clock size={12} /> {row.date ? new Date(row.date).toLocaleDateString() : "N/A"}
         </div>
       ),
     },
     {
       header: "DELIVERABLE",
       render: (row) => (
-        <a href="#" className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors text-[11px] font-bold underline">
-          <Cloud size={14} /> {row.file}
+        <a 
+          href={row.fileUrl || "#"} 
+          target="_blank" 
+          rel="noreferrer" 
+          className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors text-[11px] font-bold underline"
+        >
+          <Cloud size={14} /> {row.fileUrl ? "View Attached File" : "No file"}
         </a>
       ),
     },
     {
-      header: "SCORE (0-10)",
+      header: "SCORE (0-5)",
       render: (row) => {
-        const displayGrade = grades[row.id] !== undefined ? grades[row.id] : row.grade;
-
+        const currentScore = grades[row.id] !== undefined ? grades[row.id] : (row.score !== undefined ? row.score : row.grade);
         return (
           <div className="flex items-center gap-3">
             <input
               type="number"
               min="0"
-              max="10" 
+              max="5" 
               step="1" 
               value={grades[row.id] || ""}
-              placeholder={row.grade || "0"}
+              placeholder={row.score !== null && row.score !== undefined ? row.score : "0"}
               className="w-16 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-center text-xs font-black text-blue-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
               onChange={(e) => setGrades({ ...grades, [row.id]: e.target.value })}
             />
-            {displayGrade !== null && (
-              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full animate-in fade-in duration-300">
-                {displayGrade}/10 
+            {currentScore !== null && currentScore !== undefined && (
+              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
+                {currentScore}/5 
               </span>
             )}
           </div>
@@ -124,7 +184,6 @@ export default function TaskSubmission() {
     {
       header: "ACTIONS",
       render: (row) => (
-       
         <Button
           type="button"
           size="sm"
@@ -139,40 +198,116 @@ export default function TaskSubmission() {
   ];
 
   return (
-    <div className="p-4 md:p-8dark:bg-transparent min-h-screen font-sans">
+    <div className="p-4 md:p-8 min-h-screen font-sans">
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-black text-blue-900 dark:text-blue-400 tracking-tight">Task Submissions</h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">
-          Review and update student performance scores.
+          Select a session and task to review and grade student submittals (Scale 0-5).
         </p>
       </div>
 
-      {/* Filter Bar */}
-      <div className="flex mb-8">
-        <div className="relative w-full md:w-96">
-          <select
-            value={selectedTask}
-            onChange={(e) => setSelectedTask(e.target.value)}
-            className="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-5 py-4 rounded-2xl shadow-sm text-sm font-bold text-blue-900 dark:text-slate-100 outline-none focus:ring-4 focus:ring-blue-500/5 dark:focus:ring-blue-500/10 cursor-pointer"
-          >
-            {tasks.map((t) => (
-              <option key={t.id} value={t.id} className="dark:bg-slate-900">{t.title}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+      {/* شاشة تحميل السيشنز */}
+      {loadingSessions ? (
+        <div className="flex justify-center items-center py-12 gap-2 text-sm font-bold text-slate-400">
+          <Loader2 size={20} className="animate-spin text-blue-500" /> Loading Roadmap Sessions...
         </div>
-      </div>
+      ) : sessions.length === 0 ? (
+        <div className="text-center py-12 text-sm font-medium text-slate-400 bg-white dark:bg-slate-900 rounded-[1.5rem] border border-slate-200 dark:border-slate-800">
+          No sessions found for this roadmap.
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {sessions.map((session) => {
+            const isSessionOpen = expandedSession === session.id;
+            const tasksList = sessionTasksData[session.id] || [];
 
-      {/* Table Section */}
-      <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-[0_20px_50px_rgba(59,130,246,0.06)] dark:shadow-none overflow-hidden">
-        <Table 
-          columns={columns} 
-          data={submissions} 
-          loading={loading} 
-          rowsPerPage={10} 
-        />
-      </div>
+            return (
+              <div 
+                key={session.id} 
+                className="bg-white dark:bg-slate-900 rounded-[1.5rem] border border-slate-200 dark:border-slate-800 shadow-[0_4px_20px_rgba(59,130,246,0.03)] overflow-hidden transition-all duration-300"
+              >
+                {/* Session Header Card */}
+                <div 
+                  onClick={() => handleSessionToggle(session.id)}
+                  className={`p-5 flex items-center justify-between cursor-pointer select-none transition-colors ${
+                    isSessionOpen ? "bg-slate-50/80 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-800/60" : "hover:bg-slate-50/50 dark:hover:bg-slate-800/20"
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-950/50 rounded-xl text-blue-600 dark:text-blue-400">
+                      <BookOpen size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-base text-blue-900 dark:text-slate-100">{session.title || `Session ${session.id}`}</h3>
+                      <p className="text-xs text-slate-400 font-medium mt-0.5">Click to view assigned tasks</p>
+                    </div>
+                  </div>
+                  {isSessionOpen ? <ChevronUp className="text-slate-400" size={20} /> : <ChevronDown className="text-slate-400" size={20} />}
+                </div>
+
+                {/* Tasks Dropdown Menu */}
+                {isSessionOpen && (
+                  <div className="p-4 bg-white dark:bg-slate-900/60 space-y-3 animate-in slide-in-from-top-2 duration-200">
+                    {loadingTasks ? (
+                      <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 p-2">
+                        <Loader2 size={14} className="animate-spin text-blue-500" /> Loading tasks...
+                      </div>
+                    ) : tasksList.length === 0 ? (
+                      <p className="text-xs text-slate-400 p-2">No tasks assigned to this session.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        {tasksList.map((task) => {
+                          const isTaskActive = selectedTask === task.id;
+                          return (
+                            <div
+                              key={task.id}
+                              onClick={() => handleTaskSelect(task.id)}
+                              className={`p-4 rounded-xl border cursor-pointer select-none transition-all flex items-center justify-between ${
+                                isTaskActive 
+                                  ? "bg-blue-600 border-blue-600 text-white shadow-[0_8px_25px_rgba(59,130,246,0.25)] scale-[0.99]" 
+                                  : "bg-slate-50 dark:bg-slate-800/50 border-slate-200/60 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 text-slate-700 dark:text-slate-300"
+                              }`}
+                            >
+                              <div className="flex items-center gap-3 truncate">
+                                <Folder size={16} className={isTaskActive ? "text-blue-200" : "text-slate-400"} />
+                                <span className="text-xs font-bold truncate">{task.title}</span>
+                              </div>
+                              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md tracking-wider shrink-0 ${
+                                isTaskActive ? "bg-white/20 text-white" : "bg-white dark:bg-slate-700 shadow-sm border border-slate-100 dark:border-slate-600 text-blue-600 dark:text-blue-400"
+                              }`}>
+                                ID: {task.id}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* الـ Table Section الخاص بالتاسك المختارة */}
+                    {tasksList.some(t => t.id === selectedTask) && selectedTask && (
+                      <div className="mt-6 border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm animate-in fade-in duration-300">
+                        <div className="bg-slate-50/60 dark:bg-slate-800/20 px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+                          <Layers size={14} className="text-blue-500" />
+                          <span className="text-xs font-black text-blue-900 dark:text-slate-300 uppercase tracking-wider">
+                            Submissions Dashboard
+                          </span>
+                        </div>
+                        <Table 
+                          columns={columns} 
+                          data={submissions} 
+                          loading={loadingSubmissions} 
+                          rowsPerPage={5} 
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

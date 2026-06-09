@@ -133,14 +133,13 @@ function Committees() {
   }, [committees, search]);
   const columns = React.useMemo(
     () => [
-      { header: "Name", accessor: "name" },
-      { header: "Type", accessor: "type" },
-      { header: "Members", accessor: "membersCount" },
+      { header: "Name", render: (row) => <span>{row.name}</span> },
+      { header: "Type", render: (row) => <span>{row.type}</span> },
+      { header: "Members", render: (row) => <span>{row.membersCount}</span> },
       {
         header: "Actions",
         render: (row) => (
           <div className="flex gap-2">
-            {" "}
             <Button
               size="sm"
               variant="outline"
@@ -201,9 +200,6 @@ function Committees() {
       {filteredCommittees.length === 0 ? (
         <div className="py-12 text-center text-muted-foreground">
           No committees found.
-          <div className="mt-4">
-            <AddCommittee onAdded={fetchCommittees} />
-          </div>
         </div>
       ) : (
         <Table columns={columns} data={filteredCommittees} />

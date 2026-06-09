@@ -21,6 +21,7 @@ import ExecutiveLayout from "./executive/pages/ExecutiveLayout";
 import ExecutiveDashboard from "./executive/pages/DashBoard";
 import Recruitment from "./executive/pages/Recruitment";
 import Committees from "./executive/pages/Committees";
+import CommitteeRecruitment from "./executive/pages/CommitteeRecruitment";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import CommitteeDetails from "./executive/pages/CommitteeDetails";
 import ApplicationDetails from "./director/pages/ApplicationDetails";
@@ -67,10 +68,9 @@ function App() {
             <Route path="manageRoadmap" element={<ManageRoadmap />} />
             <Route path="taskManagement" element={<TaskManagement />} />
             <Route path="members" element={<Members />} />
-             <Route path="schedule" element={<Schedule />} />
+            <Route path="schedule" element={<Schedule />} />
             <Route path="attendance/:sessionId" element={<Attendance />} />
-              <Route path="taskSubmission" element={<TaskSubmission />} />
-        
+            <Route path="taskSubmission" element={<TaskSubmission />} />
           </Route>
         </Route>
         {/* Member Protected Routes */}
@@ -88,6 +88,10 @@ function App() {
           <Route path="/executive" element={<ExecutiveLayout />}>
             <Route index element={<ExecutiveDashboard />} />
             <Route path="recruitment" element={<Recruitment />} />
+            <Route
+              path="recruitment/committee/:committeeId"
+              element={<CommitteeRecruitment />}
+            />
             <Route path="applications" element={<DirectorApplications />} />
             <Route path="committees" element={<Committees />} />
             <Route

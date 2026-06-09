@@ -9,7 +9,7 @@ import {
   ClipboardList,
   Trash2,
   Filter,
-  ChevronDown // 🌟 استيراد السهم هنا
+  ChevronDown 
 } from "lucide-react";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -18,9 +18,10 @@ import {
   getSessionTasks, 
   createTask, 
 } from "@/features/tasks/tasks"; 
+// 🌟 غيرنا الاستدعاء هنا للفانكشن الجديدة المربوطة بالـ Swagger
 import { 
-  getSessions 
-} from "@/features/sessions/sessions"; 
+  getSessionsByRoadmap 
+} from "@/features/roadmap/roadmap"; 
 
 const taskSchema = z.object({
   title: z.string().min(3, "Title is too short"),
@@ -36,15 +37,19 @@ export default function TaskManagement() {
   const [loading, setLoading] = useState(false);
   const [dbSessions, setDbSessions] = useState([]);
   
-  // State لتخزين السيشين المختارة في الفلتر
   const [selectedSessionFilter, setSelectedSessionFilter] = useState("all");
 
-  // 1️⃣ جلب البيانات وحل مشكلة الـ id
+  // ايدي الرودماب الحالية (تقدري تخليه ديناميكي حسب الحاجه) 🌟
+  const currentRoadmapId = 1; 
+
+  // 1️⃣ جلب البيانات وحل مشكلة الـ id بناءً على الرودماب الصح
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      const sessionsData = await getSessions();
-      setDbSessions(sessionsData);
+      
+      // 🌟 بننادي الفانكشن المظبوطة اللي بترجع السيشينز المتاحة فعلاً للـ Roadmap دي
+      const sessionsData = await getSessionsByRoadmap(currentRoadmapId);
+      setDbSessions(sessionsData || []);
 
       if (!sessionsData || sessionsData.length === 0) {
         setTasks([]);
@@ -62,7 +67,8 @@ export default function TaskManagement() {
             return tasksArray.map(task => ({
               ...task,
               actualSessionId: sId,
-              sessionName: session.name || `Session ${sId}` 
+              // الباك إند باعت الأسم في الـ Swagger كـ title مش name 🌟
+              sessionName: session.title || `Session ${sId}` 
             }));
           } catch (err) {
             console.warn(`Could not fetch tasks for session`, err);
@@ -223,7 +229,7 @@ export default function TaskManagement() {
         {/* Action Buttons & Dropdown Filter */}
         <div className="flex flex-wrap items-center gap-3">
           
-          {/* الـ Dropdown Menu مع علامة السهم المخصصة 🌟 */}
+          {/* الـ Dropdown Menu مع علامة السهم المخصصة */}
           <div className="relative flex items-center bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 shadow-sm min-w-[220px]">
             <Filter size={16} className="text-gray-400 mr-2 shrink-0" />
             <select
@@ -234,11 +240,10 @@ export default function TaskManagement() {
               <option value="all">All Active Sessions</option>
               {dbSessions.map((session) => (
                 <option key={session.id || session._id} value={String(session.id || session._id)}>
-                  {session.name || `Session ${session.id || session._id}`}
+                  {session.title || `Session ${session.id || session._id}`}
                 </option>
               ))}
             </select>
-            {/* السهم المضاف في أقصى اليمين 🌟 */}
             <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400">
               <ChevronDown size={16} strokeWidth={2.5} />
             </div>
@@ -319,14 +324,11 @@ export default function TaskManagement() {
         }}
         onSubmit={handleSaveTask}
         submitLabel="Save Task"
-        
         className="max-w-2xl w-[94%] max-h-[90vh] flex flex-col overflow-hidden rounded-[24px] md:rounded-[32px]" 
         gridClassName="grid grid-cols-2 gap-3 md:gap-4 overflow-y-auto p-1 pr-2 max-h-full custom-scrollbar" 
-        
         bgColor="bg-white dark:bg-slate-900"
         titleColor="text-blue-900 dark:text-slate-100 font-black text-xl md:text-2xl pt-2"
         labelColor="text-[11px] md:text-sm font-bold text-blue-900/70 dark:text-slate-300 mb-1 block"
-        
         inputClassName="w-full px-3 py-2.5 md:px-4 md:py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-transparent text-sm text-gray-700 dark:text-slate-200 font-medium placeholder:text-gray-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
         submitClassName='text-base p-5'
         renderCustomField={(field, watch, setValue) => renderUploadField(field, watch, setValue)}

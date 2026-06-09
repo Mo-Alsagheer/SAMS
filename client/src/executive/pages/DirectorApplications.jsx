@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import Table from "@/components/shared/Table";
 import { PopupForm } from "@/components/shared/PopupForm";
 import { getInitials } from "@/utils/getInitials";
@@ -21,6 +21,7 @@ const scheduleFields = [
 
 function DirectorApplications() {
   const hook = useDirectorApplications();
+  const [search, setSearch] = useState("");
 
   const renderActions = (row) => {
     const isLoading = hook.actionLoadingId === row.id;
@@ -78,8 +79,22 @@ function DirectorApplications() {
           </div>
         ),
       },
-      { header: "Phone", accessor: "phone" },
-      { header: "Status", accessor: "status" },
+      {
+        header: "Phone",
+        render: (r) => (
+          <div>
+            <p className="text-xs text-muted-foreground">{r.phone}</p>
+          </div>
+        ),
+      },
+      {
+        header: "Status",
+        render: (r) => (
+          <div>
+            <p className="text-xs text-muted-foreground">{r.status}</p>
+          </div>
+        ),
+      },
       {
         header: "Actions",
         render: renderActions,
@@ -88,11 +103,19 @@ function DirectorApplications() {
     [hook.actionLoadingId],
   );
 
+  const filteredData = useMemo(() => {
+    const q = (search || "").toLowerCase();
+
+    return (hook.applications || []).filter((item) =>
+      `${item.name} ${item.email} ${item.phone}`.toLowerCase().includes(q),
+    );
+  }, [hook.applications, search]);
+
   return (
     <>
       {/* Committee */}
-      <div className="flex flex-col md:flex-row">
-        <SearchBar />
+      <div className="flex flex-col gap-3 md:flex-row">
+        <SearchBar value={search} onChange={setSearch} />
         <select
           value={hook.selectedCommittee}
           onChange={(e) => hook.selectCommittee(e.target.value)}
@@ -109,7 +132,7 @@ function DirectorApplications() {
 
       <Table
         columns={columns}
-        data={hook.applications}
+        data={filteredData}
         loading={hook.loadingApplications}
       />
 
