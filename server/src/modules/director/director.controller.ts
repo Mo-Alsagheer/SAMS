@@ -24,6 +24,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/role.enum';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateMeetingDto } from '../sessions/dto/create-meeting.dto';
 
 @ApiTags('director')
 @ApiBearerAuth()
@@ -167,13 +168,17 @@ export class DirectorController {
     description: 'Numeric session ID',
     example: 1,
   })
+  @ApiBody({ type: CreateMeetingDto })
   @ApiResponse({
     status: 201,
     description: 'Meeting room created successfully.',
   })
   @ApiResponse({ status: 404, description: 'Session not found.' })
-  createMeeting(@Param('sessionId', ParseIntIdPipe) sessionId: number) {
-    return this.sessionsService.createMeeting(sessionId);
+  createMeeting(
+    @Param('sessionId', ParseIntIdPipe) sessionId: number,
+    @Body() createMeetingDto: CreateMeetingDto,
+  ) {
+    return this.sessionsService.createMeeting(sessionId, createMeetingDto);
   }
 
   @Post('sessions/:sessionId/meeting/end')

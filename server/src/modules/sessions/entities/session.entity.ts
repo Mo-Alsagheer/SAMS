@@ -35,6 +35,9 @@ export class Session {
   @Column({ type: 'int', nullable: true })
   creatorId: number | null;
 
+  @Column({ type: 'text', nullable: true })
+  meetingType: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

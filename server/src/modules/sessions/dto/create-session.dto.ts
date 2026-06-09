@@ -32,4 +32,9 @@ export class CreateSessionDto {
   @IsOptional()
   @IsBoolean()
   isRecorded?: boolean;
+
+  @ApiPropertyOptional({ example: 'online' })
+  @IsOptional()
+  @IsString()
+  meetingType?: string;
 }
