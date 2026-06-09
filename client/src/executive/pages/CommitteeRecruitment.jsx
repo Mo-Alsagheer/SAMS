@@ -5,6 +5,7 @@ import { Spinner } from "@/components/ui/spinner";
 import Table from "@/components/shared/Table";
 import { toast } from "sonner";
 import { getCommitteeRecruitmentStatus } from "@/features/recruitment/recruitment";
+import { closeRecruitmentApi } from "@/features/recruitment/recruitment";
 import { PopupForm } from "@/components/shared/PopupForm";
 import { z } from "zod";
 import { openCommitteeRecruitment } from "@/features/recruitment/recruitment";
@@ -16,6 +17,7 @@ function CommitteeRecruitment() {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
+  const [actionLoadingId, setActionLoadingId] = useState(null);
 
   const fetchStatus = async (r) => {
     try {
@@ -71,6 +73,37 @@ function CommitteeRecruitment() {
       render: (row) =>
         row.closedAt ? new Date(row.closedAt).toLocaleString() : "-",
     },
+    {
+      header: "Actions",
+      render: (row) => (
+        <div className="flex gap-2">
+          {row.status === "OPEN" && (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={async () => {
+                try {
+                  setActionLoadingId(row.id);
+                  await closeRecruitmentApi(row.id);
+                  toast.success("Recruitment closed");
+                  fetchStatus(role);
+                } catch (err) {
+                  toast.error(
+                    err?.response?.data?.message ||
+                      "Failed to close recruitment",
+                  );
+                } finally {
+                  setActionLoadingId(null);
+                }
+              }}
+              disabled={actionLoadingId === row.id}
+            >
+              {actionLoadingId === row.id ? "Closing..." : "Close"}
+            </Button>
+          )}
+        </div>
+      ),
+    },
   ];
 
   const recruitmentSchema = z.object({
@@ -106,7 +139,9 @@ function CommitteeRecruitment() {
               setRole("MEMBER");
               fetchStatus("MEMBER");
             }}
-            className={role === "MEMBER" ? "bg-secondary hover:bg-secondary/80 " : ""}
+            className={
+              role === "MEMBER" ? "bg-secondary hover:bg-secondary/80 " : ""
+            }
           >
             Member
           </Button>
@@ -116,7 +151,9 @@ function CommitteeRecruitment() {
               setRole("DIRECTOR");
               fetchStatus("DIRECTOR");
             }}
-            className={role === "DIRECTOR" ? "bg-secondary hover:bg-secondary/80" : ""}
+            className={
+              role === "DIRECTOR" ? "bg-secondary hover:bg-secondary/80" : ""
+            }
           >
             Director
           </Button>
