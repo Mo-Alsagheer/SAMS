@@ -230,7 +230,7 @@ function Recruitment() {
           {row.status === "CLOSED" && (
             <Button
               size="sm"
-              className="bg-gray-500 text-white"
+              className="bg-gray-500 hover:bg-gray-400 text-white"
               onClick={() => openRecruitmentForm(row, row.role)}
             >
               Reopen
