@@ -12,6 +12,12 @@ import { Committee } from '../../committees/entities/committee.entity';
 import { Session } from '../../sessions/entities/session.entity';
 import { User } from '../../users/entities/user.entity';
 
+export enum AttendanceStatus {
+  PRESENT = 'present',
+  LATE = 'late',
+  ABSENT = 'absent',
+}
+
 /** One row per member per session; attended is set by the director after each session. */
 @Entity('attendance')
 @Unique(['sessionId', 'userId'])
@@ -44,8 +50,13 @@ export class Attendace {
   @Column({ type: 'int', nullable: true })
   score: number | null;
 
-  @Column({ type: 'boolean', default: false })
-  attended: boolean;
+  @Column({
+    type: 'enum',
+    enum: AttendanceStatus,
+    nullable: true,
+    default: null,
+  })
+  attended: AttendanceStatus | null;
 
   @Column({ type: 'int', nullable: true })
   createdBy: number | null;
