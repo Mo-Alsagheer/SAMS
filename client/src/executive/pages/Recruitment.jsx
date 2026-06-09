@@ -13,6 +13,7 @@ import { z } from "zod";
 import { PopupForm } from "@/components/shared/PopupForm";
 import StatCard from "@/components/shared/StatCard";
 import { useNavigate } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { Building2, Users, CheckCircle, XCircle } from "lucide-react";
 
@@ -240,7 +241,31 @@ function Recruitment() {
     },
   ];
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <div className="p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="p-4 bg-white rounded">
+              <Skeleton className="h-4 w-32 mb-3" />
+              <Skeleton className="h-8 w-20" />
+            </div>
+          ))}
+        </div>
+
+        <div className="border rounded-lg p-4 bg-white">
+          <Skeleton className="h-6 w-48 mb-4" />
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between">
+                <Skeleton className="h-5 w-1/3" />
+                <Skeleton className="h-5 w-1/6" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
 
   const executiveSection = groupedData[0];
   const committeesOnly = groupedData.slice(1);
