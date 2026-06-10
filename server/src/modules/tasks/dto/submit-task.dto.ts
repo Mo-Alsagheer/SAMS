@@ -1,16 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, ValidateIf } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class SubmitTaskDto {
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: 'Text content submission' })
   @IsOptional()
   @IsString()
-  @ValidateIf((o) => !o.fileUrl)
   content?: string;
 
-  @ApiPropertyOptional({ description: 'Cloudinary URL for uploaded file' })
+  @ApiPropertyOptional({ type: 'string', format: 'binary', description: 'File submission' })
   @IsOptional()
-  @IsString()
-  @ValidateIf((o) => !o.content)
-  fileUrl?: string;
+  file?: any;
 }

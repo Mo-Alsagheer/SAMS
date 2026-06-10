@@ -88,12 +88,13 @@ export class TasksService {
     taskId: number,
     userId: number,
     dto: SubmitTaskDto,
+    fileUrl?: string,
   ): Promise<TaskSubmission> {
     await this.findById(taskId);
 
-    if (!dto.content?.trim() && !dto.fileUrl?.trim()) {
+    if (!dto.content?.trim() && !fileUrl?.trim()) {
       throw new BadRequestException(
-        'Submission must include content or fileUrl',
+        'Submission must include content or file upload',
       );
     }
 
@@ -103,13 +104,13 @@ export class TasksService {
 
     if (existing) {
       existing.content = dto.content?.trim() ?? null;
-      existing.fileUrl = dto.fileUrl?.trim() ?? null;
+      existing.fileUrl = fileUrl?.trim() ?? null;
 
       this.audit
         .log({
           action: 'TasksService.updateSubmission',
           userId: String(userId),
-          body: { taskId, dto },
+          body: { taskId, dto, fileUrl },
         })
         .catch(() => undefined);
 
@@ -120,7 +121,7 @@ export class TasksService {
       taskId,
       userId,
       content: dto.content?.trim() ?? null,
-      fileUrl: dto.fileUrl?.trim() ?? null,
+      fileUrl: fileUrl?.trim() ?? null,
       score: null,
     });
 
@@ -128,7 +129,7 @@ export class TasksService {
       .log({
         action: 'TasksService.createSubmission',
         userId: String(userId),
-        body: { taskId, dto },
+        body: { taskId, dto, fileUrl },
       })
       .catch(() => undefined);
 

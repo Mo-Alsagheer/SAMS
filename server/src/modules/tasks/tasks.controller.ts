@@ -47,7 +47,7 @@ export class TasksController {
   @Post('tasks/:taskId/submissions')
   @ApiOperation({ summary: 'Submit a task (member)' })
   @ApiParam({ name: 'taskId', description: 'Numeric task ID' })
-  @ApiConsumes('multipart/form-data', 'application/json')
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   @ApiResponse({ status: 201, description: 'Submission saved.' })
   async submit(
@@ -56,13 +56,13 @@ export class TasksController {
     @Req() req: Request & { user: AuthUser },
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    let fileUrl = dto.fileUrl;
+    let fileUrl: string | undefined;
     if (file) {
       fileUrl = await this.cloudinaryService.uploadFile(
         file,
         'Task_Submissions',
       );
     }
-    return this.tasksService.submit(taskId, req.user.id, { ...dto, fileUrl });
+    return this.tasksService.submit(taskId, req.user.id, dto, fileUrl);
   }
 }
