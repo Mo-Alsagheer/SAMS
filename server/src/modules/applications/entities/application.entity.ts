@@ -26,6 +26,9 @@ export class Application {
   id: number;
 
   @Column({ type: 'int', nullable: true })
+  committeeId: number | null;
+
+  @Column({ type: 'int', nullable: true })
   processId: number | null;
 
   @ManyToOne(() => RecruitmentProcess, { onDelete: 'CASCADE' })

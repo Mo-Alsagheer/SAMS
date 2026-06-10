@@ -59,6 +59,7 @@ export class ApplicationsService {
 
     const application = this.applicationRepository.create({
       processId: dto.processId,
+      committeeId: process.committeeId,
       name: dto.name,
       email: dto.email,
       phone: dto.phone,
@@ -77,16 +78,15 @@ export class ApplicationsService {
       .catch(() => undefined);
     const application = await this.applicationRepository.findOne({
       where: { id },
-      relations: ['process'],
     });
     if (!application) {
       throw new NotFoundException('Application not found');
     }
 
     let committee = null;
-    if (application.process?.committeeId) {
+    if (application.committeeId) {
       committee = await this.committeeRepository.findOne({
-        where: { id: application.process.committeeId },
+        where: { id: application.committeeId },
       });
     }
 
@@ -124,12 +124,11 @@ export class ApplicationsService {
       .catch(() => undefined);
     const applications = await this.applicationRepository.find({
       where: { status: ApplicationStatus.SUBMITTED },
-      relations: ['process'],
     });
 
     // Fetch all relevant committees
     const committeeIds = [
-      ...new Set(applications.map((app) => app.process?.committeeId).filter((id) => id)),
+      ...new Set(applications.map((app) => app.committeeId).filter((id) => id)),
     ];
     const committees = await this.committeeRepository.findBy({
       id: In(committeeIds as number[]),
@@ -139,8 +138,8 @@ export class ApplicationsService {
     const cvsToEvaluate = applications
       .filter((app) => app.cvLink)
       .map((app) => {
-        const committee = app.process?.committeeId
-          ? committeeMap.get(app.process.committeeId)
+        const committee = app.committeeId
+          ? committeeMap.get(app.committeeId)
           : null;
         return {
           id: app.id,

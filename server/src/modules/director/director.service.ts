@@ -42,8 +42,7 @@ export class DirectorService {
   async getApplications(committeeId: number, status?: string) {
     const query = this.applicationRepository
       .createQueryBuilder('application')
-      .leftJoinAndSelect('application.process', 'process')
-      .where('process.committeeId = :committeeId', { committeeId })
+      .where('application.committeeId = :committeeId', { committeeId })
       .andWhere('application.targetRole = :targetRole', {
         targetRole: Role.MEMBER,
       });
@@ -142,7 +141,6 @@ export class DirectorService {
   async acceptPhase2(applicationId: number) {
     const application = await this.applicationRepository.findOne({
       where: { id: applicationId, targetRole: Role.MEMBER },
-      relations: ['process'],
     });
     if (!application) {
       throw new NotFoundException('Application not found');
@@ -151,7 +149,7 @@ export class DirectorService {
     // --- Quota check ---
     const recruitment = await this.recruitmentRepository.findOne({
       where: {
-        committeeId: application.process.committeeId,
+        committeeId: application.committeeId,
         role: Role.MEMBER,
         status: RecruitmentStatus.OPEN,
       },
@@ -160,7 +158,8 @@ export class DirectorService {
     if (recruitment && recruitment.targetMembers > 0) {
       const acceptedCount = await this.applicationRepository.count({
         where: {
-          processId: application.processId,
+          committeeId: application.committeeId,
+          targetRole: Role.MEMBER,
           status: ApplicationStatus.PHASE2_ACCEPTED,
         },
       });
@@ -184,7 +183,7 @@ export class DirectorService {
 
     if (user) {
       user.role = Role.MEMBER;
-      user.committeeId = application.process.committeeId;
+      user.committeeId = application.committeeId;
       user.password = hashedPassword;
       await this.userRepository.save(user);
     } else {
@@ -194,7 +193,7 @@ export class DirectorService {
         phone: application.phone,
         password: hashedPassword,
         role: Role.MEMBER,
-        committeeId: application.process.committeeId,
+        committeeId: application.committeeId,
       });
       await this.userRepository.save(user);
     }
