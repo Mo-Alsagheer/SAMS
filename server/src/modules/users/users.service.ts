@@ -51,7 +51,10 @@ export class UsersService {
     this.audit
       .log({ action: 'UsersService.findById', body: { id } })
       .catch(() => undefined);
-    return this.userRepository.findOne({ where: { id } });
+    return this.userRepository.findOne({ 
+      where: { id },
+      relations: ['committee'],
+    });
   }
 
   list(): Promise<User[]> {

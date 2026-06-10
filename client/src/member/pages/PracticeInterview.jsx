@@ -32,6 +32,10 @@ export default function PracticeInterview() {
   const [selectedClub, setSelectedClub] = useState("hr");
   const [sessionId] = useState(() => `sess_${Math.random().toString(36).substr(2, 9)}`);
   
+  // Profile & Committee locking
+  const [userProfile, setUserProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  
   // Voice & Speech States
   const [isRecording, setIsRecording] = useState(false);
   const [agentSpeaking, setAgentSpeaking] = useState(false);
@@ -47,6 +51,51 @@ export default function PracticeInterview() {
   // References
   const recognitionRef = useRef(null);
   const speechTimeoutRef = useRef(null);
+
+  const mapCommitteeToClubKey = (name) => {
+    if (!name) return "hr";
+    const lower = name.toLowerCase();
+    if (lower.includes("human") || lower.includes("hr")) return "hr";
+    if (lower.includes("public") || lower.includes("pr")) return "pr";
+    if (lower.includes("logistics") || lower.includes("operation")) return "logistics";
+    if (lower.includes("frontend") || lower.includes("web design")) return "frontend";
+    if (lower.includes("backend") || lower.includes("database")) return "backend";
+    if (lower.includes("mobile") || lower.includes("app")) return "mobile";
+    if (lower.includes("game")) return "gamedev";
+    if (lower.includes("data")) return "data";
+    if (lower.includes("machine") || lower.includes("ml") || lower.includes("ai")) return "ml";
+    if (lower.includes("graphic") || lower.includes("design")) return "graphic";
+    if (lower.includes("social") || lower.includes("marketing")) return "socialmedia";
+    if (lower.includes("photo") || lower.includes("video") || lower.includes("media")) return "pv";
+    return lower; // fallback
+  };
+
+  // Fetch profile on mount
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await api.get("/users/profile");
+        setUserProfile(res.data);
+        if (res.data?.committee?.name) {
+          setSelectedClub(mapCommitteeToClubKey(res.data.committee.name));
+        } else if (res.data?.committeeId) {
+          try {
+            const commRes = await api.get(`/committees/${res.data.committeeId}`);
+            if (commRes.data?.name) {
+              setSelectedClub(mapCommitteeToClubKey(commRes.data.name));
+            }
+          } catch (e) {
+            console.error("Failed to load fallback committee name", e);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch user profile", err);
+      } finally {
+        setLoadingProfile(false);
+      }
+    }
+    loadProfile();
+  }, []);
 
   // Initialize Speech Recognition
   useEffect(() => {
@@ -275,7 +324,12 @@ export default function PracticeInterview() {
       </div>
 
       {/* SETUP PHASE */}
-      {phase === "setup" && (
+      {loadingProfile ? (
+        <div className="flex-1 flex flex-col items-center justify-center p-8 min-h-[350px]">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+          <p className="text-muted-foreground text-sm font-medium">Loading user profile and committee details...</p>
+        </div>
+      ) : phase === "setup" && (
         <Card className="border border-border/80 shadow-lg bg-card/60 backdrop-blur-md overflow-hidden relative">
           <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
             <Bot className="w-96 h-96" />
@@ -286,42 +340,59 @@ export default function PracticeInterview() {
               Configure Your Practice Interview Session
             </CardTitle>
             <CardDescription className="text-sm md:text-base">
-              Choose the target committee domain to train. The agent will tailor its questions based on that specialization.
+              {userProfile?.committee?.name 
+                ? "Your practice interview is automatically aligned with your assigned committee's specialization."
+                : "Choose the target committee domain to train. The agent will tailor its questions based on that specialization."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 relative z-10">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {[
-                { id: "hr", name: "Human Resources", icon: Users, desc: "Recruitment, onboarding, team culture, conflict resolution." },
-                { id: "pr", name: "Public Relations", icon: Compass, desc: "Branding, communications strategy, media, reputation management." },
-                { id: "frontend", name: "Frontend Development", icon: Bot, desc: "React, UI/UX, web design, responsive interfaces." },
-                { id: "backend", name: "Backend Development", icon: Bot, desc: "API structures, SQL databases, server design, systems." },
-                { id: "graphic", name: "Graphic Design", icon: Sparkles, desc: "Visual storytelling, Adobe Suite, creative typography." },
-                { id: "socialmedia", name: "Social Media", icon: Users, desc: "Content marketing, engagement analytics, digital visibility." },
-              ].map((club) => {
-                const Icon = club.icon;
-                const isSelected = selectedClub === club.id;
-                return (
-                  <button
-                    key={club.id}
-                    onClick={() => setSelectedClub(club.id)}
-                    className={`flex flex-col text-left p-4 rounded-xl border transition-all duration-300 relative overflow-hidden cursor-pointer ${
-                      isSelected
-                        ? "border-primary bg-primary/5 shadow-md shadow-primary/5 ring-1 ring-primary"
-                        : "border-border/60 bg-card hover:bg-accent/40 hover:border-border/80"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className={`p-2 rounded-lg ${isSelected ? "bg-primary text-primary-foreground" : "bg-accent text-muted-foreground"}`}>
-                        <Icon className="h-5 w-5" />
+            {userProfile?.committee?.name ? (
+              <div className="p-6 rounded-xl border border-primary/20 bg-primary/5 shadow-md flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-primary text-primary-foreground">
+                  <Bot className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-foreground">Assigned Committee Domain</h3>
+                  <p className="text-sm text-primary font-semibold mt-0.5">{userProfile.committee.name}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Your practice interview topic is locked to this committee's domain to ensure relevant practice.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {[
+                  { id: "hr", name: "Human Resources", icon: Users, desc: "Recruitment, onboarding, team culture, conflict resolution." },
+                  { id: "pr", name: "Public Relations", icon: Compass, desc: "Branding, communications strategy, media, reputation management." },
+                  { id: "frontend", name: "Frontend Development", icon: Bot, desc: "React, UI/UX, web design, responsive interfaces." },
+                  { id: "backend", name: "Backend Development", icon: Bot, desc: "API structures, SQL databases, server design, systems." },
+                  { id: "graphic", name: "Graphic Design", icon: Sparkles, desc: "Visual storytelling, Adobe Suite, creative typography." },
+                  { id: "socialmedia", name: "Social Media", icon: Users, desc: "Content marketing, engagement analytics, digital visibility." },
+                ].map((club) => {
+                  const Icon = club.icon;
+                  const isSelected = selectedClub === club.id;
+                  return (
+                    <button
+                      key={club.id}
+                      onClick={() => setSelectedClub(club.id)}
+                      className={`flex flex-col text-left p-4 rounded-xl border transition-all duration-300 relative overflow-hidden cursor-pointer ${
+                        isSelected
+                          ? "border-primary bg-primary/5 shadow-md shadow-primary/5 ring-1 ring-primary"
+                          : "border-border/60 bg-card hover:bg-accent/40 hover:border-border/80"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className={`p-2 rounded-lg ${isSelected ? "bg-primary text-primary-foreground" : "bg-accent text-muted-foreground"}`}>
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <span className="font-semibold text-sm md:text-base">{club.name}</span>
                       </div>
-                      <span className="font-semibold text-sm md:text-base">{club.name}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{club.desc}</p>
-                  </button>
-                );
-              })}
-            </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{club.desc}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
             <div className="rounded-xl border bg-accent/30 p-4 space-y-2">
               <h4 className="font-semibold text-sm flex items-center gap-2 text-foreground">
