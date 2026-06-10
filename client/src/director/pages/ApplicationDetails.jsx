@@ -124,7 +124,7 @@ const ApplicationDetails = () => {
             >
               {statusConfig[app.status]?.label}
             </Badge>
-            <Button
+            {/* <Button
               size="sm"
               className="bg-success hover:bg-success/90 text-success-foreground gap-1.5"
             >
@@ -136,7 +136,7 @@ const ApplicationDetails = () => {
               className="text-destructive border-destructive/30 hover:bg-destructive/10 gap-1.5"
             >
               <XCircle className="h-4 w-4" /> Reject
-            </Button>
+            </Button> */}
           </div>
         </div>
 
@@ -255,7 +255,6 @@ const ApplicationDetails = () => {
                             <span>{score}</span>
                           </div>
                           <Progress value={score} className="h-2 mt-1" />
-                          //!!!
                           {justification && (
                             <p className="text-xs text-muted-foreground mt-1">
                              
