@@ -25,8 +25,8 @@ export class Application {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'int' })
-  processId: number;
+  @Column({ type: 'int', nullable: true })
+  processId: number | null;
 
   @ManyToOne(() => RecruitmentProcess, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'processId' })
