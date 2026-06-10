@@ -285,7 +285,7 @@ function Applications() {
         render: (row) => (
           <Button
             size="sm"
-            className="bg-indigo-600"
+            className="bg-indigo-600 hover:bg-indigo-500"
             onClick={() => navigate(`/director/applications/${row.id}`)}
           >
             View
