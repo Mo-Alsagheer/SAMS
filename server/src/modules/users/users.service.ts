@@ -163,6 +163,21 @@ export class UsersService {
       .catch(() => undefined);
   }
 
+  async resetPassword(id: number, newPassword: string): Promise<void> {
+    const user = await this.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await this.userRepository.save(user);
+
+    this.audit
+      .log({ action: 'UsersService.resetPassword', body: { id } })
+      .catch(() => undefined);
+  }
+
   async changeStatus(
     targetUserId: number,
     status: UserStatus,
