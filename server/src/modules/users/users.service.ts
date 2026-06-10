@@ -100,6 +100,7 @@ export class UsersService {
           score = scoreBreakdown.total;
         }
         return {
+          id: member.id,
           name: member.name,
           email: member.email,
           phone: member.phone,
