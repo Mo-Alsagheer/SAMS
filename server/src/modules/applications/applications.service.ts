@@ -175,4 +175,53 @@ export class ApplicationsService {
 
     return this.aiService.evaluateBatchApplications({ cvs: cvsToEvaluate });
   }
+
+  async evaluatePendingApplicationsForProcess(processId: number) {
+    this.audit
+      .log({ action: 'ApplicationsService.evaluatePendingApplicationsForProcess', body: { processId } })
+      .catch(() => undefined);
+
+    const process = await this.recruitmentProcessRepository.findOne({
+      where: { id: processId },
+    });
+    if (!process) {
+      throw new NotFoundException('Recruitment process not found');
+    }
+
+    const applications = await this.applicationRepository.find({
+      where: {
+        committeeId: process.committeeId === null ? IsNull() : process.committeeId,
+        targetRole: process.role,
+        status: ApplicationStatus.SUBMITTED,
+      },
+    });
+
+    let committee = null;
+    if (process.committeeId) {
+      committee = await this.committeeRepository.findOne({
+        where: { id: process.committeeId },
+      });
+    }
+
+    const cvsToEvaluate = applications
+      .filter((app) => app.cvLink)
+      .map((app) => ({
+        id: app.id,
+        type: 'gdrive',
+        link: app.cvLink,
+        committee_name: committee ? committee.name : 'General',
+        committee_focus: committee?.description
+          ? committee.description
+          : 'General community operations',
+      }));
+
+    if (cvsToEvaluate.length === 0) {
+      return {
+        message: 'No applications pending evaluation with a valid CV link for this recruitment process.',
+        results: [],
+      };
+    }
+
+    return this.aiService.evaluateBatchApplications({ cvs: cvsToEvaluate });
+  }
 }
