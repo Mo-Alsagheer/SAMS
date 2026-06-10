@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Table from "@/components/shared/Table";
 import { PopupForm } from "@/components/shared/PopupForm";
 import { getInitials } from "@/utils/getInitials";
@@ -22,6 +23,7 @@ const scheduleFields = [
 function DirectorApplications() {
   const hook = useDirectorApplications();
   const [search, setSearch] = useState("");
+  const navigate = useNavigate();
 
   const renderActions = (row) => {
     const isLoading = hook.actionLoadingId === row.id;
@@ -44,22 +46,49 @@ function DirectorApplications() {
           <>
             {btn("Accept", () => hook.acceptPhase1(row.id), "bg-green-600")}
             {btn("Reject", () => hook.rejectPhase1(row.id), "bg-red-600")}
+            {btn(
+              "Details",
+              () => navigate(`/executive/applications/${row.id}`),
+              "bg-slate-600",
+            )}
           </>
         );
 
       case "PHASE1_ACCEPTED":
-        return btn("Schedule", () => hook.openSchedule(row.id), "bg-blue-600");
+        return (
+          <>
+            {btn("Schedule", () => hook.openSchedule(row.id), "bg-blue-600")}
+            {btn(
+              "Details",
+              () => navigate(`/executive/applications/${row.id}`),
+              "bg-slate-600",
+            )}
+          </>
+        );
 
       case "INTERVIEW_SCHEDULED":
         return (
           <>
             {btn("Accept", () => hook.acceptPhase2(row.id), "bg-green-600")}
             {btn("Reject", () => hook.rejectPhase2(row.id), "bg-red-600")}
+            {btn(
+              "Details",
+              () => navigate(`/executive/applications/${row.id}`),
+              "bg-slate-600",
+            )}
           </>
         );
 
       default:
-        return null;
+        return (
+          <>
+            {btn(
+              "Details",
+              () => navigate(`/executive/applications/${row.id}`),
+              "bg-slate-600",
+            )}
+          </>
+        );
     }
   };
 
@@ -96,11 +125,21 @@ function DirectorApplications() {
         ),
       },
       {
+        header: "CV Score",
+        render: (r) => (
+          <div>
+            <p className="text-xs text-muted-foreground">
+              {r.aiScore?.final_score ?? (r.aiScore?.error ? "Error" : "-")}
+            </p>
+          </div>
+        ),
+      },
+      {
         header: "Actions",
         render: renderActions,
       },
     ],
-    [hook.actionLoadingId],
+    [hook.actionLoadingId, navigate],
   );
 
   const filteredData = useMemo(() => {
