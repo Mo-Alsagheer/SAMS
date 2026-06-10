@@ -80,17 +80,18 @@ export class ExecutiveService {
   }
 
   async getApplications(committeeId?: number, status?: string) {
-    const query = this.applicationRepository.createQueryBuilder('application');
+    const query = this.applicationRepository.createQueryBuilder('application')
+      .leftJoinAndSelect('application.process', 'process');
 
     if (committeeId) {
       query
-        .where('application.committeeId = :committeeId', { committeeId })
+        .where('process.committeeId = :committeeId', { committeeId })
         .andWhere('application.targetRole = :targetRole', {
           targetRole: Role.DIRECTOR,
         });
     } else {
       query
-        .where('application.committeeId IS NULL')
+        .where('process.committeeId IS NULL')
         .andWhere('application.targetRole = :targetRole', {
           targetRole: Role.EXECUTIVE,
         });
@@ -108,7 +109,7 @@ export class ExecutiveService {
 
     // Fetch all relevant committees
     const committeeIds = [
-      ...new Set(applications.map((app) => app.committeeId).filter((id) => id)),
+      ...new Set(applications.map((app) => app.process?.committeeId).filter((id) => id)),
     ];
     let committeeMap = new Map();
     if (committeeIds.length > 0) {
@@ -121,8 +122,8 @@ export class ExecutiveService {
     const cvsToEvaluate = applications
       .filter((app) => app.cvLink)
       .map((app) => {
-        const committee = app.committeeId
-          ? committeeMap.get(app.committeeId)
+        const committee = app.process?.committeeId
+          ? committeeMap.get(app.process.committeeId)
           : null;
         return {
           id: app.id,
@@ -210,6 +211,7 @@ export class ExecutiveService {
       where: {
         id: applicationId,
       },
+      relations: ['process'],
     });
     if (!application) {
       throw new NotFoundException('Application not found');
@@ -226,7 +228,7 @@ export class ExecutiveService {
           }
         : {
             role: Role.DIRECTOR,
-            committeeId: application.committeeId,
+            committeeId: application.process?.committeeId ?? null,
             status: RecruitmentStatus.OPEN,
           };
 
@@ -237,11 +239,8 @@ export class ExecutiveService {
     if (recruitment && recruitment.targetMembers > 0) {
       const acceptedCount = await this.applicationRepository.count({
         where: {
-          targetRole: application.targetRole,
+          processId: application.processId,
           status: ApplicationStatus.PHASE2_ACCEPTED,
-          ...(application.targetRole === Role.EXECUTIVE
-            ? { committeeId: null }
-            : { committeeId: application.committeeId }),
         },
       });
 
@@ -274,7 +273,7 @@ export class ExecutiveService {
 
     if (user) {
       user.role = application.targetRole;
-      user.committeeId = application.committeeId ?? null;
+      user.committeeId = application.process?.committeeId ?? null;
       user.password = hashedPassword;
       await this.userRepository.save(user);
     } else {
@@ -284,7 +283,7 @@ export class ExecutiveService {
         phone: application.phone,
         password: hashedPassword,
         role: application.targetRole,
-        committeeId: application.committeeId ?? null,
+        committeeId: application.process?.committeeId ?? null,
       });
       await this.userRepository.save(user);
     }

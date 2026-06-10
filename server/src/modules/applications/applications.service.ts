@@ -34,27 +34,13 @@ export class ApplicationsService {
     this.audit
       .log({ action: 'ApplicationsService.createApplication', body: { dto } })
       .catch(() => undefined);
-    if (dto.targetRole === Role.EXECUTIVE) {
-      if (dto.committeeId) {
-        throw new BadRequestException(
-          'Executive applications cannot target a specific committee',
-        );
-      }
-    } else {
-      if (!dto.committeeId) {
-        throw new BadRequestException('Committee ID is required for this role');
-      }
-    }
 
-    const committeeIdCondition = dto.committeeId ? dto.committeeId : IsNull();
-
-    // Verify committee recruitment is OPEN
     const process = await this.recruitmentProcessRepository.findOne({
-      where: { committeeId: committeeIdCondition, role: dto.targetRole },
+      where: { id: dto.processId },
     });
     if (!process || process.status !== RecruitmentStatus.OPEN) {
       throw new BadRequestException(
-        'Recruitment process for this role (and committee) is not OPEN',
+        'Recruitment process is not OPEN',
       );
     }
 
@@ -62,25 +48,24 @@ export class ApplicationsService {
     const existing = await this.applicationRepository.findOne({
       where: {
         email: dto.email,
-        committeeId: committeeIdCondition,
-        targetRole: dto.targetRole,
+        processId: dto.processId,
       },
     });
     if (existing) {
       throw new ConflictException(
-        'An application with this email has already been submitted for the specified role',
+        'An application with this email has already been submitted for this recruitment process',
       );
     }
 
     const application = this.applicationRepository.create({
-      committeeId: dto.committeeId || null,
+      processId: dto.processId,
       name: dto.name,
       email: dto.email,
       phone: dto.phone,
       linkedinLink: dto.linkedinLink,
       cvLink: dto.cvLink,
       status: ApplicationStatus.SUBMITTED,
-      targetRole: dto.targetRole,
+      targetRole: process.role,
     });
 
     return this.applicationRepository.save(application);
@@ -92,15 +77,16 @@ export class ApplicationsService {
       .catch(() => undefined);
     const application = await this.applicationRepository.findOne({
       where: { id },
+      relations: ['process'],
     });
     if (!application) {
       throw new NotFoundException('Application not found');
     }
 
     let committee = null;
-    if (application.committeeId) {
+    if (application.process?.committeeId) {
       committee = await this.committeeRepository.findOne({
-        where: { id: application.committeeId },
+        where: { id: application.process.committeeId },
       });
     }
 
@@ -138,11 +124,12 @@ export class ApplicationsService {
       .catch(() => undefined);
     const applications = await this.applicationRepository.find({
       where: { status: ApplicationStatus.SUBMITTED },
+      relations: ['process'],
     });
 
     // Fetch all relevant committees
     const committeeIds = [
-      ...new Set(applications.map((app) => app.committeeId).filter((id) => id)),
+      ...new Set(applications.map((app) => app.process?.committeeId).filter((id) => id)),
     ];
     const committees = await this.committeeRepository.findBy({
       id: In(committeeIds as number[]),
@@ -152,8 +139,8 @@ export class ApplicationsService {
     const cvsToEvaluate = applications
       .filter((app) => app.cvLink)
       .map((app) => {
-        const committee = app.committeeId
-          ? committeeMap.get(app.committeeId)
+        const committee = app.process?.committeeId
+          ? committeeMap.get(app.process.committeeId)
           : null;
         return {
           id: app.id,
@@ -190,8 +177,7 @@ export class ApplicationsService {
 
     const applications = await this.applicationRepository.find({
       where: {
-        committeeId: process.committeeId === null ? IsNull() : process.committeeId,
-        targetRole: process.role,
+        processId: processId,
         status: ApplicationStatus.SUBMITTED,
       },
     });
