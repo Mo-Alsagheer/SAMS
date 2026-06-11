@@ -271,6 +271,17 @@ export class SessionsService {
       .getMany();
   }
 
+  async findByCommitteeId(committeeId: number): Promise<Session[]> {
+    return this.sessionsRepository
+      .createQueryBuilder('session')
+      .leftJoin('roadmaps', 'roadmap', 'roadmap.id = session.roadmapId')
+      .where(
+        'session.committeeId = :committeeId OR roadmap.committeeId = :committeeId',
+        { committeeId },
+      )
+      .getMany();
+  }
+
   async getMemberExperience(user: AuthUser) {
     if (!user.committeeId) {
       throw new BadRequestException('User is not assigned to any committee');

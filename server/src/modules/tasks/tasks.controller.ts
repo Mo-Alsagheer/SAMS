@@ -44,6 +44,13 @@ export class TasksController {
     return this.tasksService.findBySession(sessionId);
   }
 
+  @Get('tasks/me')
+  @ApiOperation({ summary: 'Get current and previous tasks for the member' })
+  @ApiResponse({ status: 200, description: 'Member tasks returned.' })
+  getMemberTasks(@Req() req: Request & { user: AuthUser }) {
+    return this.tasksService.getMemberTasks(req.user.id);
+  }
+
   @Post('tasks/:taskId/submissions')
   @ApiOperation({ summary: 'Submit a task (member)' })
   @ApiParam({ name: 'taskId', description: 'Numeric task ID' })
