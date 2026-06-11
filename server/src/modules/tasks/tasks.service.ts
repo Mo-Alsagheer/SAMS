@@ -231,6 +231,13 @@ export class TasksService {
     for (const task of tasks) {
       const submission = submissions.find((s) => s.taskId === task.id);
 
+      let status = 'pending';
+      if (submission) {
+        status = submission.score !== null ? 'graded' : 'submitted';
+      } else if (new Date(task.dueDate) < now) {
+        status = 'missed';
+      }
+
       const mappedTask = {
         id: task.id,
         sessionId: task.sessionId,
@@ -239,6 +246,7 @@ export class TasksService {
         dueDate: task.dueDate,
         fileUrl: task.fileUrl,
         sessionTitle: task.session?.title,
+        status,
         submission: submission
           ? {
               id: submission.id,
