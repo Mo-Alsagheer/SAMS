@@ -19,6 +19,11 @@ export class CreateSessionDto {
   @IsString()
   title: string;
 
+  @ApiProperty({ example: 1 })
+  @Type(() => Number)
+  @IsInt()
+  sessionNumber: number;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
