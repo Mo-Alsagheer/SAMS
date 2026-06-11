@@ -40,8 +40,26 @@ export class TasksController {
   @ApiOperation({ summary: 'List tasks for a session' })
   @ApiParam({ name: 'sessionId', description: 'Numeric session ID' })
   @ApiResponse({ status: 200, description: 'Tasks returned.' })
-  listBySession(@Param('sessionId', ParseIntIdPipe) sessionId: number) {
-    return this.tasksService.findBySession(sessionId);
+  listBySession(
+    @Param('sessionId', ParseIntIdPipe) sessionId: number,
+    @Req() req: Request & { user: AuthUser },
+  ) {
+    return this.tasksService.findBySession(sessionId, req.user.id);
+  }
+
+  /**
+   * Retrieves the tasks for the currently authenticated member.
+   * Tasks are categorized into 'currentTasks' (active, unsubmitted tasks) 
+   * and 'previousTasks' (submitted tasks or tasks past their due date).
+   * 
+   * @param req The incoming request containing the authenticated user's information.
+   * @returns An object containing arrays of previous and current tasks with their statuses and scores.
+   */
+  @Get('tasks/me')
+  @ApiOperation({ summary: 'Get current and previous tasks for the member' })
+  @ApiResponse({ status: 200, description: 'Member tasks returned.' })
+  getMemberTasks(@Req() req: Request & { user: AuthUser }) {
+    return this.tasksService.getMemberTasks(req.user.id);
   }
 
   @Post('tasks/:taskId/submissions')

@@ -71,7 +71,6 @@ export class SessionsService {
       .catch(() => undefined);
     const session = this.sessionsRepository.create({
       ...createSessionDto,
-      scheduledAt: new Date(createSessionDto.scheduledAt),
       isRecorded: createSessionDto.isRecorded ?? false,
       meetingType: createSessionDto.meetingType ?? null,
       committeeId: user.committeeId,
@@ -271,6 +270,17 @@ export class SessionsService {
       .getMany();
   }
 
+  async findByCommitteeId(committeeId: number): Promise<Session[]> {
+    return this.sessionsRepository
+      .createQueryBuilder('session')
+      .leftJoin('roadmaps', 'roadmap', 'roadmap.id = session.roadmapId')
+      .where(
+        'session.committeeId = :committeeId OR roadmap.committeeId = :committeeId',
+        { committeeId },
+      )
+      .getMany();
+  }
+
   async getMemberExperience(user: AuthUser) {
     if (!user.committeeId) {
       throw new BadRequestException('User is not assigned to any committee');
@@ -459,6 +469,68 @@ export class SessionsService {
       },
       sessions: mappedSessions,
       score,
+    };
+  }
+
+  /**
+   * Computes the data required for the member dashboard UI.
+   * This leverages the heavy calculation from `getMemberExperience` and distills
+   * it into a simpler structure with top-level stats and the latest tasks.
+   * 
+   * @param user The authenticated member object.
+   * @returns Aggregated statistics, committee info, next session info, and recent tasks.
+   */
+  async getMemberDashboard(user: AuthUser) {
+    const experience = await this.getMemberExperience(user);
+    
+    const completedSessions = experience.score.sessionsAttended;
+    const allTasks = experience.sessions.flatMap(s => s.tasks);
+    
+    // Calculate pending tasks (due in the future and not submitted)
+    // In getMemberExperience, tasks without submissions are 'pending'
+    const pendingTasks = allTasks.filter(t => t.status === 'pending').length;
+    
+    let attendanceRate = 0;
+    if (experience.score.totalSessions > 0) {
+      attendanceRate = Math.round((completedSessions / experience.score.totalSessions) * 100);
+    }
+    
+    // Find next active or upcoming session
+    const nextSession = experience.sessions.find(s => s.status === 'live' || s.status === 'upcoming');
+    
+    // Get latest tasks (e.g. recently due or upcoming, sorted by dueDate desc)
+    const latestTasks = [...allTasks]
+      .sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime())
+      .slice(0, 3)
+      .map(t => {
+        let displayStatus = 'Pending';
+        if (t.status === 'graded') displayStatus = 'Graded';
+        if (t.status === 'submitted') displayStatus = 'Submitted';
+        if (t.status === 'missed') displayStatus = 'Missed';
+        
+        return {
+          id: t.id,
+          title: t.title,
+          status: displayStatus,
+          score: t.score !== undefined ? `${t.score}/${t.maxScore}` : undefined,
+        };
+      });
+      
+    return {
+      committee: experience.committee,
+      stats: {
+        completedSessions,
+        pendingTasks,
+        attendanceRate,
+      },
+      nextSession: nextSession ? {
+        id: nextSession.id,
+        title: nextSession.title,
+        date: nextSession.date,
+        status: nextSession.status === 'live' ? 'Live now' : 'Upcoming',
+        meetingActive: nextSession.meetingActive,
+      } : null,
+      latestTasks,
     };
   }
 }
