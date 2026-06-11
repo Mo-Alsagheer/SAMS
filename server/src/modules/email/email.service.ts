@@ -119,6 +119,8 @@ export class EmailService {
     const { to, resetToken, resetUrl } = opts;
     const finalUrl = `${resetUrl}?token=${resetToken}`;
 
+    this.logger.log(`\n\n========================================\n[PASSWORD RESET LINK FOR ${to}]: ${finalUrl}\n========================================\n\n`);
+
     const html = `
 <!DOCTYPE html>
 <html lang="en">
