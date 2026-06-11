@@ -1,11 +1,16 @@
 import api from "@/features/api";
-
-export async function getUserProfile() {
-  const res = await api.get("/users/profile");
+export async function getCommitteeMembers() {
+  const res = await api.get("/users/committee-members");
   return res.data;
 }
 
-export async function getCommitteeScoreboard(committeeId) {
-  const res = await api.get(`/committees/${committeeId}/scoreboard`);
+
+export async function updateMemberStatus(id, status) {
+  const res = await api.patch(`/users/${id}/status`, { status });
+  return res.data;
+}
+
+export async function getCommitteeStatistics() {
+  const res = await api.get("/users/committee-members/statistics");
   return res.data;
 }

@@ -135,12 +135,25 @@ export class TasksService {
     return this.submissionRepo.save(submission);
   }
 
-  async findSubmissionsByTask(taskId: number): Promise<TaskSubmission[]> {
+  async findSubmissionsByTask(taskId: number): Promise<any[]> {
     await this.findById(taskId);
-    return this.submissionRepo.find({
+    const submissions = await this.submissionRepo.find({
       where: { taskId },
+      relations: ['user'],
       order: { submittedAt: 'DESC' },
     });
+
+    return submissions.map((sub) => ({
+      id: sub.id,
+      taskId: sub.taskId,
+      userId: sub.userId,
+      content: sub.content,
+      fileUrl: sub.fileUrl,
+      score: sub.score,
+      submittedAt: sub.submittedAt,
+      memberName: sub.user?.name || '',
+      memberEmail: sub.user?.email || '',
+    }));
   }
 
   async findSubmissionById(submissionId: number): Promise<TaskSubmission> {

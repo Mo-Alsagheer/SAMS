@@ -125,11 +125,11 @@ export default function TaskSubmission() {
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-xs shrink-0">
-            {row.name ? row.name.charAt(0) : "U"}
+            {row.memberName ? row.memberName.charAt(0) : "U"}
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-slate-900 dark:text-slate-200 text-sm">{row.name || "Unknown Student"}</span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase">{row.email || "N/A"}</span>
+            <span className="font-bold text-slate-900 dark:text-slate-200 text-sm">{row.memberName || "Unknown Student"}</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase">{row.memberEmail || "N/A"}</span>
           </div>
         </div>
       ),

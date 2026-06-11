@@ -6,7 +6,16 @@ export async function createMeeting(sessionId) {
 }
 
 export async function joinMeeting(sessionId) {
-  // Some backends expose this as GET; try GET to match server expectations.
   const res = await api.get(`/sessions/${sessionId}/meeting/join`);
+  return res.data;
+}
+
+export async function createSessionMeeting(sessionId, meetingData) {
+  const res = await api.post(`/director/sessions/${sessionId}/meeting/create`, meetingData);
+  return res.data;
+}
+
+export async function getMyMeetings() {
+  const res = await api.get("/sessions/my-meetings");
   return res.data;
 }

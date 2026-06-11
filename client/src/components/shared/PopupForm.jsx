@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -22,11 +24,11 @@ export function PopupForm({
   onSubmit,
   title,
   submitLabel = "Submit",
-  bgColor = "bg-white", 
-  titleColor = "", 
+  bgColor = "bg-white",
+  titleColor = "",
   labelColor = "",
-  submitClassName = "", 
-  renderCustomField 
+  submitClassName = "",
+  renderCustomField,
 }) {
   const {
     register,
@@ -61,7 +63,9 @@ export function PopupForm({
         return (
           <select {...register(field.name)} className="w-full border rounded p-2">
             {field.options?.map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
+              <option key={opt.value || opt} value={opt.value || opt}>
+                {opt.label || opt}
+              </option>
             ))}
           </select>
         );
@@ -95,13 +99,13 @@ export function PopupForm({
           ))}
 
           <DialogFooter>
-            <Button variant="outline" onClick={onClose} type="button"  className={submitClassName}>
+            <Button variant="outline" onClick={onClose} type="button" className={submitClassName}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isSubmitting}
-              className={submitClassName} 
+              className={submitClassName}
             >
               {isSubmitting ? "Submitting..." : submitLabel}
             </Button>
