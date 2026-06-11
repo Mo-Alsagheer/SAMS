@@ -16,7 +16,6 @@ import {
 import { getSessionsByRoadmap } from "@/features/roadmap/roadmap";
 
 const meetingSchema = z.object({
-  meetingName: z.string().min(3, "Meeting name is too short"),
   sessionId: z.string().min(1, "Please select a session"),
   date: z.string().min(1, "Date is required"),
   time: z.string().min(1, "Time is required"),
@@ -69,6 +68,7 @@ export default function Schedule() {
     };
     fetchMyMeetings();
   }, []);
+
   const handleSchedule = async (data) => {
     try {
       setCreatingMeeting(true);
@@ -76,13 +76,12 @@ export default function Schedule() {
       const selectedSession = sessions.find((s) => s.title === data.sessionId);
       const sessionId = selectedSession ? selectedSession.id : data.sessionId;
 
-      // دمج الـ date والـ time في ISO 8601
       const scheduledAt = new Date(
         `${data.date}T${data.time}:00`,
       ).toISOString();
 
       const meetingData = {
-        title: data.meetingName,
+        title: selectedSession ? selectedSession.title : "New Meeting",
         scheduledAt,
         meetingType: data.meetingType,
       };
@@ -101,18 +100,13 @@ export default function Schedule() {
       setCreatingMeeting(false);
     }
   };
+
   const sessionOptions = sessions.map((s) => ({
     label: s.title || `Session ${s.id}`,
     value: String(s.id),
   }));
 
   const schedulingFields = [
-    {
-      name: "meetingName",
-      label: "MEETING NAME",
-      placeholder: "e.g. Frontend Architecture",
-      className: "col-span-2",
-    },
     {
       name: "sessionId",
       label: "CURRICULUM SESSION",
@@ -245,7 +239,7 @@ export default function Schedule() {
                     </div>
 
                     <Link
-                      to={`/director/attendance/${m.id}`} 
+                      to={`/director/attendance/${m.id}`}
                       className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors bg-blue-50/50 dark:bg-blue-950/30 px-2.5 py-1.5 rounded-md shrink-0 ml-2"
                     >
                       <Eye size={14} />
