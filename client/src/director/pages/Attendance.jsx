@@ -1,6 +1,8 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Users, UserCheck, UserMinus, Activity, Save, Loader2 } from "lucide-react";
+import { Users, UserCheck, UserMinus, Activity, Save, Loader2, Mail } from "lucide-react";
 import StatCard from "../../components/shared/StatCard";
 import Table from "../../components/shared/Table";
 import { Button } from "@/components/ui/button";
@@ -39,12 +41,11 @@ export default function Attendance() {
   const handleSubmitAttendance = async () => {
     try {
       setLoading(true);
-      // إرسال البيانات بالتنسيق الذي يتوقعه الـ Backend
       const payload = {
         members: members.map((m) => ({
           userId: m.userId,
-          attended: (m.attended || "absent").toLowerCase(), // حروف صغيرة
-          score: m.score || 0, // إرسال السكور كرقم
+          attended: (m.attended || "absent").toLowerCase(),
+          score: m.score || 0,
         })),
       };
 
@@ -67,20 +68,18 @@ export default function Attendance() {
           <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-[10px]">
             {row.name.split(' ').map((n) => n[0]).join('')}
           </div>
-          <div className="flex flex-col">
-            <span className="font-medium text-slate-700 text-sm">{row.name}</span>
-            <span className="text-[10px] text-slate-400">{row.email}</span>
-          </div>
+          <span className="font-medium text-slate-700 text-sm">{row.name}</span>
         </div>
       ),
     },
     {
-      header: "Score",
-      accessor: "score",
+      header: "Email Address",
+      accessor: "email",
       render: (row) => (
-        <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md text-xs">
-          {row.score}
-        </span>
+        <div className="flex items-center gap-2 text-slate-500">
+          <Mail size={14} className="text-slate-400 shrink-0" />
+          <span className="text-xs font-medium">{row.email}</span>
+        </div>
       ),
     },
     {
