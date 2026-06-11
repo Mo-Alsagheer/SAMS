@@ -188,6 +188,13 @@ export class TasksService {
     return this.submissionRepo.save(submission);
   }
 
+  /**
+   * Retrieves and categorizes tasks for a specific member based on their committee assignments.
+   * Tasks are mapped with additional computed properties like `status` and `score`.
+   * 
+   * @param userId The ID of the member whose tasks are being retrieved.
+   * @returns An object with two arrays: `previousTasks` (submitted or past due) and `currentTasks` (pending).
+   */
   async getMemberTasks(userId: number): Promise<{ previousTasks: any[]; currentTasks: any[] }> {
     const user = await this.usersService.findById(userId);
     if (!user) {
@@ -247,6 +254,7 @@ export class TasksService {
         fileUrl: task.fileUrl,
         sessionTitle: task.session?.title,
         status,
+        score: submission?.score ?? null,
         submission: submission
           ? {
               id: submission.id,
