@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
@@ -113,6 +113,30 @@ export class AuthService {
     return {
       message:
         'If that email address is in our database, we will send you an email to reset your password.',
+    };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    this.audit
+      .log({ action: 'AuthService.resetPasswordAttempt' })
+      .catch(() => undefined);
+
+    let decoded: any;
+    try {
+      decoded = await this.jwtService.verifyAsync(token);
+    } catch (e) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    if (decoded.purpose !== 'password-reset') {
+      throw new BadRequestException('Invalid token purpose');
+    }
+
+    const userId = decoded.sub;
+    await this.usersService.resetPassword(userId, newPassword);
+
+    return {
+      message: 'Password has been reset successfully',
     };
   }
 }

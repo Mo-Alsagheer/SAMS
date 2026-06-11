@@ -74,22 +74,20 @@ export default function ThemeToggle() {
     >
       <span className="sr-only">Toggle color theme</span>
 
-      <div className="relative w-14 h-8 p-1 rounded-full transition-colors duration-300 ease-in-out bg-gray-200 dark:bg-gray-700">
+      {/* <div className="relative w-14 h-8 p-1 rounded-full transition-colors duration-300 ease-in-out bg-gray-200 dark:bg-gray-700">
         <div
           className={`absolute top-1 left-1 w-6 h-6 bg-white dark:bg-gray-900 rounded-full shadow transform transition-transform duration-300 ease-in-out ${isDark ? "translate-x-6" : "translate-x-0"}`}
         />
-      </div>
+      </div> */}
 
       <div className="hidden md:flex items-center text-sm text-gray-700 dark:text-gray-200 gap-2">
         {isDark ? (
           <>
             <MoonIcon className="w-4 h-4" />
-            <span>Dark</span>
           </>
         ) : (
           <>
             <SunIcon className="w-4 h-4" />
-            <span>Light</span>
           </>
         )}
       </div>

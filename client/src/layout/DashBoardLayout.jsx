@@ -8,6 +8,7 @@ import { directormenu, executive ,membermenu} from "@/assets/menus";
 import AppSidebar from "@/components/layout/AppSidebar";
 import ThemeToggle from "@/components/shared/theme-toggle";
 import { clearAuthSession } from "@/features/auth/session";
+import { Bot } from "lucide-react";
 
 const DashboardLayout = ({
   children,
@@ -48,6 +49,15 @@ const DashboardLayout = ({
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {role === "member" && (
+                <Button 
+                  className="flex items-center gap-2 cursor-pointer bg-gradient-to-r from-primary to-purple-600 hover:opacity-95 text-white shadow-md transition-all duration-300"
+                  onClick={() => navigate("/member/practice-interview")}
+                >
+                  Practice Interview
+                  <Bot className="h-4 w-4" />
+                </Button>
+              )}
               <ThemeToggle />
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />

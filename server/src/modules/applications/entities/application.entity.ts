@@ -2,10 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
+  JoinColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Role } from '../../../common/constants/role.enum';
+import { RecruitmentProcess } from '../../recruitment/entities/recruitment.entity';
 
 export enum ApplicationStatus {
   SUBMITTED = 'SUBMITTED',
@@ -24,6 +27,13 @@ export class Application {
 
   @Column({ type: 'int', nullable: true })
   committeeId: number | null;
+
+  @Column({ type: 'int', nullable: true })
+  processId: number | null;
+
+  @ManyToOne(() => RecruitmentProcess, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'processId' })
+  process: RecruitmentProcess;
 
   @Column({ type: 'text' })
   name: string;

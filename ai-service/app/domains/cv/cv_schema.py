@@ -1,8 +1,8 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Union
 
 class CVItem(BaseModel):
-    id: str
+    id: Union[str, int]
     type: str = "text"
     data: Optional[str] = None
     link: Optional[str] = None

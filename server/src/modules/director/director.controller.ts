@@ -49,7 +49,7 @@ export class DirectorController {
     name: 'status',
     required: false,
     description: 'Filter by application status',
-    example: 'PENDING',
+    example: 'SUBMITTED',
   })
   @ApiResponse({
     status: 200,

@@ -51,7 +51,10 @@ export class UsersService {
     this.audit
       .log({ action: 'UsersService.findById', body: { id } })
       .catch(() => undefined);
-    return this.userRepository.findOne({ where: { id } });
+    return this.userRepository.findOne({ 
+      where: { id },
+      relations: ['committee'],
+    });
   }
 
   list(): Promise<User[]> {
@@ -100,6 +103,7 @@ export class UsersService {
           score = scoreBreakdown.total;
         }
         return {
+          id: member.id,
           name: member.name,
           email: member.email,
           phone: member.phone,
@@ -156,6 +160,21 @@ export class UsersService {
 
     this.audit
       .log({ action: 'UsersService.changePassword', body: { id } })
+      .catch(() => undefined);
+  }
+
+  async resetPassword(id: number, newPassword: string): Promise<void> {
+    const user = await this.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await this.userRepository.save(user);
+
+    this.audit
+      .log({ action: 'UsersService.resetPassword', body: { id } })
       .catch(() => undefined);
   }
 

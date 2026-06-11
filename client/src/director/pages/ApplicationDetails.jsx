@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
 import { getApplication } from "@/features/applications/applications";
 import {
@@ -16,6 +17,7 @@ import {
   User,
   Mail,
   Clock,
+  Phone,
 } from "lucide-react";
 import { getInitials } from "@/utils/getInitials";
 
@@ -155,6 +157,9 @@ const ApplicationDetails = () => {
                       <Mail className="h-3.5 w-3.5" /> {app.email}
                     </span>
                     <span className="flex items-center gap-1">
+                      <Phone className="h-3.5 w-3.5" /> {app.phone}
+                    </span>
+                    <span className="flex items-center gap-1">
                       <Clock className="h-3.5 w-3.5" /> Applied{" "}
                       {new Date(app.createdAt).toLocaleDateString("en-US", {
                         month: "long",
@@ -164,7 +169,9 @@ const ApplicationDetails = () => {
                     </span>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground">"app.bio"</p>
+                <p className="text-sm text-muted-foreground">
+                  {app.bio ?? app.aiScore?.overall_summary}
+                </p>
                 <div className="flex gap-2">
                   <a
                     href={app.cvLink}
@@ -188,15 +195,87 @@ const ApplicationDetails = () => {
               </div>
               <div className="flex gap-4 md:flex-col md:items-end shrink-0">
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1">Cv Score</p>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    AI Final Score
+                  </p>
                   <p className="text-3xl font-display font-bold text-primary">
-                    "app.cvScore"
+                    {app.aiScore?.final_score ?? "-"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Role: {app.targetRole}
                   </p>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* AI Review Breakdown */}
+        {app.aiScore && (
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Review</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Final Score</p>
+                  <p className="text-3xl font-display font-bold text-primary">
+                    {app.aiScore.final_score}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">
+                    Recommendation
+                  </p>
+                  <Badge className="px-3 py-1 mt-1">
+                    {app.aiScore.recommendation}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="mt-4 space-y-3">
+                {app.aiScore.per_criterion_scores &&
+                  Object.entries(app.aiScore.per_criterion_scores).map(
+                    ([key, v]) => {
+                      const score =
+                        typeof v === "number" ? v : (v?.sub_score ?? 0);
+                      const justification =
+                        (typeof v === "object" && v?.justification) ||
+                        app.aiScore.justification?.[key];
+
+                      return (
+                        <div key={key}>
+                          <div className="flex justify-between text-sm">
+                            <span>
+                              {key
+                                .replace(/_/g, " ")
+                                .replace(/\b\w/g, (c) => c.toUpperCase())}
+                            </span>
+                            <span>{score}</span>
+                          </div>
+                          <Progress value={score} className="h-2 mt-1" />
+                          //!!!
+                          {justification && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                             
+                            </p>
+                          )}
+                        </div>
+                      );
+                    },
+                  )}
+              </div>
+
+              <div className="mt-4">
+                <p className="text-sm font-semibold">Summary</p>
+                <p className="text-sm text-muted-foreground">
+                  {app.aiScore.overall_summary}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

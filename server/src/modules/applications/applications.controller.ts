@@ -8,16 +8,17 @@ import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
 export class ApplicationsController {
   constructor(private readonly applicationsService: ApplicationsService) {}
 
-  @Post('evaluate-all')
+  @Post('evaluate-all/:processId')
   @ApiOperation({
-    summary: 'Evaluate all pending applications using AI without saving to DB',
+    summary: 'Evaluate all pending applications for a specified recruitment process using AI without saving to DB',
   })
+  @ApiParam({ name: 'processId', description: 'Numeric Recruitment Process ID' })
   @ApiResponse({
     status: 200,
     description: 'Evaluation results directly from the AI service.',
   })
-  evaluatePendingApplications() {
-    return this.applicationsService.evaluatePendingApplications();
+  evaluatePendingApplications(@Param('processId', ParseIntIdPipe) processId: number) {
+    return this.applicationsService.evaluatePendingApplicationsForProcess(processId);
   }
 
   @Post('submit')

@@ -36,6 +36,7 @@ import Roadmap from "./member/pages/RoadMap";
 import MemberDashboard from "./member/pages/DashBoard";
 import SessionDetails from "./member/pages/SessionDetails";
 import Tasks from "./member/pages/Tasks";
+import PracticeInterview from "./member/pages/PracticeInterview";
 function App() {
   return (
     <>
@@ -80,6 +81,7 @@ function App() {
             <Route path="roadmap" element={<Roadmap />} />
             <Route path="session/:sessionId" element={<SessionDetails />} />
             <Route path="tasks" element={<Tasks />} />
+            <Route path="practice-interview" element={<PracticeInterview />} />
           </Route>
         </Route>
 

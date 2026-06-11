@@ -34,27 +34,13 @@ export class ApplicationsService {
     this.audit
       .log({ action: 'ApplicationsService.createApplication', body: { dto } })
       .catch(() => undefined);
-    if (dto.targetRole === Role.EXECUTIVE) {
-      if (dto.committeeId) {
-        throw new BadRequestException(
-          'Executive applications cannot target a specific committee',
-        );
-      }
-    } else {
-      if (!dto.committeeId) {
-        throw new BadRequestException('Committee ID is required for this role');
-      }
-    }
 
-    const committeeIdCondition = dto.committeeId ? dto.committeeId : IsNull();
-
-    // Verify committee recruitment is OPEN
     const process = await this.recruitmentProcessRepository.findOne({
-      where: { committeeId: committeeIdCondition, role: dto.targetRole },
+      where: { id: dto.processId },
     });
     if (!process || process.status !== RecruitmentStatus.OPEN) {
       throw new BadRequestException(
-        'Recruitment process for this role (and committee) is not OPEN',
+        'Recruitment process is not OPEN',
       );
     }
 
@@ -62,25 +48,25 @@ export class ApplicationsService {
     const existing = await this.applicationRepository.findOne({
       where: {
         email: dto.email,
-        committeeId: committeeIdCondition,
-        targetRole: dto.targetRole,
+        processId: dto.processId,
       },
     });
     if (existing) {
       throw new ConflictException(
-        'An application with this email has already been submitted for the specified role',
+        'An application with this email has already been submitted for this recruitment process',
       );
     }
 
     const application = this.applicationRepository.create({
-      committeeId: dto.committeeId || null,
+      processId: dto.processId,
+      committeeId: process.committeeId,
       name: dto.name,
       email: dto.email,
       phone: dto.phone,
       linkedinLink: dto.linkedinLink,
       cvLink: dto.cvLink,
       status: ApplicationStatus.SUBMITTED,
-      targetRole: dto.targetRole,
+      targetRole: process.role,
     });
 
     return this.applicationRepository.save(application);
@@ -169,6 +155,54 @@ export class ApplicationsService {
     if (cvsToEvaluate.length === 0) {
       return {
         message: 'No applications pending evaluation with a valid CV link.',
+        results: [],
+      };
+    }
+
+    return this.aiService.evaluateBatchApplications({ cvs: cvsToEvaluate });
+  }
+
+  async evaluatePendingApplicationsForProcess(processId: number) {
+    this.audit
+      .log({ action: 'ApplicationsService.evaluatePendingApplicationsForProcess', body: { processId } })
+      .catch(() => undefined);
+
+    const process = await this.recruitmentProcessRepository.findOne({
+      where: { id: processId },
+    });
+    if (!process) {
+      throw new NotFoundException('Recruitment process not found');
+    }
+
+    const applications = await this.applicationRepository.find({
+      where: {
+        processId: processId,
+        status: ApplicationStatus.SUBMITTED,
+      },
+    });
+
+    let committee = null;
+    if (process.committeeId) {
+      committee = await this.committeeRepository.findOne({
+        where: { id: process.committeeId },
+      });
+    }
+
+    const cvsToEvaluate = applications
+      .filter((app) => app.cvLink)
+      .map((app) => ({
+        id: app.id,
+        type: 'gdrive',
+        link: app.cvLink,
+        committee_name: committee ? committee.name : 'General',
+        committee_focus: committee?.description
+          ? committee.description
+          : 'General community operations',
+      }));
+
+    if (cvsToEvaluate.length === 0) {
+      return {
+        message: 'No applications pending evaluation with a valid CV link for this recruitment process.',
         results: [],
       };
     }

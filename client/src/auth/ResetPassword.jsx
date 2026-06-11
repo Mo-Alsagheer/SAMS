@@ -33,12 +33,17 @@ export default function ResetPassword() {
   });
   const navigate = useNavigate();
   const location = useLocation();
-  const email =
-    location.state?.email || new URLSearchParams(location.search).get("email");
+  const searchParams = new URLSearchParams(location.search);
+  const email = location.state?.email || searchParams.get("email");
+  const token = searchParams.get("token");
 
   async function onSubmit(data) {
+    if (!token) {
+      toast.error("Invalid or missing password reset token.");
+      return;
+    }
     try {
-      await resetPassword({ email, password: data.password });
+      await resetPassword({ token, newPassword: data.password });
       toast.success("Password reset successful. Please login.");
       navigate("/login", { replace: true });
     } catch (error) {

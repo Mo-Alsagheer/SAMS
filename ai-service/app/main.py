@@ -1,10 +1,16 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.cv import router as cv_router
 from app.api.routes.interview import router as interview_router
 from app.providers.llm import setup_backend
 
-app = FastAPI(title="SAMS AI Services")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    setup_backend()
+    yield
+
+app = FastAPI(title="SAMS AI Services", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,10 +22,6 @@ app.add_middleware(
 
 app.include_router(cv_router)
 app.include_router(interview_router)
-
-@app.on_event("startup")
-async def startup_event():
-    setup_backend()
 
 @app.get("/health")
 async def health():

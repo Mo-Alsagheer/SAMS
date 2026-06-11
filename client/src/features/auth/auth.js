@@ -10,8 +10,8 @@ export async function forgotPassword(email) {
   return response.data;
 }
 
-export async function resetPassword({ email, password }) {
-  const response = await api.post("/auth/reset-password", { email, password });
+export async function resetPassword({ token, newPassword }) {
+  const response = await api.post("/auth/reset-password", { token, newPassword });
   return response.data;
 }
 
