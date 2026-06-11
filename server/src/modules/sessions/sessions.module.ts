@@ -8,6 +8,7 @@ import { Attendace } from '../attendace/entities/attendace.entity';
 import { Committee } from '../committees/entities/committee.entity';
 import { User } from '../users/entities/user.entity';
 import { SessionsController } from './sessions.controller';
+import { MemberDashboardController } from './member-dashboard.controller';
 import { SessionsService } from './sessions.service';
 import { MeetingsModule } from '../meetings/meetings.module';
 import { AuditLogModule } from '../audit-log/audit-log.module';
@@ -28,7 +29,7 @@ import { RoadmapModule } from '../roadmap/roadmap.module';
     AuditLogModule,
     RoadmapModule,
   ],
-  controllers: [SessionsController],
+  controllers: [SessionsController, MemberDashboardController],
   providers: [SessionsService],
   exports: [SessionsService],
 })
