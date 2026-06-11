@@ -40,8 +40,11 @@ export class TasksController {
   @ApiOperation({ summary: 'List tasks for a session' })
   @ApiParam({ name: 'sessionId', description: 'Numeric session ID' })
   @ApiResponse({ status: 200, description: 'Tasks returned.' })
-  listBySession(@Param('sessionId', ParseIntIdPipe) sessionId: number) {
-    return this.tasksService.findBySession(sessionId);
+  listBySession(
+    @Param('sessionId', ParseIntIdPipe) sessionId: number,
+    @Req() req: Request & { user: AuthUser },
+  ) {
+    return this.tasksService.findBySession(sessionId, req.user.id);
   }
 
   /**

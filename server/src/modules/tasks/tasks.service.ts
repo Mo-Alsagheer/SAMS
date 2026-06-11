@@ -53,11 +53,48 @@ export class TasksService {
     return this.taskRepo.save(task);
   }
 
-  async findBySession(sessionId: number): Promise<Task[]> {
+  async findBySession(sessionId: number, userId?: number): Promise<any[]> {
     await this.sessionsService.findById(sessionId);
-    return this.taskRepo.find({
+    const tasks = await this.taskRepo.find({
       where: { sessionId },
       order: { dueDate: 'ASC' },
+    });
+
+    if (!userId || tasks.length === 0) {
+      return tasks;
+    }
+
+    const taskIds = tasks.map((t) => t.id);
+    const submissions = await this.submissionRepo.find({
+      where: taskIds.map((id) => ({ taskId: id, userId })),
+    });
+
+    const now = new Date();
+
+    return tasks.map((task) => {
+      const submission = submissions.find((s) => s.taskId === task.id);
+      let status = 'pending';
+
+      if (submission) {
+        status = submission.score !== null ? 'graded' : 'submitted';
+      } else if (new Date(task.dueDate) < now) {
+        status = 'missed';
+      }
+
+      return {
+        ...task,
+        status,
+        score: submission?.score ?? null,
+        submission: submission
+          ? {
+              id: submission.id,
+              content: submission.content,
+              fileUrl: submission.fileUrl,
+              score: submission.score,
+              submittedAt: submission.submittedAt,
+            }
+          : null,
+      };
     });
   }
 
