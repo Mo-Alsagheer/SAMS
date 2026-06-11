@@ -1,52 +1,62 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom"; // إضافة useParams لجلب الـ id من الرابط
-import { Users, UserCheck, UserMinus, Activity } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { Users, UserCheck, UserMinus, Activity, Save, Loader2 } from "lucide-react";
 import StatCard from "../../components/shared/StatCard";
 import Table from "../../components/shared/Table";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { getSessionAttendance, markSessionAttendance } from "@/features/attendance/attendance";
 
 export default function Attendance() {
-  const { sessionId } = useParams(); // استلام الـ id من الـ URL
+  const { sessionId } = useParams();
   const [members, setMembers] = useState([]);
+  const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
-
-  const mockData = [
-    {
-      id: "SAMS-2023-001",
-      name: "Julianna Smith",
-      status: "Present", 
-    },
-    {
-      id: "SAMS-2023-002",
-      name: "Alexander Dubois",
-      status: "Absent",
-    },
-    {
-      id: "SAMS-2023-003",
-      name: "Elena Kovac",
-      status: "Late",
-    },
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-       
-        await new Promise((resolve) => setTimeout(resolve, 600));
-        setMembers(mockData);
+        const data = await getSessionAttendance(sessionId);
+        setMembers(data.members || []);
+        setStats(data.statistics || {});
       } catch (error) {
-        const errorMessage = error?.response?.data?.message || "Failed to load attendance data";
-        toast.error(errorMessage);
+        console.error("Error loading attendance:", error);
+        toast.error("Failed to load attendance data");
       } finally {
         setLoading(false);
       }
     };
-    
-    if (sessionId) {
-      fetchData();
+    fetchData();
+  }, [sessionId]);
+
+  const handleStatusChange = (userId, newStatus) => {
+    setMembers((prev) =>
+      prev.map((m) => (m.userId === userId ? { ...m, attended: newStatus } : m))
+    );
+  };
+
+  const handleSubmitAttendance = async () => {
+    try {
+      setLoading(true);
+      // إرسال البيانات بالتنسيق الذي يتوقعه الـ Backend
+      const payload = {
+        members: members.map((m) => ({
+          userId: m.userId,
+          attended: (m.attended || "absent").toLowerCase(), // حروف صغيرة
+          score: m.score || 0, // إرسال السكور كرقم
+        })),
+      };
+
+      await markSessionAttendance(sessionId, payload);
+      toast.success("Attendance updated successfully! ");
+    } catch (error) {
+      console.error("Error submitting attendance:", error);
+      toast.error("Failed to update attendance");
+    } finally {
+      setLoading(false);
     }
-  }, [sessionId]); 
+  };
 
   const columns = [
     {
@@ -54,91 +64,69 @@ export default function Attendance() {
       accessor: "name",
       render: (row) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-[10px] shrink-0">
-            {row.name.split(' ').map(n => n[0]).join('')}
+          <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-[10px]">
+            {row.name.split(' ').map((n) => n[0]).join('')}
           </div>
-          <span className="font-medium text-slate-700 text-sm">{row.name}</span>
+          <div className="flex flex-col">
+            <span className="font-medium text-slate-700 text-sm">{row.name}</span>
+            <span className="text-[10px] text-slate-400">{row.email}</span>
+          </div>
         </div>
       ),
     },
     {
-      header: "Member ID",
-      accessor: "id",
-      render: (row) => <span className="text-slate-500 text-sm">{row.id}</span>,
+      header: "Score",
+      accessor: "score",
+      render: (row) => (
+        <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md text-xs">
+          {row.score}
+        </span>
+      ),
     },
     {
       header: "Status",
-      accessor: "status",
-      render: (row) => {
-        const statusStyles = {
-          Present: "bg-emerald-50 text-emerald-500",
-          Absent: "bg-rose-50 text-rose-500",
-          Late: "bg-amber-50 text-amber-500",
-        };
-        
-        return (
-          <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${statusStyles[row.status] || "bg-slate-50 text-slate-500"}`}>
-            {row.status}
-          </span>
-        );
-      },
-    },
-    {
-      header: "Actions",
       render: (row) => (
-        <div className="flex justify-center">
-            <input 
-                type="checkbox" 
-                defaultChecked={row.status === "Present" || row.status === "Late"}
-                className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-            />
-        </div>
+        <select
+          value={row.attended || "absent"}
+          onChange={(e) => handleStatusChange(row.userId, e.target.value)}
+          className={`text-[11px] font-bold px-3 py-1.5 rounded-full border-none cursor-pointer focus:ring-0 ${
+            (row.attended || "").toLowerCase() === "present"
+              ? "bg-emerald-50 text-emerald-600"
+              : (row.attended || "").toLowerCase() === "late"
+              ? "bg-amber-50 text-amber-600"
+              : "bg-rose-50 text-rose-600"
+          }`}
+        >
+          <option value="present">Present</option>
+          <option value="late">Late</option>
+          <option value="absent">Absent</option>
+        </select>
       ),
     },
   ];
 
   return (
     <div className="p-4 md:p-10 min-h-screen font-sans">
-      {/* Page Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-            <span className="bg-emerald-50 text-emerald-500 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Live</span>
-            <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-              Session ID: #{sessionId || "29402"}
-            </span>
+      <div className="mb-8 flex justify-between items-end">
+        <div>
+          <h1 className="text-3xl font-bold text-blue-900">Attendance</h1>
+          <p className="text-slate-500 text-sm mt-2">Monitor and manage real-time member attendance.</p>
         </div>
-        <h1 className="text-3xl font-bold text-blue-900 tracking-tight">
-          Attendance
-        </h1>
-        <p className="text-slate-500 text-sm mt-2">
-          Monitor and manage real-time member attendance and participation for this active session.
-        </p>
+        <Button onClick={handleSubmitAttendance} disabled={loading} className="bg-primary hover:bg-blue-900 text-white flex items-center gap-2">
+          {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+          Submit Attendance
+        </Button>
       </div>
 
-      {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="shadow-[0_8px_30px_rgb(59,130,246,0.1)] rounded-2xl ">
-            <StatCard title="TOTAL MEMBERS" value="48" icon={Users} color="primary"/>
-          </div>
-          <div className="shadow-[0_8px_30px_rgb(59,130,246,0.1)] rounded-2xl">
-            <StatCard title="PRESENT" value="32" icon={UserCheck} color="primary" />
-          </div>
-          <div className="shadow-[0_8px_30px_rgb(59,130,246,0.1)] rounded-2xl">
-            <StatCard title="ABSENT" value="16" icon={UserMinus} color="primary" />
-          </div>
-          <div className="shadow-[0_8px_30px_rgb(59,130,246,0.1)] rounded-2xl">
-            <StatCard title="ATTENDANCE RATE" value="66.7%" icon={Activity} color="primary" />
-          </div>
+        <StatCard title="TOTAL MEMBERS" value={stats.totalMembers || 0} icon={Users} color="primary" />
+        <StatCard title="PRESENT" value={stats.presentCount || 0} icon={UserCheck} color="primary" />
+        <StatCard title="ABSENT" value={stats.absentCount || 0} icon={UserMinus} color="primary" />
+        <StatCard title="ATTENDANCE RATE" value={`${stats.attendanceRate || 0}%`} icon={Activity} color="primary" />
       </div>
 
-      {/* Main Table Container */}
-      <div className=" rounded-xl border border-slate-100 shadow-[0_20px_50px_rgba(59,130,246,0.12)] overflow-hidden">
-        <Table
-          columns={columns}
-          data={members}
-          loading={loading}
-          rowsPerPage={5}
-        />
+      <div className="rounded-xl border border-slate-100 overflow-hidden shadow-sm">
+        <Table columns={columns} data={members} loading={loading} rowsPerPage={10} />
       </div>
     </div>
   );
