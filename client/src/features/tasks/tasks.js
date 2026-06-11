@@ -4,6 +4,10 @@ export async function getSessionTasks(sessionId) {
   const res = await api.get(`/sessions/${sessionId}/tasks`);
   return res.data;
 }
+export async function getAllMyTasks() {
+  const res = await api.get(`/tasks/me`);
+  return res.data;
+}
 
 export async function createTaskSubmission(taskId, submissionData) {
   const formData = new FormData();
