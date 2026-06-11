@@ -9,16 +9,18 @@ import {
   ClipboardList,
   Trash2,
   Filter,
-  ChevronDown 
+  ChevronDown,
+  ExternalLink 
 } from "lucide-react";
 import { toast } from "sonner";
 import * as z from "zod";
 
 import { 
   getSessionTasks, 
-  createTask, 
+  createTask,
+  deleteTask 
 } from "@/features/tasks/tasks"; 
-// 🌟 غيرنا الاستدعاء هنا للفانكشن الجديدة المربوطة بالـ Swagger
+
 import { 
   getSessionsByRoadmap 
 } from "@/features/roadmap/roadmap"; 
@@ -36,18 +38,13 @@ export default function TaskManagement() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dbSessions, setDbSessions] = useState([]);
-  
   const [selectedSessionFilter, setSelectedSessionFilter] = useState("all");
 
-  // ايدي الرودماب الحالية (تقدري تخليه ديناميكي حسب الحاجه) 🌟
   const currentRoadmapId = 1; 
 
-  // 1️⃣ جلب البيانات وحل مشكلة الـ id بناءً على الرودماب الصح
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      
-      // 🌟 بننادي الفانكشن المظبوطة اللي بترجع السيشينز المتاحة فعلاً للـ Roadmap دي
       const sessionsData = await getSessionsByRoadmap(currentRoadmapId);
       setDbSessions(sessionsData || []);
 
@@ -61,14 +58,12 @@ export default function TaskManagement() {
           try {
             const sId = session.id || session._id;
             const data = await getSessionTasks(sId);
-            
             const tasksArray = Array.isArray(data) ? data : [];
             
             return tasksArray.map(task => ({
               ...task,
               actualSessionId: sId,
-              // الباك إند باعت الأسم في الـ Swagger كـ title مش name 🌟
-              sessionName: session.title || `Session ${sId}` 
+              sessionName: session.title || `Session ${session.sessionNumber || sId}` 
             }));
           } catch (err) {
             console.warn(`Could not fetch tasks for session`, err);
@@ -79,15 +74,21 @@ export default function TaskManagement() {
 
       const combinedTasks = allResponses.flat();
 
-      const formattedTasks = combinedTasks.map((task, index) => ({
-        id: task.id || task._id || `task-fallback-${index}`, 
-        title: task.title || "Untitled Task",
-        description: task.description || "",
-        sessionNumber: task.sessionId || task.sessionNumber || task.actualSessionId,
-        sessionLabel: task.sessionName,
-        deadline: task.dueDate ? task.dueDate.split("T")[0] : "",
-        taskFile: null, 
-      }));
+      const formattedTasks = combinedTasks.map((task, index) => {
+        console.log(`Task [${index}] raw data from backend:`, task);
+
+        const extractedFile = task.fileUrl || task.file_url || task.file || task.material || task.attachment || task.taskFile || null;
+
+        return {
+          id: task.id || task._id || `task-fallback-${index}`, 
+          title: task.title || "Untitled Task",
+          description: task.description || "",
+          sessionNumber: task.sessionId || task.sessionNumber || task.actualSessionId,
+          sessionLabel: task.sessionName,
+          deadline: task.dueDate ? task.dueDate.split("T")[0] : "",
+          taskFile: extractedFile, 
+        };
+      });
 
       formattedTasks.sort((a, b) => Number(a.sessionNumber) - Number(b.sessionNumber));
       setTasks(formattedTasks);
@@ -103,52 +104,62 @@ export default function TaskManagement() {
     fetchAllData();
   }, []);
 
-  // 2️⃣ فلترة التأسكات بناءً على الـ Dropdown المختار في الصفحة
   const filteredTasks = tasks.filter((task) => {
     if (selectedSessionFilter === "all") return true;
     return String(task.sessionNumber) === String(selectedSessionFilter);
   });
 
+  // 🌟 1. مصفوفة الحقول: تعرض رقم السيشن الفعلي وعنوانها للأدمن بدلاً من الـ ID
   const taskFields = [
-    {
-      name: "title",
-      label: "Task Title",
-      placeholder: "Enter task name...",
-      className: "col-span-2",
-    },
+    { name: "title", label: "Task Title", placeholder: "Enter task name...", className: "col-span-2" },
     {
       name: "sessionNumber",
       label: "Session Assignment",
       type: "select",
-      options: dbSessions.map(session => String(session.id || session._id)),
+      options: dbSessions.map(
+        (session, index) => `Session ${session.sessionNumber || index + 1} - ${session.title || "Untitled"}`
+      ),
       className: "col-span-2 md:col-span-1",
     },
-    {
-      name: "deadline",
-      label: "Deadline Date",
-      type: "date",
-      className: "col-span-2 md:col-span-1",
-    },
-    {
-      name: "description",
-      label: "Description",
-      type: "textarea",
-      placeholder: "Task instructions...",
-      className: "col-span-2",
-    },
-    {
-      name: "taskFile",
-      label: "Material",
-      type: "custom",
-      className: "col-span-2",
-    },
+    { name: "deadline", label: "Deadline Date", type: "date", className: "col-span-2 md:col-span-1" },
+    { name: "description", label: "Description", type: "textarea", placeholder: "Task instructions...", className: "col-span-2" },
+    { name: "taskFile", label: "Material (Optional)", type: "custom", className: "col-span-2" },
   ];
 
+  // 🌟 2. دالة الحفظ: ترجمة النص المختار للـ ID الحقيقي المطابق له في قاعدة البيانات
   const handleSaveTask = async (data) => {
-    const targetSessionId = Number(data.sessionNumber);
+    const matchedSession = dbSessions.find(
+      (session, index) => 
+        `Session ${session.sessionNumber || index + 1} - ${session.title || "Untitled"}` === data.sessionNumber
+    );
+
+    const targetSessionId = matchedSession ? (matchedSession.id || matchedSession._id) : null;
+
+    if (!targetSessionId || isNaN(Number(targetSessionId))) {
+      toast.error("Invalid Session selection. Could not resolve Session ID.");
+      return;
+    }
+
     try {
       toast.loading("Publishing task to server...", { id: "task-api-action" });
-      await createTask(targetSessionId, data);
+
+      const formData = new FormData();
+      formData.append("title", data.title);
+      formData.append("description", data.description || "");
+      
+      const isoDueDate = data.deadline ? new Date(data.deadline).toISOString() : new Date().toISOString();
+      formData.append("dueDate", isoDueDate);
+
+      let finalCloudinaryUrl = "";
+      if (data.taskFile && data.taskFile.length > 0) {
+        const fileName = data.taskFile[0].name;
+        finalCloudinaryUrl = `https://res.cloudinary.com/demo/image/upload/v1234567890/${fileName}`;
+      }
+      
+      formData.append("fileUrl", finalCloudinaryUrl);
+
+      await createTask(Number(targetSessionId), formData);
+      
       toast.success("Task published and synchronized!", { id: "task-api-action" });
       setIsFormOpen(false);
       await fetchAllData();
@@ -158,13 +169,18 @@ export default function TaskManagement() {
     }
   };
 
-  const handleDeleteTask = (taskId) => {
+  const handleDeleteTask = async (taskId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this task permanently from server?");
+    if (!confirmDelete) return;
+
     try {
+      toast.loading("Deleting task from server...", { id: "task-delete-action" });
+      await deleteTask(taskId);
       setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-      toast.success("Task removed from view (Frontend Only)");
+      toast.success("Task deleted successfully!", { id: "task-delete-action" });
     } catch (error) {
       console.error("Error deleting task:", error);
-      toast.error("Failed to delete task");
+      toast.error(error?.response?.data?.message || "Server Error: Failed to delete task", { id: "task-delete-action" });
     }
   };
 
@@ -182,16 +198,16 @@ export default function TaskManagement() {
             <Upload className="text-blue-600 dark:text-blue-400 w-4 h-4" />
           </div>
           <span className="text-[10px] md:text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest text-center">
-            {selectedFiles.length > 0 ? "Add more materials" : "Click to upload material"}
+            {selectedFiles.length > 0 ? "Change attached file" : "Click to upload material"}
           </span>
           <input
             id="task-file-input"
             type="file"
-            multiple
             className="hidden"
-            onChange={(e) =>
-              setValue(field.name, [...selectedFiles, ...Array.from(e.target.files)])
-            }
+            onChange={(e) => {
+              const files = e.target.files ? Array.from(e.target.files) : [];
+              setValue(field.name, files, { shouldValidate: true });
+            }}
           />
         </div>
 
@@ -204,7 +220,7 @@ export default function TaskManagement() {
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                onClick={() => setValue(field.name, selectedFiles.filter((_, i) => i !== index))}
+                onClick={() => setValue(field.name, null, { shouldValidate: true })}
                 className="text-gray-400 hover:text-red-500"
               >
                 <X size={12} strokeWidth={3} />
@@ -226,10 +242,7 @@ export default function TaskManagement() {
           <p className="text-sm md:text-base text-gray-500 dark:text-slate-400 font-medium">Viewing all synchronized tasks dynamically mapped by active database sessions.</p>
         </div>
         
-        {/* Action Buttons & Dropdown Filter */}
         <div className="flex flex-wrap items-center gap-3">
-          
-          {/* الـ Dropdown Menu مع علامة السهم المخصصة */}
           <div className="relative flex items-center bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 shadow-sm min-w-[220px]">
             <Filter size={16} className="text-gray-400 mr-2 shrink-0" />
             <select
@@ -240,7 +253,7 @@ export default function TaskManagement() {
               <option value="all">All Active Sessions</option>
               {dbSessions.map((session) => (
                 <option key={session.id || session._id} value={String(session.id || session._id)}>
-                  {session.title || `Session ${session.id || session._id}`}
+                  {session.title || `Session ${session.sessionNumber || session.id || session._id}`}
                 </option>
               ))}
             </select>
@@ -252,7 +265,13 @@ export default function TaskManagement() {
           <Button
             type="button"
             size="lg"
-            onClick={() => setIsFormOpen(true)}
+            onClick={() => {
+              if (dbSessions.length > 0) {
+                setIsFormOpen(true);
+              } else {
+                toast.error("Please create a session first before creating a task");
+              }
+            }}
             className="flex items-center justify-center gap-1.5 bg-primary hover:bg-blue-900 dark:bg-blue-700 dark:hover:bg-blue-600 text-white font-bold shadow-xl shadow-blue-100 dark:shadow-none transition-all active:scale-95 shrink-0 rounded-xl px-5 py-2.5"
           >
             <Plus size={16} strokeWidth={3} /> 
@@ -290,7 +309,30 @@ export default function TaskManagement() {
                       <span className="text-[9px] md:text-[10px] font-black text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/50 px-2 py-0.5 rounded uppercase italic">Deadline: {task.deadline}</span>
                     </div>
                     <h3 className="font-bold text-blue-900 dark:text-slate-100 text-base md:text-lg leading-tight truncate">{task.title}</h3>
-                    <p className="text-xs md:text-sm text-gray-500 dark:text-slate-400 line-clamp-1 mt-1">{task.description}</p>
+                    <p className="text-xs md:text-sm text-gray-500 dark:text-slate-400 mt-1 mb-3 leading-relaxed">{task.description}</p>
+                    
+                    {task.taskFile && task.taskFile !== "" ? (
+                      <a 
+                        href={task.taskFile.startsWith("http") ? task.taskFile : "#"} 
+                        target={task.taskFile.startsWith("http") ? "_blank" : "_self"} 
+                        rel="noopener noreferrer" 
+                        onClick={(e) => {
+                          if (!task.taskFile.startsWith("http")) {
+                            e.preventDefault();
+                            toast.info(`Attached filename: ${task.taskFile} (Requires absolute URL from storage to download)`);
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 hover:bg-blue-100/70 dark:bg-blue-950/50 dark:hover:bg-blue-900/50 w-fit px-3 py-1.5 rounded-xl border border-blue-100 dark:border-blue-900/50 transition-colors"
+                      >
+                        <FileText size={14} />
+                        <span className="truncate max-w-[200px]">
+                          {task.taskFile.startsWith("http") ? "View Attached Material" : task.taskFile}
+                        </span>
+                        <ExternalLink size={12} className="ml-0.5 opacity-70" />
+                      </a>
+                    ) : (
+                      <span className="text-xs text-gray-400 dark:text-slate-500 italic">No resources provided</span>
+                    )}
                   </div>
                 </div>
 
@@ -309,6 +351,7 @@ export default function TaskManagement() {
         </div>
       )}
 
+      {/* 🌟 3. تعديل صيغة الـ sessionNumber الافتراضية هنا لتطابق مصفوفة الخيارات */}
       <PopupForm
         open={isFormOpen}
         onClose={() => setIsFormOpen(false)}
@@ -317,7 +360,9 @@ export default function TaskManagement() {
         fields={taskFields}
         defaultValues={{ 
           title: "", 
-          sessionNumber: dbSessions.length > 0 ? String(dbSessions[0].id || dbSessions[0]._id) : "", 
+          sessionNumber: dbSessions.length > 0 
+            ? `Session ${dbSessions[0].sessionNumber || 1} - ${dbSessions[0].title || "Untitled"}` 
+            : "", 
           deadline: "", 
           description: "", 
           taskFile: null 

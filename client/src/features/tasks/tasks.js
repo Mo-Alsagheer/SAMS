@@ -24,16 +24,13 @@ export async function createTaskSubmission(taskId, submissionData) {
 
   return res.data;
 }
-
 export async function createTask(sessionId, taskData) {
-  const res = await api.post(`/director/sessions/${sessionId}/tasks`, {
-    title: taskData.title,
-    description: taskData.description,
-    dueDate: new Date(taskData.deadline).toISOString(),
-  });
+  // ⚠️ بنباصي الـ taskData (اللي هي الـ FormData الحقيقية) مباشرة كـ Body
+  // Axios تلقائياً هيفهم إنها FormData وهيظبط الـ Headers لـ multipart/form-data من نفسه
+  const res = await api.post(`/director/sessions/${sessionId}/tasks`, taskData);
+  
   return res.data;
 }
-
 export async function uploadSessionMaterial(sessionId, materialData) {
   const formData = new FormData();
   formData.append("title", materialData.title);
@@ -66,5 +63,11 @@ export async function deleteSessionMaterial(materialId) {
 
 export async function getSessionMaterials(sessionId) {
   const res = await api.get(`/sessions/${sessionId}/materials`);
+  return res.data;
+}
+
+
+export async function deleteTask(taskId) {
+  const res = await api.delete(`/director/tasks/${taskId}`);
   return res.data;
 }

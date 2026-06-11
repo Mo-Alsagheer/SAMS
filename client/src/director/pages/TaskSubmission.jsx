@@ -5,9 +5,10 @@ import Table from "../../components/shared/Table";
 import { Button } from "@/components/ui/button"; 
 import { toast } from "sonner";
 
-// استيراد كافة الدوال من الـ API (بما فيها الدالة الجديدة)
-import {  getSessionTasks, getTaskSubmissions, updateSubmissionScore } from "@/features/submission/submission";
-import { getSessionsByRoadmap} from "@/features/roadmap/roadmap"
+// استيراد كافة الدوال من الـ API 
+import { getSessionTasks, getTaskSubmissions, updateSubmissionScore } from "@/features/submission/submission";
+import { getSessionsByRoadmap } from "@/features/roadmap/roadmap";
+
 export default function TaskSubmission() {
   const { roadmapId: urlRoadmapId } = useParams(); // 1. محاولة قراءة الـ ID من الـ URL direct
   
@@ -25,7 +26,6 @@ export default function TaskSubmission() {
   // 2. جلب السيشنز بناءً على الـ Roadmap ID ديناميكياً
   useEffect(() => {
     const fetchInitialSessions = async () => {
-      // هيفترض وجود ID في الـ URL، لو مش موجود تقدري تحطي ID افتراضي مؤقتاً للتست (مثلاً: 1)
       const currentRoadmapId = urlRoadmapId || 1; 
 
       try {
@@ -69,7 +69,7 @@ export default function TaskSubmission() {
     }
   };
 
-  // 4. جلب تسليمات الطلاب عند تغيير الـ Task المختارة
+  // 4. جلب تسليمات الطلاب عند تغيير الـ Task المختارة (تأكدي من تعديل الدالة في ملف الـ API لإضافة كلمة director)
   useEffect(() => {
     if (!selectedTask) return;
 
@@ -93,7 +93,7 @@ export default function TaskSubmission() {
     setSelectedTask(selectedTask === taskId ? null : taskId);
   };
 
-  // 5. حفظ الدرجة للباك إند
+  // 5. حفظ الدرجة للباك إند (تمت العودة للتقييم من 0 لـ 10)
   const handleSaveGrade = async (submissionId) => {
     const score = grades[submissionId];
     
@@ -102,14 +102,14 @@ export default function TaskSubmission() {
       return;
     }
 
-    if (Number(score) > 5 || Number(score) < 0) {
-      toast.error("Score must be between 0 and 5");
+    if (Number(score) > 10 || Number(score) < 0) {
+      toast.error("Score must be between 0 and 10");
       return;
     }
 
     try {
       await updateSubmissionScore(submissionId, score);
-      toast.success(`Score (${score}/5) saved successfully!`);
+      toast.success(`Score (${score}/10) saved successfully!`);
       
       setSubmissions(prev => prev.map(sub => sub.id === submissionId ? { ...sub, score: Number(score) } : sub));
     } catch (error) {
@@ -125,11 +125,11 @@ export default function TaskSubmission() {
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-xs shrink-0">
-            {row.name ? row.name.charAt(0) : "U"}
+            {row.memberName ? row.memberName.charAt(0) : "U"}
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-slate-900 dark:text-slate-200 text-sm">{row.name || "Unknown Student"}</span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase">{row.email || "N/A"}</span>
+            <span className="font-bold text-slate-900 dark:text-slate-200 text-sm">{row.memberName || "Unknown Student"}</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase">{row.memberEmail || "N/A"}</span>
           </div>
         </div>
       ),
@@ -139,7 +139,7 @@ export default function TaskSubmission() {
       accessor: "date",
       render: (row) => (
         <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
-          <Clock size={12} /> {row.date ? new Date(row.date).toLocaleDateString() : "N/A"}
+          <Clock size={12} /> {row.submittedAt ? new Date(row.submittedAt).toLocaleDateString() : "N/A"}
         </div>
       ),
     },
@@ -157,7 +157,7 @@ export default function TaskSubmission() {
       ),
     },
     {
-      header: "SCORE (0-5)",
+      header: "SCORE (0-10)", // تم التحديث إلى 10
       render: (row) => {
         const currentScore = grades[row.id] !== undefined ? grades[row.id] : (row.score !== undefined ? row.score : row.grade);
         return (
@@ -165,7 +165,7 @@ export default function TaskSubmission() {
             <input
               type="number"
               min="0"
-              max="5" 
+              max="10" 
               step="1" 
               value={grades[row.id] || ""}
               placeholder={row.score !== null && row.score !== undefined ? row.score : "0"}
@@ -174,7 +174,7 @@ export default function TaskSubmission() {
             />
             {currentScore !== null && currentScore !== undefined && (
               <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
-                {currentScore}/5 
+                {currentScore}/10 
               </span>
             )}
           </div>
@@ -203,7 +203,7 @@ export default function TaskSubmission() {
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-black text-blue-900 dark:text-blue-400 tracking-tight">Task Submissions</h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">
-          Select a session and task to review and grade student submittals (Scale 0-5).
+          Select a session and task to review and grade student submittals (Scale 0-10).
         </p>
       </div>
 

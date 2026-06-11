@@ -14,7 +14,7 @@ export default function Attendance() {
     {
       id: "SAMS-2023-001",
       name: "Julianna Smith",
-      status: "Present",
+      status: "Present", 
     },
     {
       id: "SAMS-2023-002",
