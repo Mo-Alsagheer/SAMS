@@ -24,7 +24,7 @@ import {
   useSidebar,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-
+import logo from "@/assets/ieee__logo.png";
 export default function AppSidebar({ role, navItems, name }) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -33,9 +33,13 @@ export default function AppSidebar({ role, navItems, name }) {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
-            <GraduationCap className="h-5 w-5 text-sidebar-primary-foreground" />
+        <div className="flex items-center gap-1">
+          <div className="h-8 w-8 rounded-lg overflow-hidden flex items-center justify-center">
+            <img
+              src={logo}
+              alt="IEEE Logo"
+              className="h-full w-full object-contain"
+            />
           </div>
 
           {!collapsed && (

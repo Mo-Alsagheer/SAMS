@@ -22,7 +22,7 @@ import {
   isAuthenticated,
   setAuthSession,
 } from "@/features/auth/session";
-
+import logo from "@/assets/ieee__logo.png";
 const formSchema = z.object({
   email: z.string().email("Enter a valid email").nonempty("Enter Your Email"),
   password: z
@@ -71,7 +71,14 @@ export default function Login() {
     <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 p-4 lg:p-0">
       <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 bg-white rounded-[2.5rem] overflow-hidden shadow-[0_0_60px_-10px_rgba(37,99,235,0.4)] border border-slate-100">
         <div className="relative hidden lg:flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 p-12 text-white">
-          <div className="absolute top-10 left-10 flex items-center gap-2">
+          <div className="absolute top-10 left-10 flex items-center gap-1">
+            <div className="h-8 w-8 rounded-lg overflow-hidden flex items-center justify-center">
+              <img
+                src={logo}
+                alt="IEEE Logo"
+                className="h-full w-full object-contain bg-white"
+              />
+            </div>
             <span className="font-bold text-xl tracking-tight text-white uppercase">
               IEEE
             </span>

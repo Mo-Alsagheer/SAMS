@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { NavHashLink } from "react-router-hash-link";
-import logoScroll from "../../assets/logoScroll.png";
+import logo from "@/assets/ieee__logo.png";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 
 function Navbar() {
@@ -17,20 +17,16 @@ function Navbar() {
       {" "}
       <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
         {" "}
-        <Link
-          to="/"
-          className="flex items-center gap-2 md:gap-3 cursor-pointer"
-        >
-          {" "}
+        <Link to="/" className="flex items-center gap-1.5 cursor-pointer">
           <img
-            src={logoScroll}
+            src={logo}
             alt="IEEE Logo"
             className="h-8 md:h-10 w-auto transition-all duration-500 ease-in-out"
-          />{" "}
-          <span className="text-xl md:text-2xl font-black tracking-tighter transition-colors duration-500 text-blue-900">
-            IEEE{" "}
-          </span>{" "}
-        </Link>{" "}
+          />
+          <span className="text-xl md:text-3xl font-bold text-[#0065B0] transition-colors duration-500 font-sans">
+            IEEE
+          </span>
+        </Link>
         <button
           className="lg:hidden text-3xl transition-colors text-blue-900"
           onClick={() => setIsOpen(!isOpen)}
