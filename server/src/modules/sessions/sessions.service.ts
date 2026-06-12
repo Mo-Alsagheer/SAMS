@@ -369,7 +369,7 @@ export class SessionsService {
 
       if (isRoomActive) {
         status = 'live';
-      } else if (s.scheduledAt < now) {
+      } else if (s.scheduledAt && s.scheduledAt < now) {
         status = 'completed';
       } else {
         if (futureIndex < 2) {
@@ -407,7 +407,7 @@ export class SessionsService {
           sessionId: String(s.id),
           title: t.title,
           description: t.description || '',
-          dueDate: t.dueDate.toISOString(),
+          dueDate: t.dueDate ? t.dueDate.toISOString() : null,
           status: taskStatus,
           score: sub?.score ?? undefined,
           maxScore: 10,
@@ -420,7 +420,7 @@ export class SessionsService {
         order: index + 1,
         title: s.title,
         description: s.description || '',
-        date: s.scheduledAt.toISOString(),
+        date: s.scheduledAt ? s.scheduledAt.toISOString() : null,
         duration: '90 min',
         status,
         resources,
@@ -501,7 +501,11 @@ export class SessionsService {
     
     // Get latest tasks (e.g. recently due or upcoming, sorted by dueDate desc)
     const latestTasks = [...allTasks]
-      .sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime())
+      .sort((a, b) => {
+        const timeA = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+        const timeB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+        return timeB - timeA;
+      })
       .slice(0, 3)
       .map(t => {
         let displayStatus = 'Pending';
