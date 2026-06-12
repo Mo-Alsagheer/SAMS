@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { joinMeeting } from "@/features/meetings/meetings";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -37,7 +39,7 @@ function TaskStatusBadge({ status }) {
     <span
       className={cn(
         "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
-        styles[status?.toLowerCase()] || styles.pending
+        styles[status?.toLowerCase()] || styles.pending,
       )}
     >
       {status}
@@ -74,6 +76,41 @@ function useCountdown(target) {
 ========================= */
 
 export default function Dashboard() {
+  const handleJoinMeeting = async () => {
+    if (!upcomingSession?.id) {
+      toast.error("No session available");
+      return;
+    }
+
+    try {
+      toast("Joining meeting...");
+
+      const res = await joinMeeting(upcomingSession.id);
+
+      const token =
+        res?.token ??
+        res?.data?.token ??
+        res?.access_token ??
+        res?.token?.token;
+
+      if (!token) {
+        console.error("Join meeting response:", res);
+        toast.error("Could not obtain meeting token.");
+        return;
+      }
+
+      const url = `https://demo.plugnmeet.com?access_token=${encodeURIComponent(
+        token,
+      )}`;
+
+      setTimeout(() => {
+        window.location.href = url;
+      }, 300);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to join meeting.");
+    }
+  };
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -130,9 +167,7 @@ export default function Dashboard() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-bold">
-                {data?.committee?.name}
-              </h2>
+              <h2 className="text-2xl font-bold">{data?.committee?.name}</h2>
 
               <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
                 {data?.committee?.description}
@@ -220,9 +255,10 @@ export default function Dashboard() {
                 disabled={!isLive}
                 variant="secondary"
                 className="gap-2"
+                onClick={handleJoinMeeting}
               >
                 <Video className="h-4 w-4" />
-                {isLive ? "Join Live Session" : "Join when active"}
+                {isLive ? "Join Live Session" : "Session Not Active"}
               </Button>
             </div>
           </CardContent>
@@ -241,28 +277,38 @@ export default function Dashboard() {
             </Link>
           </CardHeader>
 
-          <CardContent className="space-y-3">
-            {latestTasks.map((t) => (
-              <div
-                key={t.id}
-                className="rounded-lg border border-border/60 p-3 hover:bg-accent/40"
-              >
-                <p className="line-clamp-1 text-sm font-medium">
-                  {t.title}
-                </p>
-
-                <div className="mt-2 flex items-center justify-between">
-                  <TaskStatusBadge status={t.status} />
-
-                  {t.score && (
-                    <span className="text-xs font-semibold text-success">
-                      {t.score}
-                    </span>
-                  )}
+          
+            <CardContent className="space-y-3">
+              {latestTasks.length === 0 ? (
+                <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-border">
+                  <p className="text-sm text-muted-foreground">
+                    No tasks available
+                  </p>
                 </div>
-              </div>
-            ))}
-          </CardContent>
+              ) : (
+                latestTasks.map((t) => (
+                  <div
+                    key={t.id}
+                    className="rounded-lg border border-border/60 p-3 hover:bg-accent/40"
+                  >
+                    <p className="line-clamp-1 text-sm font-medium">
+                      {t.title}
+                    </p>
+
+                    <div className="mt-2 flex items-center justify-between">
+                      <TaskStatusBadge status={t.status} />
+
+                      {t.score && (
+                        <span className="text-xs font-semibold text-success">
+                          {t.score}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+         
         </Card>
       </div>
     </div>
