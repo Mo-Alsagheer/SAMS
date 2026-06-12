@@ -106,6 +106,11 @@ export class SessionsService {
         scheduledAt: new Date(updateSessionDto.scheduledAt),
       }),
     });
+
+    this.audit
+      .log({ action: 'SessionsService.update', userId: String(user.id), body: { id, updateSessionDto } })
+      .catch(() => undefined);
+
     return this.sessionsRepository.save(session);
   }
 
@@ -122,6 +127,10 @@ export class SessionsService {
     }
 
     await this.sessionsRepository.remove(session);
+
+    this.audit
+      .log({ action: 'SessionsService.remove', userId: String(user.id), body: { id } })
+      .catch(() => undefined);
   }
 
   async findById(id: number): Promise<Session> {
@@ -227,6 +236,10 @@ export class SessionsService {
       await this.sessionsRepository.save(session);
     }
 
+    this.audit
+      .log({ action: 'SessionsService.createMeeting', body: { sessionId, dto, roomId } })
+      .catch(() => undefined);
+
     return {
       message: 'Meeting room created successfully',
       plugnmeetRoomId: roomId,
@@ -249,6 +262,11 @@ export class SessionsService {
     }
 
     await this.meetingsService.endMeeting(session.plugnmeetRoomId);
+
+    this.audit
+      .log({ action: 'SessionsService.endMeeting', body: { sessionId, roomId: session.plugnmeetRoomId } })
+      .catch(() => undefined);
+
     return { message: 'Meeting room ended successfully' };
   }
 
@@ -369,7 +387,7 @@ export class SessionsService {
 
       if (isRoomActive) {
         status = 'live';
-      } else if (s.scheduledAt < now) {
+      } else if (s.scheduledAt && s.scheduledAt < now) {
         status = 'completed';
       } else {
         if (futureIndex < 2) {
@@ -407,7 +425,7 @@ export class SessionsService {
           sessionId: String(s.id),
           title: t.title,
           description: t.description || '',
-          dueDate: t.dueDate.toISOString(),
+          dueDate: t.dueDate ? t.dueDate.toISOString() : null,
           status: taskStatus,
           score: sub?.score ?? undefined,
           maxScore: 10,
@@ -420,7 +438,7 @@ export class SessionsService {
         order: index + 1,
         title: s.title,
         description: s.description || '',
-        date: s.scheduledAt.toISOString(),
+        date: s.scheduledAt ? s.scheduledAt.toISOString() : null,
         duration: '90 min',
         status,
         resources,
@@ -501,7 +519,11 @@ export class SessionsService {
     
     // Get latest tasks (e.g. recently due or upcoming, sorted by dueDate desc)
     const latestTasks = [...allTasks]
-      .sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime())
+      .sort((a, b) => {
+        const timeA = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+        const timeB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+        return timeB - timeA;
+      })
       .slice(0, 3)
       .map(t => {
         let displayStatus = 'Pending';
