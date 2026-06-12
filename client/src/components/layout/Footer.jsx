@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { NavHashLink } from "react-router-hash-link";
-import logo from "@/assets/ieee__logo.png";
+import logo from "@/assets/ieee__logo_white.png";
 import {
   FaFacebook,
   FaTwitter,
@@ -18,7 +18,7 @@ const Footer = () => {
             <img
               src={logo}
               alt="IEEE Logo"
-              className="h-8 md:h-10 w-auto transition-all duration-500 bg-white rounded-lg ease-in-out"
+              className="h-8 md:h-10 w-auto transition-all duration-500 ease-in-out"
             />
             <span className="text-xl md:text-3xl font-bold text-white transition-colors duration-500 font-sans">
               IEEE

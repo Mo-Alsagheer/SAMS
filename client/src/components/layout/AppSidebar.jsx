@@ -24,7 +24,7 @@ import {
   useSidebar,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import logo from "@/assets/ieee__logo.png";
+import logo from "@/assets/ieee__logo_white.png";
 export default function AppSidebar({ role, navItems, name }) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";

@@ -22,7 +22,7 @@ import {
   isAuthenticated,
   setAuthSession,
 } from "@/features/auth/session";
-import logo from "@/assets/ieee__logo.png";
+import logo from "@/assets/ieee__logo_white.png";
 const formSchema = z.object({
   email: z.string().email("Enter a valid email").nonempty("Enter Your Email"),
   password: z
@@ -76,10 +76,10 @@ export default function Login() {
               <img
                 src={logo}
                 alt="IEEE Logo"
-                className="h-full w-full object-contain bg-white"
+                className="h-full w-full object-contain "
               />
             </div>
-            <span className="font-bold text-xl tracking-tight text-white uppercase">
+            <span className="font-bold text-2xl tracking-tight text-white uppercase">
               IEEE
             </span>
           </div>
