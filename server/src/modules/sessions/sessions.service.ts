@@ -106,6 +106,11 @@ export class SessionsService {
         scheduledAt: new Date(updateSessionDto.scheduledAt),
       }),
     });
+
+    this.audit
+      .log({ action: 'SessionsService.update', userId: String(user.id), body: { id, updateSessionDto } })
+      .catch(() => undefined);
+
     return this.sessionsRepository.save(session);
   }
 
@@ -122,6 +127,10 @@ export class SessionsService {
     }
 
     await this.sessionsRepository.remove(session);
+
+    this.audit
+      .log({ action: 'SessionsService.remove', userId: String(user.id), body: { id } })
+      .catch(() => undefined);
   }
 
   async findById(id: number): Promise<Session> {
@@ -227,6 +236,10 @@ export class SessionsService {
       await this.sessionsRepository.save(session);
     }
 
+    this.audit
+      .log({ action: 'SessionsService.createMeeting', body: { sessionId, dto, roomId } })
+      .catch(() => undefined);
+
     return {
       message: 'Meeting room created successfully',
       plugnmeetRoomId: roomId,
@@ -249,6 +262,11 @@ export class SessionsService {
     }
 
     await this.meetingsService.endMeeting(session.plugnmeetRoomId);
+
+    this.audit
+      .log({ action: 'SessionsService.endMeeting', body: { sessionId, roomId: session.plugnmeetRoomId } })
+      .catch(() => undefined);
+
     return { message: 'Meeting room ended successfully' };
   }
 
