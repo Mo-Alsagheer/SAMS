@@ -63,7 +63,7 @@ function Applications() {
     async (forceRefresh = false) => {
       if (!committeeId) return;
 
-      const cacheKey = `applications_${committeeId}_Members_${status}`;
+      const cacheKey = `applications_${committeeId}_${status}`;
 
       if (!forceRefresh) {
         const cached = sessionStorage.getItem(cacheKey);
