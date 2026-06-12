@@ -150,13 +150,9 @@ export default function TaskManagement() {
       const isoDueDate = data.deadline ? new Date(data.deadline).toISOString() : new Date().toISOString();
       formData.append("dueDate", isoDueDate);
 
-      let finalCloudinaryUrl = "";
       if (data.taskFile && data.taskFile.length > 0) {
-        const fileName = data.taskFile[0].name;
-        finalCloudinaryUrl = `https://res.cloudinary.com/demo/image/upload/v1234567890/${fileName}`;
+        formData.append("file", data.taskFile[0]);
       }
-      
-      formData.append("fileUrl", finalCloudinaryUrl);
 
       await createTask(Number(targetSessionId), formData);
       

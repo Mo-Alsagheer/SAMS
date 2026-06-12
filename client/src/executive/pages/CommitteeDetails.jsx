@@ -91,7 +91,7 @@ function CommitteeDetails() {
         <Skeleton className="h-10 w-40" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Array(4).fill(0).map((_, i) => (
+          {Array(2).fill(0).map((_, i) => (
             <div key={i} className="p-4 rounded-xl border bg-card space-y-3">
               <Skeleton className="h-3 w-24" />
               <Skeleton className="h-5 w-full" />
@@ -146,8 +146,8 @@ function CommitteeDetails() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <InfoCard label="Type" value={committee?.type} />
           <InfoCard label="Members Count" value={committee?.membersCount} />
-          <InfoCard label="Plan ID" value={committee?.planID} />
-          <InfoCard label="Created By" value={committee?.createdBy} />
+          {/* <InfoCard label="Plan ID" value={committee?.planID} />
+          <InfoCard label="Created By" value={committee?.createdBy} /> */}
         </div>
       </div>
 

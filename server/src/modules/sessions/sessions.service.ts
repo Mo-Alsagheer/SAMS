@@ -71,7 +71,7 @@ export class SessionsService {
       .catch(() => undefined);
     const session = this.sessionsRepository.create({
       ...createSessionDto,
-      scheduledAt: new Date(createSessionDto.scheduledAt),
+      scheduledAt: null,
       isRecorded: createSessionDto.isRecorded ?? false,
       meetingType: createSessionDto.meetingType ?? null,
       committeeId: user.committeeId,

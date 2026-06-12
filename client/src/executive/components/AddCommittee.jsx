@@ -33,6 +33,7 @@ const committeeFields = [
     label: "WhatsApp Group Link",
     type: "text",
   },
+  { name: "membersCount", label: "Members Count", type: "number" },
 ];
 
 export default function AddCommittee({ onAdded }) {
@@ -41,10 +42,23 @@ export default function AddCommittee({ onAdded }) {
 
   // 4. Form submission handler
   const handleAddCommittee = useCallback(async (values) => {
-    const {  ...rest } = values;
-    const data = {
-      ...rest
-    };
+    const { ...rest } = values;
+
+    // ensure membersCount is a number if provided (some form libraries submit as strings)
+    if (
+      rest.membersCount !== undefined &&
+      rest.membersCount !== null &&
+      rest.membersCount !== ""
+    ) {
+      const parsed = Number(rest.membersCount);
+      if (!Number.isNaN(parsed)) {
+        rest.membersCount = parsed;
+      } else {
+        delete rest.membersCount;
+      }
+    }
+
+    const data = { ...rest };
 
     setLoading(true);
     try {

@@ -124,7 +124,7 @@ const ApplicationDetails = () => {
             >
               {statusConfig[app.status]?.label}
             </Badge>
-            <Button
+            {/* <Button
               size="sm"
               className="bg-success hover:bg-success/90 text-success-foreground gap-1.5"
             >
@@ -136,7 +136,7 @@ const ApplicationDetails = () => {
               className="text-destructive border-destructive/30 hover:bg-destructive/10 gap-1.5"
             >
               <XCircle className="h-4 w-4" /> Reject
-            </Button>
+            </Button> */}
           </div>
         </div>
 
@@ -216,49 +216,54 @@ const ApplicationDetails = () => {
             <CardHeader>
               <CardTitle>AI Review</CardTitle>
             </CardHeader>
+
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Final Score</p>
                   <p className="text-3xl font-display font-bold text-primary">
-                    {app.aiScore.final_score}
+                    {app.aiScore.final_score ?? "-"}
                   </p>
                 </div>
+
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">
                     Recommendation
                   </p>
                   <Badge className="px-3 py-1 mt-1">
-                    {app.aiScore.recommendation}
+                    {app.aiScore.recommendation ?? "N/A"}
                   </Badge>
                 </div>
               </div>
 
-              <div className="mt-4 space-y-3">
+              <div className="mt-5 space-y-4">
                 {app.aiScore.per_criterion_scores &&
                   Object.entries(app.aiScore.per_criterion_scores).map(
-                    ([key, v]) => {
+                    ([key, value]) => {
                       const score =
-                        typeof v === "number" ? v : (v?.sub_score ?? 0);
+                        typeof value === "number"
+                          ? value
+                          : (value?.sub_score ?? 0);
+
                       const justification =
-                        (typeof v === "object" && v?.justification) ||
-                        app.aiScore.justification?.[key];
+                        typeof value === "object"
+                          ? value?.justification
+                          : app.aiScore?.justification?.[key];
 
                       return (
                         <div key={key}>
                           <div className="flex justify-between text-sm">
-                            <span>
-                              {key
-                                .replace(/_/g, " ")
-                                .replace(/\b\w/g, (c) => c.toUpperCase())}
+                            <span className="capitalize">
+                              {key.replace(/_/g, " ")}
                             </span>
                             <span>{score}</span>
                           </div>
+
                           <Progress value={score} className="h-2 mt-1" />
-                          //!!!
+
                           {justification && (
                             <p className="text-xs text-muted-foreground mt-1">
-                             
+                              {justification}
                             </p>
                           )}
                         </div>
@@ -267,12 +272,14 @@ const ApplicationDetails = () => {
                   )}
               </div>
 
-              <div className="mt-4">
-                <p className="text-sm font-semibold">Summary</p>
-                <p className="text-sm text-muted-foreground">
-                  {app.aiScore.overall_summary}
-                </p>
-              </div>
+              {app.aiScore.overall_summary && (
+                <div className="mt-5">
+                  <p className="text-sm font-semibold">Summary</p>
+                  <p className="text-sm text-muted-foreground">
+                    {app.aiScore.overall_summary}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}

@@ -119,6 +119,8 @@ export class EmailService {
     const { to, resetToken, resetUrl } = opts;
     const finalUrl = `${resetUrl}?token=${resetToken}`;
 
+    this.logger.log(`\n\n========================================\n[PASSWORD RESET LINK FOR ${to}]: ${finalUrl}\n========================================\n\n`);
+
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -180,6 +182,112 @@ export class EmailService {
       this.audit
         .log({
           action: 'EmailService.sendForgetPasswordEmailFailed',
+          body: { to, errorMessage: String(error) },
+        })
+        .catch(() => undefined);
+    }
+  }
+
+  async sendApplicationStatusEmail(opts: {
+    to: string;
+    name: string;
+    status: string;
+    additionalInfo?: string;
+  }): Promise<void> {
+    const { to, name, status, additionalInfo } = opts;
+
+    let statusText = '';
+    let descriptionText = '';
+    let headerColor = 'linear-gradient(135deg, #1a1f3c 0%, #2d3580 100%)';
+
+    switch (status) {
+      case 'PHASE1_ACCEPTED':
+        statusText = 'Phase 1 Accepted 🎉';
+        descriptionText = 'Congratulations! Your application has successfully passed the initial screening (Phase 1 evaluation).';
+        break;
+      case 'PHASE1_REJECTED':
+        statusText = 'Application Update - Not Accepted';
+        descriptionText = 'Thank you for your interest in SAMS. Unfortunately, your application did not pass the initial screening phase at this time.';
+        headerColor = 'linear-gradient(135deg, #3c1a1a 0%, #802d2d 100%)';
+        break;
+      case 'INTERVIEW_SCHEDULED':
+        statusText = 'Interview Scheduled 📅';
+        descriptionText = 'Great news! An interview has been scheduled for your application.';
+        break;
+      case 'PHASE2_ACCEPTED':
+        statusText = 'Welcome to SAMS! 🎉';
+        descriptionText = 'Congratulations! You have been officially accepted as a member.';
+        break;
+      case 'PHASE2_REJECTED':
+        statusText = 'Application Update - Not Accepted';
+        descriptionText = 'Thank you for interviewing with us. Unfortunately, we will not be moving forward with your application at this time.';
+        headerColor = 'linear-gradient(135deg, #3c1a1a 0%, #802d2d 100%)';
+        break;
+      default:
+        statusText = 'Application Status Update';
+        descriptionText = `Your application status has been updated to: ${status}.`;
+    }
+
+    this.logger.log(`\n\n========================================\n[APPLICATION STATUS EMAIL FOR ${to}]: Status = ${statusText} | Info = ${additionalInfo || 'None'}\n========================================\n\n`);
+
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Application Status Update</title>
+  <style>
+    body { margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6fb; }
+    .wrapper { max-width: 560px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .header { background: ${headerColor}; padding: 40px 32px; text-align: center; }
+    .header h1 { margin: 0; color: #ffffff; font-size: 26px; letter-spacing: 1px; }
+    .body { padding: 36px 32px; }
+    .greeting { font-size: 18px; color: #1a1f3c; font-weight: 600; margin-bottom: 12px; }
+    .text { font-size: 15px; color: #555; line-height: 1.7; margin-bottom: 24px; }
+    .details { background: #f0f3ff; border-left: 4px solid #2d3580; border-radius: 8px; padding: 20px 24px; margin-bottom: 28px; }
+    .details p { margin: 0 0 10px; font-size: 14px; color: #444; }
+    .details p:last-child { margin: 0; }
+    .footer { background: #f8f9fe; padding: 20px 32px; text-align: center; font-size: 12px; color: #aaa; border-top: 1px solid #eee; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1>SAMS</h1>
+    </div>
+    <div class="body">
+      <div class="greeting">Hello, ${name}!</div>
+      <p class="text">${descriptionText}</p>
+      <div class="details">
+        <p><strong>New Status:</strong> ${statusText}</p>
+        ${additionalInfo ? `<p>${additionalInfo}</p>` : ''}
+      </div>
+    </div>
+    <div class="footer">
+      &copy; ${new Date().getFullYear()} SAMS. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>
+    `.trim();
+
+    try {
+      await this.resend.emails.send({
+        from: this.fromAddress,
+        to,
+        subject: `SAMS: Application Status Update — ${statusText}`,
+        html,
+      });
+      this.logger.log(`Application status email sent to ${to} for status ${status}`);
+      this.audit
+        .log({ action: 'EmailService.sendApplicationStatusEmail', body: { to, status } })
+        .catch(() => undefined);
+    } catch (error) {
+      this.logger.error(`Failed to send status update email to ${to}`, error);
+      this.audit
+        .log({
+          action: 'EmailService.sendApplicationStatusEmailFailed',
           body: { to, errorMessage: String(error) },
         })
         .catch(() => undefined);
