@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react'
 import { PopupForm } from '../../components/shared/PopupForm'
 import { Button } from "@/components/ui/button" 
@@ -19,7 +21,7 @@ const sessionSchema = z.object({
 export default function ManageRoadmap() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [sessions, setSessions] = useState([]);
-  const [editingSessionId, setEditingSessionId] = useState(null); // الاعتماد على الـ id بدلاً من الاندكس
+  const [editingSessionId, setEditingSessionId] = useState(null); 
   const [isLoading, setIsLoading] = useState(false);
 
   const [isMaterialsOpen, setIsMaterialsOpen] = useState(false);
@@ -55,14 +57,11 @@ export default function ManageRoadmap() {
         })
       );
 
-      const sortedByCreation = sessionsWithMaterials.sort((a, b) => Number(a.id || 0) - Number(b.id || 0));
+      const sortedSessions = sessionsWithMaterials.sort((a, b) => 
+        Number(a.sessionNumber || a.id || 0) - Number(b.sessionNumber || b.id || 0)
+      );
 
-      const resetedNumbersSessions = sortedByCreation.map((session, index) => ({
-        ...session,
-        sessionNumber: String(index + 1)
-      }));
-
-      setSessions(resetedNumbersSessions);
+      setSessions(sortedSessions);
     } catch (error) {
       console.error(error);
       toast.error("Failed to load sessions for this roadmap");
@@ -237,7 +236,6 @@ export default function ManageRoadmap() {
     }
   };
 
-  // جلب بيانات السيشن المراد تعديلها حالياً بالبحث عنها بالـ id
   const currentEditingSession = sessions.find(s => s.id === editingSessionId) || null;
 
   return (
@@ -334,7 +332,7 @@ export default function ManageRoadmap() {
           title: currentEditingSession.title,
           outline: currentEditingSession.description,
           sessionFile: currentEditingSession.materials || []
-        } : { sessionNumber: String(sessions.length + 1), title: '', outline: '', sessionFile: [] }} 
+        } : { sessionNumber: '', title: '', outline: '', sessionFile: [] }} 
         onSubmit={handleSaveSession}
         submitLabel="Save"
         className="max-w-2xl w-[94%] max-h-[90vh] flex flex-col overflow-hidden rounded-[24px] md:rounded-[32px]" 

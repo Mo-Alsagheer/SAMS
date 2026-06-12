@@ -29,8 +29,6 @@ export async function createTaskSubmission(taskId, submissionData) {
   return res.data;
 }
 export async function createTask(sessionId, taskData) {
-  // ⚠️ بنباصي الـ taskData (اللي هي الـ FormData الحقيقية) مباشرة كـ Body
-  // Axios تلقائياً هيفهم إنها FormData وهيظبط الـ Headers لـ multipart/form-data من نفسه
   const res = await api.post(`/director/sessions/${sessionId}/tasks`, taskData);
   
   return res.data;

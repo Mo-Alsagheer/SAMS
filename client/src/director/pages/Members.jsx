@@ -4,33 +4,13 @@ import StatCard from "../../components/shared/StatCard";
 import Table from "../../components/shared/Table";
 import { toast } from "sonner";
 
-// استيراد الدوال من الـ API الفعلي
 import { getCommitteeMembers, updateMemberStatus, getCommitteeStatistics } from "@/features/member/member"; 
 
 export default function Members() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // حفظ هيكل الريسبونس الكامل
-  const [stats, setStats] = useState({
-    totalMembers: 0,
-    active: 0,
-    hold: 0,
-    fired: 0,
-    attendance: {
-      totalSessions: 0,
-      totalPresent: 0,
-      totalLate: 0,
-      totalAbsent: 0,
-      averageAttendanceRate: 0
-    },
-    tasks: {
-      totalAssignedTasks: 0,
-      totalSubmissions: 0,
-      submissionRate: 0,
-      averageTaskScore: 0
-    }
-  });
+  const [stats, setStats] = useState(null);
 
   const fetchCommitteeData = async () => {
     try {
@@ -41,7 +21,6 @@ export default function Members() {
         getCommitteeStatistics()
       ]);
 
-      // 1. معالجة بيانات الجدول
       let extractedMembers = [];
       if (Array.isArray(membersResponse)) {
         extractedMembers = membersResponse;
@@ -57,27 +36,8 @@ export default function Members() {
       }));
       setMembers(membersWithIds);
 
-      // 2. معالجة وحفظ الريسبونس جوه الـ State
       if (statsResponse) {
-        setStats({
-          totalMembers: statsResponse.totalMembers || 0,
-          active: statsResponse.byStatus?.active || 0,
-          hold: statsResponse.byStatus?.hold || 0,
-          fired: statsResponse.byStatus?.fired || 0,
-          attendance: {
-            totalSessions: statsResponse.attendance?.totalSessions || 0,
-            totalPresent: statsResponse.attendance?.totalPresent || 0,
-            totalLate: statsResponse.attendance?.totalLate || 0,
-            totalAbsent: statsResponse.attendance?.totalAbsent || 0,
-            averageAttendanceRate: statsResponse.attendance?.averageAttendanceRate || 0
-          },
-          tasks: {
-            totalAssignedTasks: statsResponse.tasks?.totalAssignedTasks || 0,
-            totalSubmissions: statsResponse.tasks?.totalSubmissions || 0,
-            submissionRate: statsResponse.tasks?.submissionRate || 0,
-            averageTaskScore: statsResponse.tasks?.averageTaskScore || 0
-          }
-        });
+        setStats(statsResponse);
       }
 
     } catch (error) {
@@ -212,45 +172,41 @@ export default function Members() {
   ];
 
   return (
-    <div className="p-4 md:p-8 min-h-screen font-sans">
-      <div className="mb-8">
-        <h1 className="text-3xl font-black text-blue-900 dark:text-blue-400 tracking-tight">
+    <div className="p-4 md:p-8 min-h-screen font-sans bg-[#f8fafc] dark:bg-slate-950 space-y-6">
+      <div className="mb-6">
+        <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
           Members Management
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">
+        <p className="text-slate-400 dark:text-slate-500 text-xs md:text-sm font-medium mt-1">
           Monitor performance parameters, attendance analytics, and task assignments.
         </p>
       </div>
 
-      {/* الـ 3 كروت المظبوطة بالعناوين المطلوبة بالملّي */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div className="shadow-[0_8px_30px_rgb(59,130,246,0.1)] rounded-2xl">
-          <StatCard
-            title="TOTAL MEMBERS"
-            value={loading ? "..." : stats.totalMembers}
-            icon={Users}
-            color="primary"
-          />
-        </div>
-        <div className="shadow-[0_8px_30px_rgb(59,130,246,0.1)] rounded-2xl">
-          <StatCard
-            title="ATTENDANCE"
-            value={loading ? "..." : `${stats.attendance.averageAttendanceRate}%`}
-            icon={Calendar}
-            color="primary"
-          />
-        </div>
-        <div className="shadow-[0_8px_30px_rgb(59,130,246,0.1)] rounded-2xl">
-          <StatCard
-            title="TASKS"
-            value={loading ? "..." : `${stats.tasks.submissionRate}% Rate`}
-            icon={ListTodo}
-            color="primary"
-          />
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <StatCard
+          title="TOTAL MEMBERS"
+          value={loading ? "..." : (stats?.totalMembers || 0)}
+          icon={Users}
+          color="primary"
+          className="!p-6 md:!p-7 flex flex-col justify-between gap-4 min-h-[140px]"
+        />
+        <StatCard
+          title="ATTENDANCE RATE"
+          value={loading ? "..." : `${stats?.attendance?.averageAttendanceRate || 0}%`}
+          icon={Calendar}
+          color="success"
+          className="!p-6 md:!p-7 flex flex-col justify-between gap-4 min-h-[140px]"
+        />
+        <StatCard
+          title="TASKS SUBMISSION"
+          value={loading ? "..." : `${stats?.tasks?.submissionRate || 0}%`}
+          icon={ListTodo}
+          color="warning"
+          className="!p-6 md:!p-7 flex flex-col justify-between gap-4 min-h-[140px]"
+        />
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-[0_20px_50px_rgba(59,130,246,0.15)] overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200/60 dark:border-slate-800 shadow-[0_20px_50px_rgba(59,130,246,0.08)] overflow-hidden">
         <Table
           columns={columns}
           data={members}

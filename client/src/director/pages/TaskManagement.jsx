@@ -63,7 +63,9 @@ export default function TaskManagement() {
             return tasksArray.map(task => ({
               ...task,
               actualSessionId: sId,
-              sessionName: session.title || `Session ${session.sessionNumber || sId}` 
+              sessionName: session.title || `Session ${session.sessionNumber || sId}`,
+             
+              sessionNo: String(session.sessionNumber || "")
             }));
           } catch (err) {
             console.warn(`Could not fetch tasks for session`, err);
@@ -75,15 +77,13 @@ export default function TaskManagement() {
       const combinedTasks = allResponses.flat();
 
       const formattedTasks = combinedTasks.map((task, index) => {
-        console.log(`Task [${index}] raw data from backend:`, task);
-
         const extractedFile = task.fileUrl || task.file_url || task.file || task.material || task.attachment || task.taskFile || null;
 
         return {
           id: task.id || task._id || `task-fallback-${index}`, 
           title: task.title || "Untitled Task",
           description: task.description || "",
-          sessionNumber: task.sessionId || task.sessionNumber || task.actualSessionId,
+          sessionNumber: task.sessionNo || String(task.sessionId || task.sessionNumber || task.actualSessionId),
           sessionLabel: task.sessionName,
           deadline: task.dueDate ? task.dueDate.split("T")[0] : "",
           taskFile: extractedFile, 
@@ -109,16 +109,13 @@ export default function TaskManagement() {
     return String(task.sessionNumber) === String(selectedSessionFilter);
   });
 
-  // 🌟 1. مصفوفة الحقول: تعرض رقم السيشن الفعلي وعنوانها للأدمن بدلاً من الـ ID
   const taskFields = [
     { name: "title", label: "Task Title", placeholder: "Enter task name...", className: "col-span-2" },
     {
       name: "sessionNumber",
       label: "Session Assignment",
       type: "select",
-      options: dbSessions.map(
-        (session, index) => `Session ${session.sessionNumber || index + 1} - ${session.title || "Untitled"}`
-      ),
+      options: dbSessions.map((session, index) => `Session ${session.sessionNumber || index + 1}`),
       className: "col-span-2 md:col-span-1",
     },
     { name: "deadline", label: "Deadline Date", type: "date", className: "col-span-2 md:col-span-1" },
@@ -126,11 +123,9 @@ export default function TaskManagement() {
     { name: "taskFile", label: "Material (Optional)", type: "custom", className: "col-span-2" },
   ];
 
-  // 🌟 2. دالة الحفظ: ترجمة النص المختار للـ ID الحقيقي المطابق له في قاعدة البيانات
   const handleSaveTask = async (data) => {
     const matchedSession = dbSessions.find(
-      (session, index) => 
-        `Session ${session.sessionNumber || index + 1} - ${session.title || "Untitled"}` === data.sessionNumber
+      (session, index) => `Session ${session.sessionNumber || index + 1}` === data.sessionNumber
     );
 
     const targetSessionId = matchedSession ? (matchedSession.id || matchedSession._id) : null;
@@ -141,7 +136,7 @@ export default function TaskManagement() {
     }
 
     try {
-      toast.loading("Publishing task to server...", { id: "task-api-action" });
+      toast.loading("Adding task to tasks list", { id: "task-api-action" });
 
       const formData = new FormData();
       formData.append("title", data.title);
@@ -156,7 +151,7 @@ export default function TaskManagement() {
 
       await createTask(Number(targetSessionId), formData);
       
-      toast.success("Task published and synchronized!", { id: "task-api-action" });
+      toast.success("Task added successfully!", { id: "task-api-action" });
       setIsFormOpen(false);
       await fetchAllData();
     } catch (error) {
@@ -231,7 +226,6 @@ export default function TaskManagement() {
   return (
     <div className="p-4 md:p-10 bg-[#f8f9fa] dark:bg-transparent min-h-screen">
       
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mb-8 md:mb-12">
         <div>
           <h1 className="text-2xl md:text-3xl font-black text-blue-900 dark:text-blue-400 mb-2">Task Management</h1>
@@ -239,6 +233,7 @@ export default function TaskManagement() {
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
+
           <div className="relative flex items-center bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 shadow-sm min-w-[220px]">
             <Filter size={16} className="text-gray-400 mr-2 shrink-0" />
             <select
@@ -247,11 +242,14 @@ export default function TaskManagement() {
               className="bg-transparent text-sm font-bold text-gray-700 dark:text-slate-200 outline-none w-full cursor-pointer appearance-none pr-8"
             >
               <option value="all">All Active Sessions</option>
-              {dbSessions.map((session) => (
-                <option key={session.id || session._id} value={String(session.id || session._id)}>
-                  {session.title || `Session ${session.sessionNumber || session.id || session._id}`}
-                </option>
-              ))}
+              {dbSessions.map((session, index) => {
+                const sNumber = String(session.sessionNumber || index + 1);
+                return (
+                  <option key={session.id || session._id} value={sNumber}>
+                    Session {sNumber}
+                  </option>
+                );
+              })}
             </select>
             <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400">
               <ChevronDown size={16} strokeWidth={2.5} />
@@ -276,7 +274,6 @@ export default function TaskManagement() {
         </div>
       </div>
 
-      {/* Tasks List */}
       {loading ? (
         <div className="flex justify-center items-center py-20 text-blue-900 dark:text-blue-400 font-bold text-sm animate-pulse">
           Syncing dashboard with backend database...
@@ -300,7 +297,7 @@ export default function TaskManagement() {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2 mb-1.5">
                       <span className="text-[9px] md:text-[10px] font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded uppercase tracking-tight">
-                        {task.sessionLabel || `Session ${task.sessionNumber}`}
+                        Session {task.sessionNumber}
                       </span>
                       <span className="text-[9px] md:text-[10px] font-black text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/50 px-2 py-0.5 rounded uppercase italic">Deadline: {task.deadline}</span>
                     </div>
@@ -347,7 +344,6 @@ export default function TaskManagement() {
         </div>
       )}
 
-      {/* 🌟 3. تعديل صيغة الـ sessionNumber الافتراضية هنا لتطابق مصفوفة الخيارات */}
       <PopupForm
         open={isFormOpen}
         onClose={() => setIsFormOpen(false)}
@@ -356,9 +352,7 @@ export default function TaskManagement() {
         fields={taskFields}
         defaultValues={{ 
           title: "", 
-          sessionNumber: dbSessions.length > 0 
-            ? `Session ${dbSessions[0].sessionNumber || 1} - ${dbSessions[0].title || "Untitled"}` 
-            : "", 
+          sessionNumber: "", 
           deadline: "", 
           description: "", 
           taskFile: null 

@@ -16,7 +16,6 @@ import {
 import { getSessionsByRoadmap } from "@/features/roadmap/roadmap";
 
 const meetingSchema = z.object({
-  meetingName: z.string().min(3, "Meeting name is too short"),
   sessionId: z.string().min(1, "Please select a session"),
   date: z.string().min(1, "Date is required"),
   time: z.string().min(1, "Time is required"),
@@ -43,7 +42,8 @@ export default function Schedule() {
         const res = await getSessionsByRoadmap(currentRoadmapId);
         setSessions(Array.isArray(res) ? res : res?.data || []);
       } catch (error) {
-        const message = error?.response?.data?.message || "Failed to load sessions.";
+        const message =
+          error?.response?.data?.message || "Failed to load sessions.";
         toast.error(message);
       } finally {
         setLoadingSessions(false);
@@ -59,7 +59,8 @@ export default function Schedule() {
         const res = await getMyMeetings();
         setMeetings(Array.isArray(res) ? res : res?.data || []);
       } catch (error) {
-        const message = error?.response?.data?.message || "Failed to load meetings.";
+        const message =
+          error?.response?.data?.message || "Failed to load meetings.";
         toast.error(message);
       } finally {
         setLoadingMeetings(false);
@@ -67,18 +68,26 @@ export default function Schedule() {
     };
     fetchMyMeetings();
   }, []);
-const handleSchedule = async (data) => {
+
+  const handleSchedule = async (data) => {
     try {
       setCreatingMeeting(true);
 
-      const selectedSession = sessions.find((s) => s.title === data.sessionId);
+      const selectedSession = sessions.find((s) => {
+        const sessionLabel = s.sessionNumber 
+          ? `Session ${s.sessionNumber}${s.title ? `: ${s.title}` : ""}`
+          : s.title || `Session ${s.id}`;
+        return sessionLabel === data.sessionId;
+      });
+
       const sessionId = selectedSession ? selectedSession.id : data.sessionId;
 
-      // دمج الـ date والـ time في ISO 8601
-      const scheduledAt = new Date(`${data.date}T${data.time}:00`).toISOString();
+      const scheduledAt = new Date(
+        `${data.date}T${data.time}:00`,
+      ).toISOString();
 
       const meetingData = {
-        title: data.meetingName,
+        title: selectedSession ? selectedSession.title : "New Meeting",
         scheduledAt,
         meetingType: data.meetingType,
       };
@@ -90,27 +99,29 @@ const handleSchedule = async (data) => {
       setMeetings(Array.isArray(res) ? res : res?.data || []);
       setShowForm(false);
     } catch (error) {
-      const message = error?.response?.data?.message || "Failed to create meeting.";
+      const message =
+        error?.response?.data?.message || "Failed to create meeting.";
       toast.error(message);
     } finally {
       setCreatingMeeting(false);
     }
   };
-  const sessionOptions = sessions.map((s) => ({
-    label: s.title || `Session ${s.id}`,
-    value: String(s.id),
-  }));
+
+  const sessionOptions = sessions.map((s) => {
+    const label = s.sessionNumber 
+      ? `Session ${s.sessionNumber}${s.title ? `: ${s.title}` : ""}`
+      : s.title || `Session ${s.id}`;
+      
+    return {
+      label: label,
+      value: String(s.id),
+    };
+  });
 
   const schedulingFields = [
     {
-      name: "meetingName",
-      label: "MEETING NAME",
-      placeholder: "e.g. Frontend Architecture",
-      className: "col-span-2",
-    },
-    {
       name: "sessionId",
-      label: "CURRICULUM SESSION",
+      label: "SESSION NUMBER",
       type: "select",
       options: loadingSessions
         ? ["Loading sessions..."]
@@ -130,13 +141,13 @@ const handleSchedule = async (data) => {
 
   const formDefaultValues = useMemo(
     () => ({ date: date ? date.toISOString().split("T")[0] : "" }),
-    [date]
+    [date],
   );
 
   const modifiers = {
     booked: (day) =>
       meetings.some(
-        (m) => new Date(m.scheduledAt).toDateString() === day.toDateString()
+        (m) => new Date(m.scheduledAt).toDateString() === day.toDateString(),
       ),
   };
 
@@ -150,7 +161,7 @@ const handleSchedule = async (data) => {
   };
 
   const todayMeetings = meetings.filter(
-    (m) => new Date(m.scheduledAt).toDateString() === date.toDateString()
+    (m) => new Date(m.scheduledAt).toDateString() === date.toDateString(),
   );
 
   return (
@@ -225,11 +236,13 @@ const handleSchedule = async (data) => {
                             minute: "2-digit",
                           })}
                           {m.meetingType && (
-                            <span className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md tracking-wider ${
-                              m.meetingType === "online"
-                                ? "bg-blue-50 dark:bg-blue-950/40 text-blue-500 dark:text-blue-400"
-                                : "bg-orange-50 dark:bg-orange-950/40 text-orange-500 dark:text-orange-400"
-                            }`}>
+                            <span
+                              className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md tracking-wider ${
+                                m.meetingType === "online"
+                                  ? "bg-blue-50 dark:bg-blue-950/40 text-blue-500 dark:text-blue-400"
+                                  : "bg-orange-50 dark:bg-orange-950/40 text-orange-500 dark:text-orange-400"
+                              }`}
+                            >
                               {m.meetingType}
                             </span>
                           )}
@@ -238,7 +251,7 @@ const handleSchedule = async (data) => {
                     </div>
 
                     <Link
-                      to={`/director/attendance/${m.roadmapId || "1"}`}
+                      to={`/director/attendance/${m.id}`}
                       className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors bg-blue-50/50 dark:bg-blue-950/30 px-2.5 py-1.5 rounded-md shrink-0 ml-2"
                     >
                       <Eye size={14} />
