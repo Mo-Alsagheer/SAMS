@@ -20,35 +20,33 @@ import {
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import StatCard from "@/components/shared/StatCard";
-
-import { committee, sessions } from "@/data/mock-data";
+import { getMemberDashBordData } from "@/features/member/member";
 
 /* =========================
-   DERIVED DATA
+   STATUS BADGE
 ========================= */
 
-const tasks = sessions.flatMap((s) => s.tasks || []);
+function TaskStatusBadge({ status }) {
+  const styles = {
+    pending: "bg-warning/15 text-warning-foreground border border-warning/30",
+    submitted: "bg-info/15 text-info border border-info/30",
+    graded: "bg-success/15 text-success border border-success/30",
+  };
 
-const stats = {
-  completedSessions: sessions.filter((s) => s.status === "completed").length,
-
-  pendingTasks: tasks.filter((t) => t.status === "pending").length,
-
-  attendanceRate: Math.round(
-    (sessions.filter((s) => s.attended).length / sessions.length) * 100,
-  ),
-};
-
-const upcomingSession =
-  sessions.find((s) => s.status === "live") ||
-  sessions.find((s) => s.status === "upcoming");
-
-const latest = tasks.slice(0, 3);
-
-const isLive = upcomingSession?.status === "live";
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
+        styles[status?.toLowerCase()] || styles.pending
+      )}
+    >
+      {status}
+    </span>
+  );
+}
 
 /* =========================
-   HOOK
+   COUNTDOWN HOOK
 ========================= */
 
 function useCountdown(target) {
@@ -72,36 +70,46 @@ function useCountdown(target) {
 }
 
 /* =========================
-   BADGES
-========================= */
-
-function TaskStatusBadge({ status }) {
-  const styles = {
-    pending: "bg-warning/15 text-warning-foreground border border-warning/30",
-
-    submitted: "bg-info/15 text-info border border-info/30",
-
-    graded: "bg-success/15 text-success border border-success/30",
-  };
-
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
-        styles[status],
-      )}
-    >
-      {status}
-    </span>
-  );
-}
-
-/* =========================
    DASHBOARD
 ========================= */
 
 export default function Dashboard() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDashboard = async () => {
+    try {
+      setLoading(true);
+      const res = await getMemberDashBordData();
+      setData(res);
+    } catch (err) {
+      console.error("Dashboard error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  const upcomingSession = data?.nextSession;
+  const isLive = upcomingSession?.status === "Live now";
   const countdown = useCountdown(upcomingSession?.date);
+
+  const latestTasks = data?.latestTasks ?? [];
+
+  /* =========================
+     LOADING STATE
+  ========================= */
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-4">
+        <p className="text-muted-foreground">Loading dashboard...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -112,44 +120,43 @@ export default function Dashboard() {
           Here's what's happening with your learning journey today.
         </p>
       </div>
-      {/* Committee Overview */}
+
+      {/* Committee */}
       <Card className="mb-8 border-border/60">
-        <CardContent className="flex flex-col gap-6  lg:flex-row lg:items-center lg:justify-between">
-          {/* LEFT */}
+        <CardContent className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
             <div className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
               Committee
             </div>
 
             <div>
-              <h2 className="text-2xl font-bold">{committee.name}</h2>
+              <h2 className="text-2xl font-bold">
+                {data?.committee?.name}
+              </h2>
 
               <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-                {committee.description}
+                {data?.committee?.description}
               </p>
             </div>
           </div>
         </CardContent>
 
-        {/* FOOTER */}
         <CardFooter className="flex flex-col gap-4 border-t border-border/50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-          {/* Director */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <User className="h-4 w-4 text-primary" />
             <span>
               <span className="font-medium text-foreground">
-                {committee.director}
+                {data?.committee?.director}
               </span>{" "}
               • Director
             </span>
           </div>
 
-          {/* Sessions */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Layers className="h-4 w-4 text-primary" />
             <span>
               <span className="font-medium text-foreground">
-                {committee.totalSessions}
+                {data?.committee?.totalSessions}
               </span>{" "}
               Sessions
             </span>
@@ -161,21 +168,21 @@ export default function Dashboard() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <StatCard
           title="Completed Sessions"
-          value={stats.completedSessions}
+          value={data?.stats?.completedSessions ?? 0}
           icon={CheckCircle2}
           color="success"
         />
 
         <StatCard
           title="Pending Tasks"
-          value={stats.pendingTasks}
+          value={data?.stats?.pendingTasks ?? 0}
           icon={Clock}
           color="warning"
         />
 
         <StatCard
           title="Attendance Rate"
-          value={`${stats.attendanceRate}%`}
+          value={`${data?.stats?.attendanceRate ?? 0}%`}
           icon={TrendingUp}
           color="primary"
         />
@@ -221,7 +228,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Tasks */}
+        {/* Latest Tasks */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Latest Tasks</CardTitle>
@@ -235,19 +242,21 @@ export default function Dashboard() {
           </CardHeader>
 
           <CardContent className="space-y-3">
-            {latest.map((t) => (
+            {latestTasks.map((t) => (
               <div
                 key={t.id}
                 className="rounded-lg border border-border/60 p-3 hover:bg-accent/40"
               >
-                <p className="line-clamp-1 text-sm font-medium">{t.title}</p>
+                <p className="line-clamp-1 text-sm font-medium">
+                  {t.title}
+                </p>
 
                 <div className="mt-2 flex items-center justify-between">
                   <TaskStatusBadge status={t.status} />
 
-                  {t.score !== undefined && (
+                  {t.score && (
                     <span className="text-xs font-semibold text-success">
-                      {t.score}/{t.maxScore}
+                      {t.score}
                     </span>
                   )}
                 </div>
