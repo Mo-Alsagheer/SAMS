@@ -112,7 +112,13 @@ export class DirectorService {
       throw new NotFoundException('Application not found');
     }
     application.status = ApplicationStatus.PHASE1_ACCEPTED;
-    return this.applicationRepository.save(application);
+    const saved = await this.applicationRepository.save(application);
+    await this.emailService.sendApplicationStatusEmail({
+      to: application.email,
+      name: application.name,
+      status: ApplicationStatus.PHASE1_ACCEPTED,
+    });
+    return saved;
   }
 
   async rejectPhase1(applicationId: number) {
@@ -123,7 +129,13 @@ export class DirectorService {
       throw new NotFoundException('Application not found');
     }
     application.status = ApplicationStatus.PHASE1_REJECTED;
-    return this.applicationRepository.save(application);
+    const saved = await this.applicationRepository.save(application);
+    await this.emailService.sendApplicationStatusEmail({
+      to: application.email,
+      name: application.name,
+      status: ApplicationStatus.PHASE1_REJECTED,
+    });
+    return saved;
   }
 
   async scheduleInterview(applicationId: number, payload: any) {
@@ -135,6 +147,17 @@ export class DirectorService {
     }
     application.status = ApplicationStatus.INTERVIEW_SCHEDULED;
     await this.applicationRepository.save(application);
+
+    const formattedDate = payload.date ? new Date(payload.date).toLocaleString() : 'N/A';
+    const additionalInfo = `<strong>Date/Time:</strong> ${formattedDate}<br/><strong>Meeting Link:</strong> <a href="${payload.link || '#'}">${payload.link || 'TBD'}</a>`;
+
+    await this.emailService.sendApplicationStatusEmail({
+      to: application.email,
+      name: application.name,
+      status: ApplicationStatus.INTERVIEW_SCHEDULED,
+      additionalInfo,
+    });
+
     return { ...application, ...payload };
   }
 
@@ -200,6 +223,13 @@ export class DirectorService {
 
     const loginUrl =
       this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:5173';
+    
+    await this.emailService.sendApplicationStatusEmail({
+      to: application.email,
+      name: application.name,
+      status: ApplicationStatus.PHASE2_ACCEPTED,
+    });
+
     await this.emailService.sendWelcomeEmail({
       to: application.email,
       name: application.name,
@@ -219,7 +249,13 @@ export class DirectorService {
       throw new NotFoundException('Application not found');
     }
     application.status = ApplicationStatus.PHASE2_REJECTED;
-    return this.applicationRepository.save(application);
+    const saved = await this.applicationRepository.save(application);
+    await this.emailService.sendApplicationStatusEmail({
+      to: application.email,
+      name: application.name,
+      status: ApplicationStatus.PHASE2_REJECTED,
+    });
+    return saved;
   }
 
   private generatePassword(length = 12): string {
