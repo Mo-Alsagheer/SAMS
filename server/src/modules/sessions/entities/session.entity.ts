@@ -20,8 +20,11 @@ export class Session {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
-  @Column({ type: 'timestamp' })
-  scheduledAt: Date;
+  @Column({ type: 'timestamp', nullable: true })
+  scheduledAt: Date | null;
+
+  @Column({ type: 'int', nullable: true })
+  sessionNumber: number | null;
 
   @Column({ type: 'text', nullable: true })
   plugnmeetRoomId: string | null;
