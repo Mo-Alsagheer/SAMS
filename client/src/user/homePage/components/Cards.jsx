@@ -6,6 +6,8 @@ import { Card, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { getCommittees } from "@/features/committee/committee";
 import { getCommitteeRecruitmentStatus } from "@/features/recruitment/recruitment";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 
 function Cards() {
   const [data, setData] = useState([]);
@@ -17,14 +19,18 @@ function Cards() {
       try {
         setLoading(true);
         const result = await getCommittees();
-        const committeesArray = Array.isArray(result) ? result : (result.data || []);
+        const committeesArray = Array.isArray(result)
+          ? result
+          : result.data || [];
 
         const baseCommittees = committeesArray.slice(0, 3).map((item) => ({
           id: item._id || item.id,
           displayTitle: item.name,
-          description: item.description || "Join our community and explore new opportunities.",
+          description:
+            item.description ||
+            "Join our community and explore new opportunities.",
           image: item.imageUrl || "https://avatar.vercel.sh/shadcn1",
-          status: "closed", 
+          status: "closed",
         }));
 
         setData(baseCommittees);
@@ -32,20 +38,23 @@ function Cards() {
         baseCommittees.forEach(async (committee) => {
           try {
             const statusRes = await getCommitteeRecruitmentStatus(committee.id);
-            
-            const isActuallyOpen = 
-              statusRes?.status?.toUpperCase() === "OPEN" || 
+
+            const isActuallyOpen =
+              statusRes?.status?.toUpperCase() === "OPEN" ||
               statusRes?.isOpen === true;
 
             setData((prev) =>
               prev.map((item) =>
                 item.id === committee.id
                   ? { ...item, status: isActuallyOpen ? "open" : "closed" }
-                  : item
-              )
+                  : item,
+              ),
             );
           } catch (err) {
-            console.error(`Error fetching status for ${committee.displayTitle}:`, err);
+            console.error(
+              `Error fetching status for ${committee.displayTitle}:`,
+              err,
+            );
           }
         });
       } catch (err) {
@@ -71,12 +80,22 @@ function Cards() {
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 py-12 text-left" dir="ltr">
+      <div className="flex justify-end mb-6">
+        <Link to="/committees">
+          <Button variant="ghost" size="sm" className="gap-2">
+            All Committees
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </Link>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
         {data.map((item) => (
           <Card
             key={item.id}
             className={`relative w-full pt-0 overflow-hidden border-none bg-card transition-all duration-500 shadow-[0_0_25px_rgba(59,130,246,0.2)] ${
-              item.status === "open" ? "hover:-translate-y-3 hover:scale-[1.03]" : "opacity-95"
+              item.status === "open"
+                ? "hover:-translate-y-3 hover:scale-[1.03]"
+                : "opacity-95"
             }`}
           >
             <div className="relative aspect-video overflow-hidden">
@@ -85,7 +104,9 @@ function Cards() {
                 src={item.image}
                 alt={item.displayTitle}
                 className={`relative z-20 w-full h-full object-cover transition-all duration-500 ${
-                  item.status === "open" ? "grayscale-0 brightness-90" : "grayscale brightness-50"
+                  item.status === "open"
+                    ? "grayscale-0 brightness-90"
+                    : "grayscale brightness-50"
                 }`}
               />
             </div>
@@ -116,8 +137,8 @@ function Cards() {
                 disabled={item.status !== "open"}
                 onClick={() => navigate(`/committee/${item.id}`)}
                 className={`w-full p-5 text-white text-lg transition-all duration-200 shadow-md ${
-                  item.status === "open" 
-                    ? "bg-blue-800 hover:bg-blue-900 active:scale-95" 
+                  item.status === "open"
+                    ? "bg-blue-800 hover:bg-blue-900 active:scale-95"
                     : "bg-slate-500 cursor-not-allowed"
                 }`}
               >

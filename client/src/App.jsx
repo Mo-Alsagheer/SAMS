@@ -25,6 +25,7 @@ import CommitteeRecruitment from "./executive/pages/CommitteeRecruitment";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import CommitteeDetails from "./executive/pages/CommitteeDetails";
 import ApplicationDetails from "./director/pages/ApplicationDetails";
+import DirectorApplicationDetails from "./executive/pages/ApplicationDetails";
 import ManageRoadmap from "./director/pages/ManageRoadmap";
 import TaskManagement from "./director/pages/TaskManagement";
 import Members from "./director/pages/Members";
@@ -95,6 +96,7 @@ function App() {
               element={<CommitteeRecruitment />}
             />
             <Route path="applications" element={<DirectorApplications />} />
+            <Route path="applications/:id" element={<DirectorApplicationDetails />} />
             <Route path="committees" element={<Committees />} />
             <Route
               path="committees/:committeeId"

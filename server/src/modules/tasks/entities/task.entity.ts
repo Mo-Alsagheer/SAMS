@@ -33,8 +33,8 @@ export class Task {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
-  @Column({ type: 'timestamp' })
-  dueDate: Date;
+  @Column({ type: 'timestamp', nullable: true })
+  dueDate: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -1,4 +1,10 @@
 import api from "@/features/api";
+
+export async function getMemberDashBordData() {
+  const res = await api.get("/member-dashboard");
+  return res.data;
+}
+
 export async function getCommitteeMembers() {
   const res = await api.get("/users/committee-members");
   return res.data;

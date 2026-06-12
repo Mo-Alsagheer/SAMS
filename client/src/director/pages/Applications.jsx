@@ -40,7 +40,7 @@ const scheduleFields = [
     label: "Meeting Link",
   },
 ];
-
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 function Applications() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
@@ -59,92 +59,148 @@ function Applications() {
   const user = getCurrentUser();
   const committeeId = user?.committeeId || "";
 
-  const loadApplications = useCallback(async () => {
-    if (!committeeId) return;
+  const loadApplications = useCallback(
+    async (forceRefresh = false) => {
+      if (!committeeId) return;
 
-    setLoading(true);
+      const cacheKey = `applications_${committeeId}_${status}`;
 
-    try {
-      const data = await listMemberApplications({
-        committeeId,
-        status: status === "All" ? "" : status,
-      });
+      if (!forceRefresh) {
+        const cached = sessionStorage.getItem(cacheKey);
 
-      setApplications(data || []);
-    } catch {
-      toast.error("Failed to load applications");
-    } finally {
-      setLoading(false);
-    }
-  }, [committeeId, status]);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+
+          if (Date.now() - timestamp < CACHE_DURATION) {
+            setApplications(data || []);
+            return;
+          }
+        }
+      }
+
+      setLoading(true);
+
+      try {
+        const data = await listMemberApplications({
+          committeeId,
+          status: status === "All" ? "" : status,
+        });
+
+        setApplications(data || []);
+
+        sessionStorage.setItem(
+          cacheKey,
+          JSON.stringify({
+            data,
+            timestamp: Date.now(),
+          }),
+        );
+      } catch {
+        toast.error("Failed to load applications");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [committeeId, status],
+  );
 
   useEffect(() => {
     loadApplications();
   }, [loadApplications]);
 
-  const accept = useCallback(async (row) => {
-    setActionLoadingId(row.id);
+  const accept = useCallback(
+    async (row) => {
+      setActionLoadingId(row.id);
 
-    try {
-      if (row.status === "INTERVIEW_SCHEDULED") {
-        await acceptMemberPhase2(row.id);
-        toast.success("Final accepted");
-      } else {
-        await acceptMemberPhase1(row.id);
-        toast.success("Accepted");
+      try {
+        if (row.status === "INTERVIEW_SCHEDULED") {
+          await acceptMemberPhase2(row.id);
+          toast.success("Final accepted");
+        } else {
+          await acceptMemberPhase1(row.id);
+          toast.success("Accepted");
+        }
+
+        setApplications((prev) => {
+          const updated = prev.map((app) =>
+            app.id === row.id
+              ? {
+                  ...app,
+                  status:
+                    row.status === "INTERVIEW_SCHEDULED"
+                      ? "PHASE2_ACCEPTED"
+                      : "PHASE1_ACCEPTED",
+                }
+              : app,
+          );
+
+          const cacheKey = `applications_${committeeId}_${status}`;
+
+          sessionStorage.setItem(
+            cacheKey,
+            JSON.stringify({
+              data: updated,
+              timestamp: Date.now(),
+            }),
+          );
+
+          return updated;
+        });
+      } catch {
+        toast.error("Failed to accept");
+      } finally {
+        setActionLoadingId(null);
       }
+    },
+    [committeeId, status],
+  );
 
-      setApplications((prev) =>
-        prev.map((app) =>
-          app.id === row.id
-            ? {
-                ...app,
-                status:
-                  row.status === "INTERVIEW_SCHEDULED"
-                    ? "PHASE2_ACCEPTED"
-                    : "PHASE1_ACCEPTED",
-              }
-            : app,
-        ),
-      );
-    } catch {
-      toast.error("Failed to accept");
-    } finally {
-      setActionLoadingId(null);
-    }
-  }, []);
+  const reject = useCallback(
+    async (row) => {
+      setActionLoadingId(row.id);
 
-  const reject = useCallback(async (row) => {
-    setActionLoadingId(row.id);
+      try {
+        if (row.status === "INTERVIEW_SCHEDULED") {
+          await rejectMemberPhase2(row.id);
+          toast.success("Final rejected");
+        } else {
+          await rejectMemberPhase1(row.id);
+          toast.success("Rejected");
+        }
 
-    try {
-      if (row.status === "INTERVIEW_SCHEDULED") {
-        await rejectMemberPhase2(row.id);
-        toast.success("Final rejected");
-      } else {
-        await rejectMemberPhase1(row.id);
-        toast.success("Rejected");
+        setApplications((prev) => {
+          const updated = prev.map((app) =>
+            app.id === row.id
+              ? {
+                  ...app,
+                  status:
+                    row.status === "INTERVIEW_SCHEDULED"
+                      ? "PHASE2_REJECTED"
+                      : "PHASE1_REJECTED",
+                }
+              : app,
+          );
+
+          const cacheKey = `applications_${committeeId}_${status}`;
+
+          sessionStorage.setItem(
+            cacheKey,
+            JSON.stringify({
+              data: updated,
+              timestamp: Date.now(),
+            }),
+          );
+
+          return updated;
+        });
+      } catch {
+        toast.error("Failed to reject");
+      } finally {
+        setActionLoadingId(null);
       }
-
-      setApplications((prev) =>
-        prev.map((app) =>
-          app.id === row.id
-            ? {
-                ...app,
-                status:
-                  row.status === "INTERVIEW_SCHEDULED"
-                    ? "PHASE2_REJECTED"
-                    : "PHASE1_REJECTED",
-              }
-            : app,
-        ),
-      );
-    } catch {
-      toast.error("Failed to reject");
-    } finally {
-      setActionLoadingId(null);
-    }
-  }, []);
+    },
+    [committeeId, status],
+  );
 
   const openSchedule = (id) => {
     setSelectedAppId(id);
@@ -165,13 +221,33 @@ function Applications() {
       try {
         await scheduleMemberInterview(selectedAppId, {
           date: new Date(formData.date).toISOString(),
-
           link: formData.link,
         });
 
         toast.success("Interview scheduled");
 
-        await loadApplications();
+        setApplications((prev) => {
+          const updated = prev.map((app) =>
+            app.id === selectedAppId
+              ? {
+                  ...app,
+                  status: "INTERVIEW_SCHEDULED",
+                }
+              : app,
+          );
+
+          const cacheKey = `applications_${committeeId}_${status}`;
+
+          sessionStorage.setItem(
+            cacheKey,
+            JSON.stringify({
+              data: updated,
+              timestamp: Date.now(),
+            }),
+          );
+
+          return updated;
+        });
 
         closeSchedule();
       } catch {
@@ -180,7 +256,7 @@ function Applications() {
         setActionLoadingId(null);
       }
     },
-    [selectedAppId, loadApplications],
+    [selectedAppId, committeeId, status],
   );
 
   const filteredData = useMemo(() => {
@@ -274,7 +350,7 @@ function Applications() {
       },
       {
         header: "Cv Score",
-      
+        // accessor: "aiScore.overall",
         render: (row) => <span>{row.aiScore?.final_score ?? "-"}</span>,
       },
       {
@@ -283,7 +359,7 @@ function Applications() {
         render: (row) => (
           <Button
             size="sm"
-            className="bg-indigo-600"
+            className="bg-indigo-600 hover:bg-indigo-500"
             onClick={() => navigate(`/director/applications/${row.id}`)}
           >
             View
@@ -310,6 +386,9 @@ function Applications() {
           value={status}
           onChange={setStatus}
         />
+        <Button onClick={() => loadApplications(true)} className="mb-4">
+          Refresh
+        </Button>
       </div>
 
       <Table columns={columns} data={filteredData} loading={loading} />

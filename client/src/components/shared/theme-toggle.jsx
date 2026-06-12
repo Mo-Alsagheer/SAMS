@@ -80,7 +80,7 @@ export default function ThemeToggle() {
         />
       </div> */}
 
-      <div className="hidden md:flex items-center text-sm text-gray-700 dark:text-gray-200 gap-2">
+      <div className=" md:flex items-center text-sm text-gray-700 dark:text-gray-200 gap-2">
         {isDark ? (
           <>
             <MoonIcon className="w-4 h-4" />
