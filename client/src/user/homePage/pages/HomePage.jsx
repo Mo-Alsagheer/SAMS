@@ -5,12 +5,14 @@ import Cards from "../components/Cards";
 import StatsSection from "../components/StatsSection";
 import AboutUs from "../components/AboutUs";
 import LastSection from "../components/LastSection";
+import ExecutiveSection from "../components/ExecutiveSection";
 function HomePage() {
   return (
     <div>
       <Navbar />
       <HeroSection />
       <AboutUs />
+      <ExecutiveSection/>
       <StatsSection />
       <Cards />
       <LastSection />

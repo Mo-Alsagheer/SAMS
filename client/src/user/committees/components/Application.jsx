@@ -1,32 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
+
+import { PopupForm } from "@/components/shared/PopupForm"; 
+
 import { getCommittees } from "@/features/committee/committee";
 import { submitApplication } from "@/features/applications/applications";
-import { toast } from "sonner";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { User, Mail, Phone, Linkedin, Link2, CheckCircle2 } from "lucide-react";
 
 const formSchema = z.object({
   committeeName: z.string().min(1, "Please select a committee"),
@@ -35,28 +19,22 @@ const formSchema = z.object({
   phone: z.string().regex(/^01[0125]\d{8}$/, "Invalid Egyptian phone number"),
   linkedinLink: z.string().url("Please enter a valid LinkedIn URL"),
   cvLink: z.string().url("Please enter a valid CV link"),
-  targetRole: z.string(),
 });
 
 const Application = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [committees, setCommittees] = useState([]);
   const [selectedCommitteeData, setSelectedCommitteeData] = useState(null);
 
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      committeeName: "",
-      fullName: "",
-      email: "",
-      phone: "",
-      linkedinLink: "",
-      cvLink: "",
-      targetRole: "MEMBER",
-    },
+  const [defaultValues, setDefaultValues] = useState({
+    committeeName: "",
+    fullName: "",
+    email: "",
+    phone: "",
+    linkedinLink: "",
+    cvLink: "",
   });
 
   useEffect(() => {
@@ -70,8 +48,11 @@ const Application = () => {
             (com) => String(com._id || com.id) === String(id)
           );
           if (selected) {
-            form.setValue("committeeName", selected.name);
             setSelectedCommitteeData(selected);
+            setDefaultValues((prev) => ({
+              ...prev,
+              committeeName: selected.name,
+            }));
           }
         }
       } catch (error) {
@@ -80,20 +61,66 @@ const Application = () => {
       }
     };
     loadData();
-  }, [id, form]);
+  }, [id]);
+
+  const fields = [
+    {
+      name: "committeeName",
+      label: "Committee",
+      type: "select",
+      options: [
+        { value: "", label: "Select Committee" },
+        ...committees.map((com) => ({
+          value: com.name,
+          label: com.name,
+        })),
+      ],
+    },
+    {
+      name: "fullName",
+      label: "Full Name",
+      type: "text",
+      placeholder: "Enter your name",
+    },
+    {
+      name: "email",
+      label: "Email",
+      type: "email",
+      placeholder: "email@example.com",
+    },
+    {
+      name: "phone",
+      label: "Phone",
+      type: "text",
+      placeholder: "01xxxxxxxxx",
+    },
+    {
+      name: "linkedinLink",
+      label: "LinkedIn Profile",
+      type: "text",
+      placeholder: "https://linkedin.com/...",
+    },
+    {
+      name: "cvLink",
+      label: "CV Link",
+      type: "text",
+      placeholder: "Drive or Dropbox link",
+    },
+  ];
 
   const onSubmit = async (values) => {
-    setLoading(true);
     try {
+      const finalCommittee =
+        selectedCommitteeData ||
+        committees.find((c) => c.name === values.committeeName);
+
       const apiData = {
-        committeeId:
-          selectedCommitteeData?._id || selectedCommitteeData?.id || id,
+        processId: finalCommittee?._id || finalCommittee?.id || id || "1",
         name: values.fullName,
         email: values.email,
         phone: values.phone,
         linkedinLink: values.linkedinLink,
         cvLink: values.cvLink,
-        targetRole: values.targetRole,
       };
 
       await submitApplication(apiData);
@@ -109,13 +136,11 @@ const Application = () => {
       toast.error(
         Array.isArray(errorMessage) ? errorMessage.join(", ") : errorMessage
       );
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 font-sans">
       <Navbar />
       <main className="flex-grow flex justify-center items-center p-4 pt-24 pb-10">
         {isSubmitted ? (
@@ -141,222 +166,30 @@ const Application = () => {
             </CardContent>
           </Card>
         ) : (
-          <Card className="w-full max-w-md border-none shadow-2xl rounded-3xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-800 overflow-hidden">
-            <CardHeader className="pt-6 pb-2 text-center">
-              <CardTitle className="text-2xl font-black text-white">
-                Apply to <span className="text-blue-300">SAMS</span>
-              </CardTitle>
-              <p className="text-sm text-blue-100/80 font-medium mt-1">
-                Join our community today
-              </p>
-            </CardHeader>
-            <CardContent className="px-6 pb-6">
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-3"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <FormField
-                      control={form.control}
-                      name="committeeName"
-                      render={({ field }) => (
-                        <FormItem className="space-y-1">
-                          <FormLabel className="text-sm font-bold text-blue-50 ml-1">
-                            Committee
-                          </FormLabel>
-                          <Select
-                            onValueChange={(val) => {
-                              field.onChange(val);
-                              const selected = committees.find(
-                                (c) => c.name === val
-                              );
-                              setSelectedCommitteeData(selected);
-                            }}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full h-10 bg-white border-none rounded-xl text-blue-900">
-                                <SelectValue placeholder="Select" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="bg-white border-blue-100 rounded-xl">
-                              {committees.map((com) => (
-                                <SelectItem
-                                  key={String(com._id || com.id)}
-                                  value={com.name}
-                                >
-                                  {com.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage className="text-red-300 text-[10px]" />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="targetRole"
-                      render={({ field }) => (
-                        <FormItem className="space-y-1">
-                          <FormLabel className="text-sm font-bold text-blue-50 ml-1">
-                            Target Role
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              readOnly
-                             className="w-full h-10 bg-white/20 border border-white/30 rounded-xl text-white font-bold cursor-not-allowed placeholder:text-white/50" />
-                          </FormControl>
-                          <FormMessage className="text-red-300 text-[10px]" />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="fullName"
-                    render={({ field }) => (
-                      <FormItem className="space-y-1">
-                        <FormLabel className="text-sm font-semibold text-blue-50 ml-1">
-                          Full Name
-                        </FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <User
-                              className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500"
-                              size={14}
-                            />
-                            <Input
-                              placeholder="Enter your name"
-                              {...field}
-                              className="pl-9 h-10 bg-white border-none rounded-xl text-sm text-blue-900"
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage className="text-red-300 text-[10px]" />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem className="space-y-1">
-                          <FormLabel className="text-sm font-semibold text-blue-50 ml-1">
-                            Email
-                          </FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Mail
-                                className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500"
-                                size={14}
-                              />
-                              <Input
-                                placeholder="mail@example.com"
-                                {...field}
-                                className="pl-9 h-10 bg-white border-none rounded-xl text-sm text-blue-900"
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage className="text-red-300 text-[10px]" />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem className="space-y-1">
-                          <FormLabel className="text-sm font-semibold text-blue-50 ml-1">
-                            Phone
-                          </FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Phone
-                                className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500"
-                                size={14}
-                              />
-                              <Input
-                                placeholder="01xxxxxxxxx"
-                                {...field}
-                                className="pl-9 h-10 bg-white border-none rounded-xl text-sm text-blue-900"
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage className="text-red-300 text-[10px]" />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="linkedinLink"
-                    render={({ field }) => (
-                      <FormItem className="space-y-1">
-                        <FormLabel className="text-sm font-semibold text-blue-50 ml-1">
-                          LinkedIn Profile
-                        </FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Linkedin
-                              className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500"
-                              size={14}
-                            />
-                            <Input
-                              placeholder="https://linkedin.com/..."
-                              {...field}
-                              className="pl-9 h-10 bg-white border-none rounded-xl text-sm text-blue-900"
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage className="text-red-300 text-[10px]" />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="cvLink"
-                    render={({ field }) => (
-                      <FormItem className="space-y-1">
-                        <FormLabel className="text-sm font-semibold text-blue-50 ml-1">
-                          CV Link
-                        </FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Link2
-                              className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500"
-                              size={14}
-                            />
-                            <Input
-                              placeholder="Drive or Dropbox link"
-                              {...field}
-                              className="pl-9 h-10 bg-white border-none rounded-xl text-sm text-blue-900"
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage className="text-red-300 text-[10px]" />
-                      </FormItem>
-                    )}
-                  />
-
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full h-11 mt-4 text-sm font-bold bg-white text-blue-700 hover:bg-blue-50 rounded-xl shadow-xl transition-all"
-                  >
-                    {loading ? "Sending..." : "Submit Application"}
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
+          <PopupForm
+            open={true}
+            onClose={() => navigate("/")} 
+            schema={formSchema}
+            defaultValues={defaultValues}
+            fields={fields}
+            onSubmit={onSubmit}
+            title="Apply to IEEE Community"
+            submitLabel="Submit Application"
+            
+            className="max-w-2xl w-[94%] max-h-[90vh] flex flex-col overflow-hidden rounded-[24px] md:rounded-[32px]"
+            bgColor="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-[0_15px_50px_rgba(59,130,246,0.06)]"
+            titleColor="text-blue-900 dark:text-slate-100 font-black text-xl md:text-2xl pt-2 text-center tracking-tight"
+            labelColor="text-[11px] md:text-sm font-bold text-blue-900/70 dark:text-slate-300 mb-1 block ml-1"
+            
+            submitClassName="text-xs font-bold !h-9 !px-4 !rounded-lg transition-all duration-200 active:scale-95 !w-auto shadow-sm inline-flex items-center justify-center
+              [&:parent]:flex-row [&:parent]:justify-end [&:parent]:gap-2
+              [&[type='button']]:!w-auto [&[type='button']]:!inline-flex
+              [&[type='button']]:!bg-slate-100 [&[type='button']]:!text-slate-700 [&[type='button']]:hover:!bg-slate-200 [&[type='button']]:!border-none 
+              dark:[&[type='button']]:!bg-slate-800 dark:[&[type='button']]:!text-slate-300 dark:[&[type='button']]:hover:!bg-slate-700
+              [&[type='submit']]:!w-auto [&[type='submit']]:!inline-flex
+              [&[type='submit']]:bg-primary [&[type='submit']]:text-white [&[type='submit']]:hover:bg-blue-900 
+              dark:[&[type='submit']]:bg-blue-700 dark:[&[type='submit']]:hover:bg-blue-600"
+          />
         )}
       </main>
       <Footer />

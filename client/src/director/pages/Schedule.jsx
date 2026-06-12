@@ -73,7 +73,13 @@ export default function Schedule() {
     try {
       setCreatingMeeting(true);
 
-      const selectedSession = sessions.find((s) => s.title === data.sessionId);
+      const selectedSession = sessions.find((s) => {
+        const sessionLabel = s.sessionNumber 
+          ? `Session ${s.sessionNumber}${s.title ? `: ${s.title}` : ""}`
+          : s.title || `Session ${s.id}`;
+        return sessionLabel === data.sessionId;
+      });
+
       const sessionId = selectedSession ? selectedSession.id : data.sessionId;
 
       const scheduledAt = new Date(
@@ -101,15 +107,21 @@ export default function Schedule() {
     }
   };
 
-  const sessionOptions = sessions.map((s) => ({
-    label: s.title || `Session ${s.id}`,
-    value: String(s.id),
-  }));
+  const sessionOptions = sessions.map((s) => {
+    const label = s.sessionNumber 
+      ? `Session ${s.sessionNumber}${s.title ? `: ${s.title}` : ""}`
+      : s.title || `Session ${s.id}`;
+      
+    return {
+      label: label,
+      value: String(s.id),
+    };
+  });
 
   const schedulingFields = [
     {
       name: "sessionId",
-      label: "CURRICULUM SESSION",
+      label: "SESSION NUMBER",
       type: "select",
       options: loadingSessions
         ? ["Loading sessions..."]

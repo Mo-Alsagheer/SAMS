@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom"; // عشان لو الـ roadmapId في الـ URL
+import { useParams } from "react-router-dom"; 
 import { Cloud, Save, Clock, ChevronDown, ChevronUp, Folder, BookOpen, Layers, Loader2 } from "lucide-react";
 import Table from "../../components/shared/Table";
 import { Button } from "@/components/ui/button"; 
 import { toast } from "sonner";
 
-// استيراد كافة الدوال من الـ API 
 import { getSessionTasks, getTaskSubmissions, updateSubmissionScore } from "@/features/submission/submission";
 import { getSessionsByRoadmap } from "@/features/roadmap/roadmap";
 
 export default function TaskSubmission() {
-  const { roadmapId: urlRoadmapId } = useParams(); // 1. محاولة قراءة الـ ID من الـ URL direct
+  const { roadmapId: urlRoadmapId } = useParams();
   
   const [sessions, setSessions] = useState([]); 
   const [submissions, setSubmissions] = useState([]);
@@ -23,7 +22,6 @@ export default function TaskSubmission() {
   const [expandedSession, setExpandedSession] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
 
-  // 2. جلب السيشنز بناءً على الـ Roadmap ID ديناميكياً
   useEffect(() => {
     const fetchInitialSessions = async () => {
       const currentRoadmapId = urlRoadmapId || 1; 
@@ -43,7 +41,6 @@ export default function TaskSubmission() {
     fetchInitialSessions();
   }, [urlRoadmapId]);
 
-  // 3. جلب التاسكات فور فتح كارت السيشن
   const handleSessionToggle = async (sessionId) => {
     if (expandedSession === sessionId) {
       setExpandedSession(null);
@@ -69,7 +66,6 @@ export default function TaskSubmission() {
     }
   };
 
-  // 4. جلب تسليمات الطلاب عند تغيير الـ Task المختارة (تأكدي من تعديل الدالة في ملف الـ API لإضافة كلمة director)
   useEffect(() => {
     if (!selectedTask) return;
 
@@ -93,7 +89,6 @@ export default function TaskSubmission() {
     setSelectedTask(selectedTask === taskId ? null : taskId);
   };
 
-  // 5. حفظ الدرجة للباك إند (تمت العودة للتقييم من 0 لـ 10)
   const handleSaveGrade = async (submissionId) => {
     const score = grades[submissionId];
     
@@ -157,7 +152,7 @@ export default function TaskSubmission() {
       ),
     },
     {
-      header: "SCORE (0-10)", // تم التحديث إلى 10
+      header: "SCORE (0-10)", 
       render: (row) => {
         const currentScore = grades[row.id] !== undefined ? grades[row.id] : (row.score !== undefined ? row.score : row.grade);
         return (
@@ -199,7 +194,7 @@ export default function TaskSubmission() {
 
   return (
     <div className="p-4 md:p-8 min-h-screen font-sans">
-      {/* Page Header */}
+      
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-black text-blue-900 dark:text-blue-400 tracking-tight">Task Submissions</h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">
@@ -207,7 +202,6 @@ export default function TaskSubmission() {
         </p>
       </div>
 
-      {/* شاشة تحميل السيشنز */}
       {loadingSessions ? (
         <div className="flex justify-center items-center py-12 gap-2 text-sm font-bold text-slate-400">
           <Loader2 size={20} className="animate-spin text-blue-500" /> Loading Roadmap Sessions...
@@ -227,7 +221,6 @@ export default function TaskSubmission() {
                 key={session.id} 
                 className="bg-white dark:bg-slate-900 rounded-[1.5rem] border border-slate-200 dark:border-slate-800 shadow-[0_4px_20px_rgba(59,130,246,0.03)] overflow-hidden transition-all duration-300"
               >
-                {/* Session Header Card */}
                 <div 
                   onClick={() => handleSessionToggle(session.id)}
                   className={`p-5 flex items-center justify-between cursor-pointer select-none transition-colors ${
@@ -246,7 +239,6 @@ export default function TaskSubmission() {
                   {isSessionOpen ? <ChevronUp className="text-slate-400" size={20} /> : <ChevronDown className="text-slate-400" size={20} />}
                 </div>
 
-                {/* Tasks Dropdown Menu */}
                 {isSessionOpen && (
                   <div className="p-4 bg-white dark:bg-slate-900/60 space-y-3 animate-in slide-in-from-top-2 duration-200">
                     {loadingTasks ? (
@@ -273,18 +265,12 @@ export default function TaskSubmission() {
                                 <Folder size={16} className={isTaskActive ? "text-blue-200" : "text-slate-400"} />
                                 <span className="text-xs font-bold truncate">{task.title}</span>
                               </div>
-                              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md tracking-wider shrink-0 ${
-                                isTaskActive ? "bg-white/20 text-white" : "bg-white dark:bg-slate-700 shadow-sm border border-slate-100 dark:border-slate-600 text-blue-600 dark:text-blue-400"
-                              }`}>
-                                ID: {task.id}
-                              </span>
                             </div>
                           );
                         })}
                       </div>
                     )}
 
-                    {/* الـ Table Section الخاص بالتاسك المختارة */}
                     {tasksList.some(t => t.id === selectedTask) && selectedTask && (
                       <div className="mt-6 border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm animate-in fade-in duration-300">
                         <div className="bg-slate-50/60 dark:bg-slate-800/20 px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">

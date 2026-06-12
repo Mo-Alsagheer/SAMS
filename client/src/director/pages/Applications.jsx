@@ -94,7 +94,6 @@ function Applications() {
         toast.success("Accepted");
       }
 
-      // ✅ update only status locally
       setApplications((prev) =>
         prev.map((app) =>
           app.id === row.id
@@ -127,7 +126,6 @@ function Applications() {
         toast.success("Rejected");
       }
 
-      // ✅ update only status locally
       setApplications((prev) =>
         prev.map((app) =>
           app.id === row.id
@@ -276,7 +274,7 @@ function Applications() {
       },
       {
         header: "Cv Score",
-        // accessor: "aiScore.overall",
+      
         render: (row) => <span>{row.aiScore?.final_score ?? "-"}</span>,
       },
       {
