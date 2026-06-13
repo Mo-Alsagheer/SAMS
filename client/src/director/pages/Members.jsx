@@ -9,7 +9,6 @@ import { getCommitteeMembers, updateMemberStatus, getCommitteeStatistics } from 
 export default function Members() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
-  
   const [stats, setStats] = useState(null);
 
   const fetchCommitteeData = async () => {
@@ -32,7 +31,7 @@ export default function Members() {
 
       const membersWithIds = extractedMembers.map((member, index) => ({
         ...member,
-        id: member.id || String(index + 1)
+        id: member.id || member._id || String(index + 1) // الـ id لضمان دعم الـ MongoDB _id برضه
       }));
       setMembers(membersWithIds);
 
@@ -171,10 +170,20 @@ export default function Members() {
     },
   ];
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950">
+        <div className="text-center font-bold text-blue-800 dark:text-blue-400 animate-pulse">
+          Loading Members Dashboard...
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 md:p-8 min-h-screen font-sans  dark:bg-slate-950 space-y-6">
+    <div className="p-4 md:p-8 min-h-screen font-sans bg-slate-50 dark:bg-slate-950 space-y-6">
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+        <h1 className="text-2xl md:text-3xl font-black text-blue-900 dark:text-slate-100 tracking-tight">
           Members Management
         </h1>
         <p className="text-slate-400 dark:text-slate-500 text-xs md:text-sm font-medium mt-1">
@@ -185,21 +194,21 @@ export default function Members() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
         <StatCard
           title="TOTAL MEMBERS"
-          value={loading ? "..." : (stats?.totalMembers || 0)}
+          value={stats?.totalMembers || 0}
           icon={Users}
           color="primary"
           className="!p-6 md:!p-7 flex flex-col justify-between gap-4 min-h-[140px]"
         />
         <StatCard
           title="ATTENDANCE RATE"
-          value={loading ? "..." : `${stats?.attendance?.averageAttendanceRate || 0}%`}
+          value={`${stats?.attendance?.averageAttendanceRate || 0}%`}
           icon={Calendar}
           color="success"
           className="!p-6 md:!p-7 flex flex-col justify-between gap-4 min-h-[140px]"
         />
         <StatCard
           title="TASKS SUBMISSION"
-          value={loading ? "..." : `${stats?.tasks?.submissionRate || 0}%`}
+          value={`${stats?.tasks?.submissionRate || 0}%`}
           icon={ListTodo}
           color="warning"
           className="!p-6 md:!p-7 flex flex-col justify-between gap-4 min-h-[140px]"
