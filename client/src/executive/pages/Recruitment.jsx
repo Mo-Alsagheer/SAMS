@@ -234,6 +234,17 @@ function Recruitment() {
     },
 
     {
+      header: "Opened At",
+      render: (row) =>
+        row.openedAt ? new Date(row.openedAt).toLocaleString() : "-",
+    },
+    {
+      header: "Closed At",
+      render: (row) =>
+        row.closedAt ? new Date(row.closedAt).toLocaleString() : "-",
+    },
+
+    {
       header: "Actions",
       render: (row) => (
         <div className="flex gap-2">
