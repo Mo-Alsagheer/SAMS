@@ -126,6 +126,15 @@ export class RecruitmentService {
     return this.recruitmentRepository.find();
   }
 
+  async findGlobalProcesses() {
+    this.audit
+      .log({ action: 'RecruitmentService.findGlobalProcesses' })
+      .catch(() => undefined);
+    return this.recruitmentRepository.find({
+      where: { committeeId: IsNull() },
+    });
+  }
+
   async getStatusByCommittee(committeeId: number, role?: Role) {
     const committee = await this.committeeRepository.findOne({
       where: { id: committeeId },

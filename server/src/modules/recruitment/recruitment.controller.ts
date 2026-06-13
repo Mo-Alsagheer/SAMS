@@ -112,6 +112,17 @@ export class RecruitmentController {
     return this.recruitmentService.findAll();
   }
 
+  @Get('global')
+  @Roles(Role.EXECUTIVE)
+  @ApiOperation({ summary: 'List all global recruitment processes (where committeeId is null)' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all global recruitment processes.',
+  })
+  findGlobal() {
+    return this.recruitmentService.findGlobalProcesses();
+  }
+
   @Get(':committeeId/status')
   @Public()
   @ApiOperation({ summary: 'Get recruitment status for a specific committee' })
