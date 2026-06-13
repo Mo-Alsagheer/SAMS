@@ -330,9 +330,27 @@ function Recruitment() {
         <div className="space-y-4">
           {executiveSection && (
             <div className="border rounded-lg p-4 ">
-              <h2 className="text-lg font-semibold mb-3">
-                {executiveSection.committeeName}
-              </h2>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-semibold">
+                  {executiveSection.committeeName}
+                </h2>
+                <Button
+                  size="sm"
+                  className="bg-success hover:bg-success/90 text-white px-3 py-2 rounded-md"
+                  onClick={() =>
+                    openRecruitmentForm(
+                      executiveSection.recruitments[0] || {
+                        committeeId: null,
+                        committeeName: "Executive",
+                        role: "EXECUTIVE",
+                      },
+                      "EXECUTIVE",
+                    )
+                  }
+                >
+                  New Recruitment
+                </Button>
+              </div>
               <Table
                 columns={columns}
                 data={executiveSection.recruitments}
