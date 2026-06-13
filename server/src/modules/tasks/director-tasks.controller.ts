@@ -59,12 +59,14 @@ export class DirectorTasksController {
   ) {
     let fileUrl = dto.fileUrl;
     if (file) {
-      fileUrl = await this.cloudinaryService.uploadFile(
-        file,
-        'Task_Materials',
-      );
+      fileUrl = await this.cloudinaryService.uploadFile(file, 'Task_Materials');
     }
-    return this.tasksService.createForSession(sessionId, dto, req.user.id, fileUrl);
+    return this.tasksService.createForSession(
+      sessionId,
+      dto,
+      req.user.id,
+      fileUrl,
+    );
   }
 
   @Delete('tasks/:taskId')

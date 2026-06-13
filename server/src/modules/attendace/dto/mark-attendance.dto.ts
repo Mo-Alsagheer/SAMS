@@ -1,6 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsEnum, IsInt, IsNotEmpty, Max, Min, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  Max,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 import { AttendanceStatus } from '../entities/attendace.entity';
 
 export class MemberAttendanceScoreDto {

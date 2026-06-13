@@ -114,7 +114,10 @@ export class RecruitmentController {
 
   @Get('global')
   @Public()
-  @ApiOperation({ summary: 'List all global recruitment processes (where committeeId is null)' })
+  @ApiOperation({
+    summary:
+      'List all global recruitment processes (where committeeId is null)',
+  })
   @ApiResponse({
     status: 200,
     description: 'List of all global recruitment processes.',

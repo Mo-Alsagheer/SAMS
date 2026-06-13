@@ -51,7 +51,10 @@ export class SessionsController {
   @Get('roadmap/:roadmapId')
   @ApiOperation({ summary: 'Get all sessions for a specific roadmap' })
   @ApiParam({ name: 'roadmapId', description: 'Numeric Roadmap ID' })
-  @ApiResponse({ status: 200, description: 'Return all sessions for the roadmap.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return all sessions for the roadmap.',
+  })
   findAll(@Param('roadmapId', ParseIntIdPipe) roadmapId: number) {
     return this.sessionsService.findAll(roadmapId);
   }
@@ -67,12 +70,13 @@ export class SessionsController {
   }
 
   @Get('member-experience')
-  @ApiOperation({ summary: 'Get the member dashboard experience data (full detail)' })
+  @ApiOperation({
+    summary: 'Get the member dashboard experience data (full detail)',
+  })
   @ApiResponse({ status: 200, description: 'Return member experience data.' })
   getMemberExperience(@Req() req: Request & { user: AuthUser }) {
     return this.sessionsService.getMemberExperience(req.user);
   }
-
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a session by ID' })

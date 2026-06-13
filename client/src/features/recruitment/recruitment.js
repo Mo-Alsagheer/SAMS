@@ -30,9 +30,13 @@ export async function getCommitteeRecruitmentStatus(committeeId, role = "") {
   return res.data;
 }
 
-export async function getGlobalRecruitment() {
+export async function getGlobalRecruitments() {
   const res = await api.get("/executive/recruitment/global");
   return res.data;
+}
+
+export async function getGlobalRecruitment() {
+  return getGlobalRecruitments();
 }
 
 export async function getRecruitmentById(id) {

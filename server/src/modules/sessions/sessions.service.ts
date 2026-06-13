@@ -10,7 +10,10 @@ import { Session } from './entities/session.entity';
 import { Material } from '../materials/entities/material.entity';
 import { Task } from '../tasks/entities/task.entity';
 import { TaskSubmission } from '../tasks/entities/task-submission.entity';
-import { Attendace, AttendanceStatus } from '../attendace/entities/attendace.entity';
+import {
+  Attendace,
+  AttendanceStatus,
+} from '../attendace/entities/attendace.entity';
 import { Committee } from '../committees/entities/committee.entity';
 import { User } from '../users/entities/user.entity';
 import { MeetingsService } from '../meetings/meetings.service';
@@ -52,7 +55,9 @@ export class SessionsService {
       throw new ForbiddenException('Only directors can schedule meetings');
     }
     if (user.committeeId == null) {
-      throw new BadRequestException('Director is not assigned to any committee');
+      throw new BadRequestException(
+        'Director is not assigned to any committee',
+      );
     }
 
     if (createSessionDto.roadmapId) {
@@ -61,7 +66,7 @@ export class SessionsService {
       );
       if (!roadmap || roadmap.committeeId !== user.committeeId) {
         throw new ForbiddenException(
-          'Roadmap does not belong to the director\'s committee',
+          "Roadmap does not belong to the director's committee",
         );
       }
     }
@@ -108,7 +113,11 @@ export class SessionsService {
     });
 
     this.audit
-      .log({ action: 'SessionsService.update', userId: String(user.id), body: { id, updateSessionDto } })
+      .log({
+        action: 'SessionsService.update',
+        userId: String(user.id),
+        body: { id, updateSessionDto },
+      })
       .catch(() => undefined);
 
     return this.sessionsRepository.save(session);
@@ -129,7 +138,11 @@ export class SessionsService {
     await this.sessionsRepository.remove(session);
 
     this.audit
-      .log({ action: 'SessionsService.remove', userId: String(user.id), body: { id } })
+      .log({
+        action: 'SessionsService.remove',
+        userId: String(user.id),
+        body: { id },
+      })
       .catch(() => undefined);
   }
 
@@ -147,7 +160,9 @@ export class SessionsService {
     // Executives are permitted to join any meeting room.
     if (user.role !== Role.EXECUTIVE) {
       if (!user.committeeId) {
-        throw new ForbiddenException('You must be assigned to a committee to join a session');
+        throw new ForbiddenException(
+          'You must be assigned to a committee to join a session',
+        );
       }
 
       let belongsToCommittee = false;
@@ -161,7 +176,9 @@ export class SessionsService {
       }
 
       if (!belongsToCommittee) {
-        throw new ForbiddenException('You can only join sessions belonging to your committee');
+        throw new ForbiddenException(
+          'You can only join sessions belonging to your committee',
+        );
       }
     }
 
@@ -237,7 +254,10 @@ export class SessionsService {
     }
 
     this.audit
-      .log({ action: 'SessionsService.createMeeting', body: { sessionId, dto, roomId } })
+      .log({
+        action: 'SessionsService.createMeeting',
+        body: { sessionId, dto, roomId },
+      })
       .catch(() => undefined);
 
     return {
@@ -264,7 +284,10 @@ export class SessionsService {
     await this.meetingsService.endMeeting(session.plugnmeetRoomId);
 
     this.audit
-      .log({ action: 'SessionsService.endMeeting', body: { sessionId, roomId: session.plugnmeetRoomId } })
+      .log({
+        action: 'SessionsService.endMeeting',
+        body: { sessionId, roomId: session.plugnmeetRoomId },
+      })
       .catch(() => undefined);
 
     return { message: 'Meeting room ended successfully' };
@@ -399,7 +422,9 @@ export class SessionsService {
       }
 
       const att = attendanceList.find((a) => a.sessionId === s.id);
-      const attended = att ? (att.attended !== null && att.attended !== AttendanceStatus.ABSENT) : false;
+      const attended = att
+        ? att.attended !== null && att.attended !== AttendanceStatus.ABSENT
+        : false;
 
       const sessMaterials = materials.filter((m) => m.sessionId === s.id);
       const resources = sessMaterials.map((m) => {
@@ -457,7 +482,8 @@ export class SessionsService {
       return sessionObj;
     });
 
-    const attendancePoints = mappedSessions.filter((s) => s.attended).length * 5;
+    const attendancePoints =
+      mappedSessions.filter((s) => s.attended).length * 5;
     const taskPoints = mappedSessions
       .flatMap((s) => s.tasks)
       .reduce((sum, t) => sum + (t.score ?? 0), 0);
@@ -495,28 +521,32 @@ export class SessionsService {
    * Computes the data required for the member dashboard UI.
    * This leverages the heavy calculation from `getMemberExperience` and distills
    * it into a simpler structure with top-level stats and the latest tasks.
-   * 
+   *
    * @param user The authenticated member object.
    * @returns Aggregated statistics, committee info, next session info, and recent tasks.
    */
   async getMemberDashboard(user: AuthUser) {
     const experience = await this.getMemberExperience(user);
-    
+
     const completedSessions = experience.score.sessionsAttended;
-    const allTasks = experience.sessions.flatMap(s => s.tasks);
-    
+    const allTasks = experience.sessions.flatMap((s) => s.tasks);
+
     // Calculate pending tasks (due in the future and not submitted)
     // In getMemberExperience, tasks without submissions are 'pending'
-    const pendingTasks = allTasks.filter(t => t.status === 'pending').length;
-    
+    const pendingTasks = allTasks.filter((t) => t.status === 'pending').length;
+
     let attendanceRate = 0;
     if (experience.score.totalSessions > 0) {
-      attendanceRate = Math.round((completedSessions / experience.score.totalSessions) * 100);
+      attendanceRate = Math.round(
+        (completedSessions / experience.score.totalSessions) * 100,
+      );
     }
-    
+
     // Find next active or upcoming session
-    const nextSession = experience.sessions.find(s => s.status === 'live' || s.status === 'upcoming');
-    
+    const nextSession = experience.sessions.find(
+      (s) => s.status === 'live' || s.status === 'upcoming',
+    );
+
     // Get latest tasks (e.g. recently due or upcoming, sorted by dueDate desc)
     const latestTasks = [...allTasks]
       .sort((a, b) => {
@@ -525,12 +555,12 @@ export class SessionsService {
         return timeB - timeA;
       })
       .slice(0, 3)
-      .map(t => {
+      .map((t) => {
         let displayStatus = 'Pending';
         if (t.status === 'graded') displayStatus = 'Graded';
         if (t.status === 'submitted') displayStatus = 'Submitted';
         if (t.status === 'missed') displayStatus = 'Missed';
-        
+
         return {
           id: t.id,
           title: t.title,
@@ -538,7 +568,7 @@ export class SessionsService {
           score: t.score !== undefined ? `${t.score}/${t.maxScore}` : undefined,
         };
       });
-      
+
     return {
       committee: experience.committee,
       stats: {
@@ -546,13 +576,15 @@ export class SessionsService {
         pendingTasks,
         attendanceRate,
       },
-      nextSession: nextSession ? {
-        id: nextSession.id,
-        title: nextSession.title,
-        date: nextSession.date,
-        status: nextSession.status === 'live' ? 'Live now' : 'Upcoming',
-        meetingActive: nextSession.meetingActive,
-      } : null,
+      nextSession: nextSession
+        ? {
+            id: nextSession.id,
+            title: nextSession.title,
+            date: nextSession.date,
+            status: nextSession.status === 'live' ? 'Live now' : 'Upcoming',
+            meetingActive: nextSession.meetingActive,
+          }
+        : null,
       latestTasks,
     };
   }
