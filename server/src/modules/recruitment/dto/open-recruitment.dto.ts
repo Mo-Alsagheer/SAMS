@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsNotEmpty, Min, IsOptional, IsDateString } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, Min, IsOptional, IsDateString, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Role } from '../../../common/constants/role.enum';
 
@@ -19,6 +19,11 @@ export class OpenRecruitmentDto {
   @IsEnum(Role)
   @IsNotEmpty()
   role: Role;
+
+  @ApiPropertyOptional({ example: 'Treasurer' })
+  @IsOptional()
+  @IsString()
+  title?: string;
 
   @ApiPropertyOptional({ example: '2026-06-13T00:00:00.000Z' })
   @IsOptional()

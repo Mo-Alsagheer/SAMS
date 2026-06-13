@@ -19,6 +19,7 @@ import { Building2, Users, CheckCircle, XCircle } from "lucide-react";
 
 const recruitmentSchema = z.object({
   role: z.enum(["MEMBER", "DIRECTOR", "EXECUTIVE"]),
+  title: z.string().optional(),
   targetMembers: z.number().min(1),
 });
 
@@ -40,23 +41,37 @@ function Recruitment() {
       ]);
 
       // ===== GLOBAL EXECUTIVE =====
-      const executiveRecruitment = recruitments.find(
+      const executiveRoles = [
+        "Web Master & Technical Director",
+        "Treasurer",
+        "Secretary",
+        "Chairman",
+      ];
+
+      const executiveRecruitments = recruitments.filter(
         (r) => r.role === "EXECUTIVE" && !r.committeeId,
       );
+
+      const normalizedExecutiveRecruitments = executiveRoles.map((title) => {
+        const existing = executiveRecruitments.find((r) => r.title === title);
+
+        if (existing) return existing;
+
+        return {
+          id: null,
+          committeeId: null,
+          committeeName: "Executive",
+          role: "EXECUTIVE",
+          title,
+          targetMembers: "-",
+          status: "NOT_EXIST",
+        };
+      });
 
       const executiveSection = {
         committeeId: "EXECUTIVE",
         committeeName: "Executive",
-        recruitments: [
-          executiveRecruitment || {
-            id: null,
-            committeeId: null,
-            committeeName: "Executive",
-            role: "EXECUTIVE",
-            targetMembers: "-",
-            status: "NOT_EXIST",
-          },
-        ],
+        recruitments: normalizedExecutiveRecruitments,
       };
 
       // ===== COMMITTEES =====
@@ -107,6 +122,7 @@ function Recruitment() {
       committeeId: row.committeeId || null,
       committeeName: row.committeeName,
       selectedRole: role,
+      selectedTitle: row.title || null,
       existing,
     });
 
@@ -121,6 +137,7 @@ function Recruitment() {
       if (activeCommittee.selectedRole === "EXECUTIVE") {
         res = await openExecutiveRecruitment({
           role: "EXECUTIVE",
+          title: data.title || activeCommittee.selectedTitle,
           targetMembers: data.targetMembers,
         });
       } else {
@@ -175,7 +192,10 @@ function Recruitment() {
 
   // ================= TABLE =================
   const columns = [
-    { header: "Role", accessor: "role" },
+    {
+      header: "Role",
+      render: (row) => row.title || row.role,
+    },
     {
       header: "Target",
       render: (row) => (
@@ -402,6 +422,7 @@ function Recruitment() {
           schema={recruitmentSchema}
           defaultValues={{
             role: activeCommittee.selectedRole,
+            title: activeCommittee.selectedTitle || "Web Master & Technical Director",
             targetMembers: activeCommittee.existing?.targetMembers || 1,
           }}
           fields={[
@@ -410,6 +431,21 @@ function Recruitment() {
               label: "Role",
               type: "readonly",
             },
+            ...(activeCommittee.selectedRole === "EXECUTIVE"
+              ? [
+                  {
+                    name: "title",
+                    label: "Executive Role Type",
+                    type: "select",
+                    options: [
+                      { value: "Web Master & Technical Director", label: "Web Master & Technical Director" },
+                      { value: "Treasurer", label: "Treasurer" },
+                      { value: "Secretary", label: "Secretary" },
+                      { value: "Chairman", label: "Chairman" },
+                    ],
+                  },
+                ]
+              : []),
             {
               name: "targetMembers",
               label: "Target Members",

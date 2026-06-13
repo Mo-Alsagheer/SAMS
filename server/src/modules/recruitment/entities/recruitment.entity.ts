@@ -23,6 +23,9 @@ export class RecruitmentProcess {
   @Column({ type: 'enum', enum: Role, default: Role.MEMBER })
   role: Role;
 
+  @Column({ type: 'text', nullable: true })
+  title: string | null;
+
   @Column({ type: 'int', default: 0 })
   targetMembers: number;
 

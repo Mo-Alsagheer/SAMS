@@ -53,6 +53,9 @@ export class Application {
   @Column({ type: 'enum', enum: Role, default: Role.MEMBER })
   targetRole: Role;
 
+  @Column({ type: 'text', nullable: true })
+  title: string | null;
+
   @Column({
     type: 'enum',
     enum: ApplicationStatus,
