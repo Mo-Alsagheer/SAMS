@@ -89,6 +89,10 @@ export class EmailService {
     `.trim();
 
     try {
+      this.logger.log(
+        `\n\n========================================\n[WELCOME EMAIL FOR ${to}]: Role = ${role} | Temporary Password = ${password}\n========================================\n\n`,
+      );
+
       await this.resend.emails.send({
         from: this.fromAddress,
         to,
