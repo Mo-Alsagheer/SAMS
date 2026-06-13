@@ -325,7 +325,7 @@ function Applications() {
 
         render: (row) => (
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gray-100 text-primary flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-gray-100 text-primary flex items-center justify-center dark:text-card">
               {getInitials(row.name || "")}
             </div>
 
@@ -359,7 +359,6 @@ function Applications() {
         render: (row) => (
           <Button
             size="sm"
-            className="bg-indigo-600 hover:bg-indigo-500"
             onClick={() => navigate(`/director/applications/${row.id}`)}
           >
             View
@@ -382,6 +381,7 @@ function Applications() {
         <SearchBar value={search} onChange={setSearch} />
 
         <FilterDropdown
+
           options={APPLICATION_STATUS}
           value={status}
           onChange={setStatus}

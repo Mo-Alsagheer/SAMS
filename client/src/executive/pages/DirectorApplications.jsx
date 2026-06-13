@@ -43,40 +43,44 @@ function DirectorApplications() {
       case "SUBMITTED":
       case "AI_REVIEWED":
         return (
-          <>
+          <div className="flex gap-2">
             {btn("Accept", () => hook.acceptPhase1(row.id), "bg-green-600")}
             {btn("Reject", () => hook.rejectPhase1(row.id), "bg-red-600")}
             {btn(
               "Details",
               () => navigate(`/executive/applications/${row.id}`),
-              "bg-slate-600",
+              "bg-slate-600 hover:bg-slate-500 dark:bg-primary",
             )}
-          </>
+          </div>
         );
 
       case "PHASE1_ACCEPTED":
         return (
-          <>
-            {btn("Schedule", () => hook.openSchedule(row.id), "bg-blue-600")}
+          <div className="flex gap-2">
+            {btn(
+              "Schedule",
+              () => hook.openSchedule(row.id),
+              "bg-blue-600 hover:bg-blue-500",
+            )}
             {btn(
               "Details",
               () => navigate(`/executive/applications/${row.id}`),
-              "bg-slate-600",
+              "bg-slate-600 hover:bg-slate-500 dark:bg-primary",
             )}
-          </>
+          </div>
         );
 
       case "INTERVIEW_SCHEDULED":
         return (
-          <>
+          <div className="flex gap-2">
             {btn("Accept", () => hook.acceptPhase2(row.id), "bg-green-600")}
             {btn("Reject", () => hook.rejectPhase2(row.id), "bg-red-600")}
             {btn(
               "Details",
               () => navigate(`/executive/applications/${row.id}`),
-              "bg-slate-600",
+              "bg-slate-600 hover:bg-slate-500 dark:bg-primary",
             )}
-          </>
+          </div>
         );
 
       default:
@@ -85,7 +89,7 @@ function DirectorApplications() {
             {btn(
               "Details",
               () => navigate(`/executive/applications/${row.id}`),
-              "bg-slate-600",
+              "bg-slate-600 hover:bg-slate-500 dark:bg-primary",
             )}
           </>
         );
@@ -158,7 +162,7 @@ function DirectorApplications() {
         <select
           value={hook.selectedCommittee}
           onChange={(e) => hook.selectCommittee(e.target.value)}
-          className="border bg-white rounded-lg px-3 py-2 mb-4"
+          className="border bg-white rounded-lg px-3 py-2 mb-4 dark:bg-card"
         >
           <option value="">Select Committee</option>
           {hook.committees.map((c) => (

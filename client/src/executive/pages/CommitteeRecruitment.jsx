@@ -19,6 +19,14 @@ function CommitteeRecruitment() {
   const [loading, setLoading] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [reopenTarget, setReopenTarget] = useState(null);
+
+  const toLocalDatetimeString = (dateObj) => {
+    if (!dateObj) return "";
+    const date = new Date(dateObj);
+    const tzoffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - tzoffset).toISOString().slice(0, 16);
+  };
 
   const fetchStatus = async (r) => {
     try {
@@ -56,7 +64,7 @@ function CommitteeRecruitment() {
       accessor: "status",
       render: (row) => (
         <span
-          className={`px-2 py-1 rounded text-sm ${row.status === "OPEN" ? "bg-green-100 text-green-600" : row.status === "CLOSED" ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-500"}`}
+          className={`px-2 py-1 rounded-full text-sm lowercase ${row.status === "OPEN" ? "bg-green-100 text-green-600" : row.status === "CLOSED" ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-500"}`}
         >
           {row.status}
         </span>
@@ -101,6 +109,15 @@ function CommitteeRecruitment() {
               disabled={actionLoadingId === row.id}
             >
               {actionLoadingId === row.id ? "Closing..." : "Close"}
+            </Button>
+          )}
+          {row.status === "CLOSED" && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setReopenTarget(row)}
+            >
+              Reopen
             </Button>
           )}
         </div>
@@ -156,7 +173,7 @@ function CommitteeRecruitment() {
             onClick={() => setFormOpen(true)}
             className="bg-success hover:bg-success/90 text-white px-3 py-2 rounded-md"
           >
-            Open Recruitment
+            New Recruitment
           </Button>
         </div>
       </div>
@@ -168,7 +185,7 @@ function CommitteeRecruitment() {
               setRole("MEMBER");
               fetchStatus("MEMBER");
             }}
-            className={`px-3 py-2 rounded-md text-sm font-medium ${role === "MEMBER" ? "bg-primary text-white" : "text-foreground"}`}
+            className={`px-3 py-2 rounded-md text-sm font-medium ${role === "MEMBER" ? "bg-primary text-white dark:text-black" : "text-foreground"}`}
           >
             Members
           </button>
@@ -177,7 +194,7 @@ function CommitteeRecruitment() {
               setRole("DIRECTOR");
               fetchStatus("DIRECTOR");
             }}
-            className={`px-3 py-2 rounded-md text-sm font-medium ${role === "DIRECTOR" ? "bg-primary text-white" : "text-foreground"}`}
+            className={`px-3 py-2 rounded-md text-sm font-medium ${role === "DIRECTOR" ? "bg-primary text-white dark:text-black " : "text-foreground"}`}
           >
             Directors
           </button>
@@ -215,6 +232,53 @@ function CommitteeRecruitment() {
             { name: "targetMembers", label: "Target Members", type: "number" },
           ]}
           onSubmit={handleOpenRecruitment}
+        />
+      )}
+
+      {reopenTarget && (
+        <PopupForm
+          open={!!reopenTarget}
+          onClose={() => setReopenTarget(null)}
+          title={`Reopen Recruitment - ${reopenTarget.role}`}
+          schema={z.object({
+            role: z.string(),
+            targetMembers: z.number().min(1),
+            openedAt: z.string().nonempty("Opening date is required"),
+            closedAt: z.string().nonempty("Closing date is required"),
+          })}
+          defaultValues={{
+            role: reopenTarget.role,
+            targetMembers: reopenTarget.targetMembers || 1,
+            openedAt: toLocalDatetimeString(new Date()),
+            closedAt: toLocalDatetimeString(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)),
+          }}
+          fields={[
+            { name: "role", label: "Role", type: "readonly" },
+            { name: "targetMembers", label: "Target Members", type: "number" },
+            { name: "openedAt", label: "Opening Date", type: "datetime-local" },
+            { name: "closedAt", label: "Closing Date", type: "datetime-local" },
+          ]}
+          onSubmit={async (data) => {
+            try {
+              setLoading(true);
+              const payload = {
+                role: data.role,
+                targetMembers: Number(data.targetMembers),
+                openedAt: new Date(data.openedAt).toISOString(),
+                closedAt: new Date(data.closedAt).toISOString(),
+              };
+              await openCommitteeRecruitment(committeeId, payload);
+              toast.success("Recruitment reopened successfully");
+              setReopenTarget(null);
+              fetchStatus(role);
+            } catch (err) {
+              toast.error(
+                err?.response?.data?.message || "Failed to reopen recruitment"
+              );
+            } finally {
+              setLoading(false);
+            }
+          }}
         />
       )}
     </div>

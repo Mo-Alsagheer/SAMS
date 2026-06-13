@@ -52,20 +52,17 @@ export class RecruitmentService {
     });
 
     if (process) {
-      if (process.status === RecruitmentStatus.OPEN) {
-        throw new BadRequestException(
-          'Recruitment process is already OPEN for this committee and role',
-        );
-      }
       process.status = RecruitmentStatus.OPEN;
-      process.openedAt = new Date();
+      process.openedAt = dto.openedAt ? new Date(dto.openedAt) : new Date();
+      process.closedAt = dto.closedAt ? new Date(dto.closedAt) : null;
       process.targetMembers = dto.targetMembers;
     } else {
       process = this.recruitmentRepository.create({
         committeeId,
         createdBy: executiveId,
         status: RecruitmentStatus.OPEN,
-        openedAt: new Date(),
+        openedAt: dto.openedAt ? new Date(dto.openedAt) : new Date(),
+        closedAt: dto.closedAt ? new Date(dto.closedAt) : null,
         targetMembers: dto.targetMembers,
         role: dto.role,
       });
@@ -86,20 +83,17 @@ export class RecruitmentService {
     });
 
     if (process) {
-      if (process.status === RecruitmentStatus.OPEN) {
-        throw new BadRequestException(
-          'Recruitment process is already OPEN globally for this role',
-        );
-      }
       process.status = RecruitmentStatus.OPEN;
-      process.openedAt = new Date();
+      process.openedAt = dto.openedAt ? new Date(dto.openedAt) : new Date();
+      process.closedAt = dto.closedAt ? new Date(dto.closedAt) : null;
       process.targetMembers = dto.targetMembers;
     } else {
       process = this.recruitmentRepository.create({
         committeeId: null,
         createdBy: executiveId,
         status: RecruitmentStatus.OPEN,
-        openedAt: new Date(),
+        openedAt: dto.openedAt ? new Date(dto.openedAt) : new Date(),
+        closedAt: dto.closedAt ? new Date(dto.closedAt) : null,
         targetMembers: dto.targetMembers,
         role: dto.role,
       });
@@ -130,6 +124,28 @@ export class RecruitmentService {
       .log({ action: 'RecruitmentService.findAll' })
       .catch(() => undefined);
     return this.recruitmentRepository.find();
+  }
+
+  async findGlobalProcesses() {
+    this.audit
+      .log({ action: 'RecruitmentService.findGlobalProcesses' })
+      .catch(() => undefined);
+    return this.recruitmentRepository.find({
+      where: { committeeId: IsNull() },
+    });
+  }
+
+  async findById(id: number) {
+    this.audit
+      .log({ action: 'RecruitmentService.findById', body: { id } })
+      .catch(() => undefined);
+    const process = await this.recruitmentRepository.findOne({
+      where: { id },
+    });
+    if (!process) {
+      throw new NotFoundException('Recruitment process not found');
+    }
+    return process;
   }
 
   async getStatusByCommittee(committeeId: number, role?: Role) {

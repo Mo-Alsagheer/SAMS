@@ -12,5 +12,5 @@ export const APPLICATION_STATUS = [
 export const ACTION_STYLES = {
   ACCEPT: "bg-green-600 hover:bg-green-500 text-white",
   REJECT: "bg-red-600 hover:bg-red-500 text-white",
-  PRIMARY: "bg-primary",
+  PRIMARY: "bg-blue-600 hover:bg-blue-500",
 };

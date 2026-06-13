@@ -8,7 +8,7 @@ function FilterDropdown({ options, value, onChange }) {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 border rounded-lg px-4 py-2 bg-white hover:bg-gray-50"
+        className="flex items-center gap-2 border rounded-lg px-4 py-2 bg-card"
       >
         <ListFilterIcon size={16} /><p></p>
         {options.find((option) => option.value === value)?.name ||
@@ -16,7 +16,7 @@ function FilterDropdown({ options, value, onChange }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-44 bg-white border rounded-lg shadow-lg">
+        <div className="absolute right-0 mt-2 w-44 bg-card border rounded-lg shadow-lg">
           {options.map((option) => (
             <button
               key={option.value}
@@ -24,7 +24,7 @@ function FilterDropdown({ options, value, onChange }) {
                 onChange(option.value);
                 setOpen(false);
               }}
-              className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${
+              className={`block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-blue-600 ${
                 value === option.value ? "font-semibold text-blue-600" : ""
               }`}
             >

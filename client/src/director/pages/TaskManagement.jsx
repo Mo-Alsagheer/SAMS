@@ -64,7 +64,6 @@ export default function TaskManagement() {
               ...task,
               actualSessionId: sId,
               sessionName: session.title || `Session ${session.sessionNumber || sId}`,
-             
               sessionNo: String(session.sessionNumber || "")
             }));
           } catch (err) {
@@ -224,8 +223,7 @@ export default function TaskManagement() {
   };
 
   return (
-    <div className="p-4 md:p-10  min-h-screen">
-      
+    <div className="p-4 md:p-10 bg-slate-50 dark:bg-transparent min-h-screen">
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mb-8 md:mb-12">
         <div>
           <h1 className="text-2xl md:text-3xl font-black text-blue-900 dark:text-blue-400 mb-2">Task Management</h1>
@@ -233,7 +231,6 @@ export default function TaskManagement() {
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
-
           <div className="relative flex items-center bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 shadow-sm min-w-[220px]">
             <Filter size={16} className="text-gray-400 mr-2 shrink-0" />
             <select
@@ -352,7 +349,7 @@ export default function TaskManagement() {
         fields={taskFields}
         defaultValues={{ 
           title: "", 
-          sessionNumber: "", 
+          sessionNumber: dbSessions.length > 0 ? `Session ${dbSessions[0].sessionNumber || 1}` : "", 
           deadline: "", 
           description: "", 
           taskFile: null 
@@ -369,5 +366,5 @@ export default function TaskManagement() {
         renderCustomField={(field, watch, setValue) => renderUploadField(field, watch, setValue)}
       />
     </div>
-  );
+  ); 
 }
