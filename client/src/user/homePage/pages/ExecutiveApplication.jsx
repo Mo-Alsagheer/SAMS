@@ -3,9 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import * as z from "zod";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { CheckCircle2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 import { PopupForm } from "@/components/shared/PopupForm"; 
 import { getRecruitmentById } from "@/features/recruitment/recruitment";
@@ -42,40 +43,46 @@ const ExecutiveApplication = () => {
   });
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadRecruitmentData = async () => {
       if (!id) return;
       
       try {
+        if (isMounted) setLoading(true);
+        
         const localRole = STATIC_ROLES.find((role) => String(role.id) === String(id));
-        if (localRole) {
+        if (localRole && isMounted) {
           setRoleTitle(localRole.title);
         }
 
         const recruitmentData = await getRecruitmentById(id);
-        console.log("Recruitment API Response:", recruitmentData);
+        console.log("Recruitment API Response inside Form:", recruitmentData);
 
-        if (recruitmentData?.title || recruitmentData?.name) {
-          setRoleTitle(recruitmentData.title || recruitmentData.name);
+        if (recruitmentData && isMounted) {
+          if (recruitmentData.title || recruitmentData.name) {
+            setRoleTitle(recruitmentData.title || recruitmentData.name);
+          }
         }
-
-        if (recruitmentData?.status?.toLowerCase() === "closed") {
-          toast.error("This position is currently closed.");
-          navigate("/executiveRoles");
-          return; 
-        }
-
       } catch (error) {
-        console.error("Error loading recruitment:", error);
-     
-        toast.error("Could not verify dynamic status, proceeding with default settings.");
+        console.error("Error loading recruitment from SAMS:", error);
+        if (isMounted) {
+          if (String(id) === "24" || String(id) === "4") setRoleTitle("Chairman");
+          else if (String(id) === "25" || String(id) === "3") setRoleTitle("Secretary");
+          else if (String(id) === "26" || String(id) === "2") setRoleTitle("Treasurer");
+          else if (String(id) === "27" || String(id) === "1") setRoleTitle("Web Master & Technical Director");
+        }
       } finally {
-
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     loadRecruitmentData();
-  }, [id, navigate]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
 
   const fields = [
     { name: "fullName", label: "Full Name", type: "text", placeholder: "Enter your name" },
@@ -88,7 +95,7 @@ const ExecutiveApplication = () => {
   const onSubmit = async (values) => {
     try {
       const apiData = {
-        processId: id, 
+        processId: Number(id), 
         name: values.fullName,
         email: values.email,
         phone: values.phone,
@@ -142,28 +149,31 @@ const ExecutiveApplication = () => {
             </CardContent>
           </Card>
         ) : (
-          <PopupForm
-            open={true}
-            onClose={() => navigate("/executiveRoles")} 
-            schema={formSchema}
-            defaultValues={defaultValues}
-            fields={fields}
-            onSubmit={onSubmit}
-            title={`Apply for ${roleTitle}`}
-            submitLabel="Submit Application"
-            className="max-w-2xl w-[94%] max-h-[90vh] flex flex-col overflow-hidden rounded-[24px] md:rounded-[32px]"
-            bgColor="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-[0_15px_50px_rgba(59,130,246,0.06)]"
-            titleColor="text-blue-900 dark:text-slate-100 font-black text-xl md:text-2xl pt-2 text-center tracking-tight"
-            labelColor="text-[11px] md:text-sm font-bold text-blue-900/70 dark:text-slate-300 mb-1 block ml-1"
-            submitClassName="text-xs font-bold !h-9 !px-4 !rounded-lg transition-all duration-200 active:scale-95 !w-auto shadow-sm inline-flex items-center justify-center
-              [&:parent]:flex-row [&:parent]:justify-end [&:parent]:gap-2
-              [&[type='button']]:!w-auto [&[type='button']]:!inline-flex
-              [&[type='button']]:!bg-slate-100 [&[type='button']]:!text-slate-700 [&[type='button']]:hover:!bg-slate-200 [&[type='button']]:!border-none 
-              dark:[&[type='button']]:!bg-slate-800 dark:[&[type='button']]:!text-slate-300 dark:[&[type='button']]:hover:!bg-slate-700
-              [&[type='submit']]:!w-auto [&[type='submit']]:!inline-flex
-              [&[type='submit']]:bg-blue-600 [&[type='submit']]:text-white [&[type='submit']]:hover:bg-blue-700 
-              dark:[&[type='submit']]:bg-blue-700 dark:[&[type='submit']]:hover:bg-blue-600"
-          />
+          
+          <div className="w-full flex justify-center animate-in fade-in duration-300">
+            <PopupForm
+              open={true}
+              onClose={() => navigate("/executiveRoles")} 
+              schema={formSchema}
+              defaultValues={defaultValues}
+              fields={fields}
+              onSubmit={onSubmit}
+              title={`Apply for ${roleTitle}`}
+              submitLabel="Submit Application"
+              className="max-w-2xl w-[94%] max-h-[90vh] flex flex-col overflow-hidden rounded-[24px] md:rounded-[32px]"
+              bgColor="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-[0_15px_50px_rgba(59,130,246,0.06)]"
+              titleColor="text-blue-900 dark:text-slate-100 font-black text-xl md:text-2xl pt-2 text-center tracking-tight"
+              labelColor="text-[11px] md:text-sm font-bold text-blue-900/70 dark:text-slate-300 mb-1 block ml-1"
+              submitClassName="text-xs font-bold !h-9 !px-4 !rounded-lg transition-all duration-200 active:scale-95 !w-auto shadow-sm inline-flex items-center justify-center
+                [&:parent]:flex-row [&:parent]:justify-end [&:parent]:gap-2
+                [&[type='button']]:!w-auto [&[type='button']]:!inline-flex
+                [&[type='button']]:!bg-slate-100 [&[type='button']]:!text-slate-700 [&[type='button']]:hover:!bg-slate-200 [&[type='button']]:!border-none 
+                dark:[&[type='button']]:!bg-slate-800 dark:[&[type='button']]:!text-slate-300 dark:[&[type='button']]:hover:!bg-slate-700
+                [&[type='submit']]:!w-auto [&[type='submit']]:!inline-flex
+                [&[type='submit']]:bg-primary [&[type='submit']]:text-white [&[type='submit']]:hover:bg-blue-900 
+                dark:[&[type='submit']]:bg-blue-700 dark:[&[type='submit']]:hover:bg-blue-600"
+            />
+          </div>
         )}
       </main>
       <Footer />
@@ -172,7 +182,3 @@ const ExecutiveApplication = () => {
 };
 
 export default ExecutiveApplication;
-
-
-
-

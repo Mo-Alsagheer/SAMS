@@ -11,7 +11,7 @@ import { PopupForm } from "@/components/shared/PopupForm";
 
 import { getCommittees } from "@/features/committee/committee";
 import { submitApplication } from "@/features/applications/applications";
-import { getCommitteeRecruitmentStatus, getGlobalRecruitments } from "@/features/recruitment/recruitment";
+import { getCommitteeRecruitmentStatus, getGlobalRecruitment } from "@/features/recruitment/recruitment";
 
 const formSchema = z.object({
   committeeName: z.string().min(1, "Please select a committee"),
@@ -45,7 +45,7 @@ const Application = () => {
       try {
         const [committeesData, globalData] = await Promise.all([
           getCommittees(),
-          getGlobalRecruitments(),
+          getGlobalRecruitment(),
         ]);
         setCommittees(committeesData);
         setGlobalProcesses(globalData.filter((p) => p.status === "OPEN"));

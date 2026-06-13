@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { getGlobalRecruitment } from "@/features/recruitment/recruitment";
 import { toast } from "sonner";
 import { Calendar, ShieldCheck, ChevronDown, ChevronUp, CheckCircle2, Award } from "lucide-react";
+
+import { getGlobalRecruitment } from "@/features/recruitment/recruitment";
 
 const STATIC_ROLES = [
   {
@@ -67,49 +68,86 @@ const STATIC_ROLES = [
 function ExecutiveRoles() {
   const [rolesData, setRolesData] = useState([]);
   const [loading, setLoading] = useState(true);
-  
   const [expandedResp, setExpandedResp] = useState({}); 
   const [expandedSkills, setExpandedSkills] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchGlobalStatus = async () => {
+     
+      console.log("🚀 STARTING FETCH: useEffect triggered successfully!");
+      
       try {
-        setLoading(true);
-        const response = await getGlobalRecruitment();
-        const globalRecruitment = Array.isArray(response) ? response[0] : null;
-        
-        const apiStatus = globalRecruitment?.status?.toLowerCase() || "closed";
-        const rawClosedAt = globalRecruitment?.closedAt;
-        
-        const formattedDate = rawClosedAt 
-          ? new Date(rawClosedAt).toLocaleString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true
-            })
-          : "N/A";
+        if (isMounted) setLoading(true);
 
-        const mergedData = STATIC_ROLES.map((role) => ({
-          ...role,
-          status: apiStatus,
-          closedAt: formattedDate
-        }));
+        console.log("📡 Calling SAMS API...");
+        const apiPromise = getGlobalRecruitment();
+        
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Timeout")), 3000)
+        );
 
-        setRolesData(mergedData);
+        const response = await Promise.race([apiPromise, timeoutPromise]);
+        console.log("✅ SAMS API Response received:", response);
+
+        const dataArray = Array.isArray(response) 
+          ? response 
+          : (response && typeof response === 'object' ? [response] : []);
+        
+        const mergedData = STATIC_ROLES.map((staticRole) => {
+          const apiRole = dataArray.find(r => {
+            if (!r || !r.title) return false;
+            return r.title.trim().toLowerCase() === staticRole.title.trim().toLowerCase();
+          });
+
+          const fallbackRole = !apiRole 
+            ? dataArray.find(r => r && r.title && staticRole.title.toLowerCase().includes(r.title.toLowerCase()))
+            : null;
+
+          const activeSource = apiRole || fallbackRole;
+          const apiStatus = activeSource?.status?.toLowerCase() || "closed";
+          const rawClosedAt = activeSource?.closedAt;
+          
+          const formattedDate = rawClosedAt
+            ? new Date(rawClosedAt).toLocaleString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true
+              })
+            : null;
+
+          return {
+            ...staticRole,
+            dbId: activeSource?.id || staticRole.id, 
+            status: apiStatus,
+            closedAt: formattedDate
+          };
+        });
+
+        if (isMounted) setRolesData(mergedData);
       } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Failed to sync recruitment status.");
-        setRolesData(STATIC_ROLES.map(r => ({ ...r, status: "closed", closedAt: "N/A" })));
+        console.error("❌ CATCH BLOCK TRIGGERED:", error);
+      
+        if (isMounted) {
+          setRolesData(STATIC_ROLES.map(r => ({ ...r, status: "open", closedAt: null })));
+          toast.error("Using offline fallback mode.");
+        }
       } finally {
-        setLoading(false);
+        console.log("🏁 FINALLY BLOCK: Setting loading to false");
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchGlobalStatus();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const toggleResponsibilities = (id) => {
@@ -135,7 +173,6 @@ function ExecutiveRoles() {
       <Navbar />
 
       <main className="flex-grow pt-16">
-       
         <section className="relative bg-gradient-to-r from-slate-950 via-blue-950 to-slate-950 py-14 text-center">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-blue-500/10 blur-[100px] rounded-full pointer-events-none"></div>
 
@@ -177,7 +214,7 @@ function ExecutiveRoles() {
                           {item.status.toUpperCase()}
                         </Badge>
 
-                        {item.status === "open" && item.closedAt && item.closedAt !== "N/A" && (
+                        {item.status === "open" && item.closedAt && (
                           <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium bg-slate-50 dark:bg-slate-800/40 px-2.5 py-1 rounded-full border border-slate-100 dark:border-slate-800">
                             <Calendar size={13} className="text-blue-500 dark:text-blue-400" />
                             <span>Closes at: {item.closedAt}</span>
@@ -195,7 +232,6 @@ function ExecutiveRoles() {
                     </CardHeader>
 
                     <div className="px-6 md:px-8 space-y-3">
-                      
                       <div>
                         <button
                           onClick={() => toggleResponsibilities(item.id)}
@@ -245,7 +281,6 @@ function ExecutiveRoles() {
                           </div>
                         )}
                       </div>
-
                     </div>
                   </div>
 
@@ -254,7 +289,7 @@ function ExecutiveRoles() {
                       disabled={item.status !== "open"}
                       onClick={() => {
                         if (item.status === "open") {
-                          navigate(`/executive/apply/${item.id}`);
+                          navigate(`/executive/apply/${item.dbId}`);
                         } else {
                           toast.error("Recruitment is currently closed.");
                         }
