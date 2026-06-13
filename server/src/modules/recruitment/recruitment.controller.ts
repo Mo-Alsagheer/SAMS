@@ -123,6 +123,20 @@ export class RecruitmentController {
     return this.recruitmentService.findGlobalProcesses();
   }
 
+  @Get(':id')
+  @Public()
+  @ApiOperation({ summary: 'Get a specific recruitment process by ID' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID of the recruitment process',
+    example: 1,
+  })
+  @ApiResponse({ status: 200, description: 'The recruitment process details.' })
+  @ApiResponse({ status: 404, description: 'Recruitment process not found.' })
+  findById(@Param('id', ParseIntIdPipe) id: number) {
+    return this.recruitmentService.findById(id);
+  }
+
   @Get(':committeeId/status')
   @Public()
   @ApiOperation({ summary: 'Get recruitment status for a specific committee' })

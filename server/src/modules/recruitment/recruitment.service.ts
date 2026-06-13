@@ -135,6 +135,19 @@ export class RecruitmentService {
     });
   }
 
+  async findById(id: number) {
+    this.audit
+      .log({ action: 'RecruitmentService.findById', body: { id } })
+      .catch(() => undefined);
+    const process = await this.recruitmentRepository.findOne({
+      where: { id },
+    });
+    if (!process) {
+      throw new NotFoundException('Recruitment process not found');
+    }
+    return process;
+  }
+
   async getStatusByCommittee(committeeId: number, role?: Role) {
     const committee = await this.committeeRepository.findOne({
       where: { id: committeeId },
