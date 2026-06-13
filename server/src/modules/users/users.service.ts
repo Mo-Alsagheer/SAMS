@@ -51,7 +51,7 @@ export class UsersService {
     this.audit
       .log({ action: 'UsersService.findById', body: { id } })
       .catch(() => undefined);
-    return this.userRepository.findOne({ 
+    return this.userRepository.findOne({
       where: { id },
       relations: ['committee'],
     });
@@ -64,7 +64,10 @@ export class UsersService {
 
   async listCommitteeMembers(user: AuthUser) {
     this.audit
-      .log({ action: 'UsersService.listCommitteeMembers', userId: String(user.id) })
+      .log({
+        action: 'UsersService.listCommitteeMembers',
+        userId: String(user.id),
+      })
       .catch(() => undefined);
 
     let members: User[] = [];
@@ -96,10 +99,11 @@ export class UsersService {
       members.map(async (member) => {
         let score = 0;
         if (member.committeeId) {
-          const scoreBreakdown = await this.attendanceService.buildScoreForUserCommittee(
-            member,
-            member.committeeId,
-          );
+          const scoreBreakdown =
+            await this.attendanceService.buildScoreForUserCommittee(
+              member,
+              member.committeeId,
+            );
           score = scoreBreakdown.total;
         }
         return {
@@ -204,7 +208,9 @@ export class UsersService {
       const isAssigned = await this.committeeRepo
         .createQueryBuilder('c')
         .where('c.id = :committeeId', { committeeId: targetUser.committeeId })
-        .andWhere(':directorId = ANY(c.directorIDs)', { directorId: requester.id })
+        .andWhere(':directorId = ANY(c.directorIDs)', {
+          directorId: requester.id,
+        })
         .getOne();
 
       if (!isAssigned) {
@@ -230,7 +236,10 @@ export class UsersService {
 
   async getCommitteeMembersStats(user: AuthUser) {
     this.audit
-      .log({ action: 'UsersService.getCommitteeMembersStats', userId: String(user.id) })
+      .log({
+        action: 'UsersService.getCommitteeMembersStats',
+        userId: String(user.id),
+      })
       .catch(() => undefined);
 
     let members: User[] = [];
@@ -241,7 +250,9 @@ export class UsersService {
         where: { role: Role.MEMBER },
       });
       committeeIds = [
-        ...new Set(members.map((m) => m.committeeId).filter((id) => id !== null)),
+        ...new Set(
+          members.map((m) => m.committeeId).filter((id) => id !== null),
+        ),
       ] as number[];
     } else if (user.role === Role.DIRECTOR) {
       const committees = await this.committeeRepo

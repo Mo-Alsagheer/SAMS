@@ -40,7 +40,10 @@ export class UsersController {
   @Get('committee-members')
   @UseGuards(RolesGuard)
   @Roles(Role.EXECUTIVE, Role.DIRECTOR)
-  @ApiOperation({ summary: 'List all committee members with details and scores (Executive/Director)' })
+  @ApiOperation({
+    summary:
+      'List all committee members with details and scores (Executive/Director)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Committee members returned successfully.',
@@ -52,7 +55,10 @@ export class UsersController {
   @Get('committee-members/statistics')
   @UseGuards(RolesGuard)
   @Roles(Role.EXECUTIVE, Role.DIRECTOR)
-  @ApiOperation({ summary: 'Get overall statistics for committee members (Executive/Director)' })
+  @ApiOperation({
+    summary:
+      'Get overall statistics for committee members (Executive/Director)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Committee member statistics returned successfully.',
@@ -65,7 +71,10 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles(Role.EXECUTIVE, Role.DIRECTOR)
   @ApiOperation({ summary: 'Change the status of a user (Executive/Director)' })
-  @ApiResponse({ status: 200, description: 'User status updated successfully.' })
+  @ApiResponse({
+    status: 200,
+    description: 'User status updated successfully.',
+  })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
   @ApiBody({ type: ChangeStatusDto })

@@ -26,7 +26,11 @@ describe('SessionsService', () => {
   beforeEach(async () => {
     repoMock = {
       create: jest.fn().mockImplementation((dto) => dto),
-      save: jest.fn().mockImplementation((session) => Promise.resolve({ id: 1, ...session })),
+      save: jest
+        .fn()
+        .mockImplementation((session) =>
+          Promise.resolve({ id: 1, ...session }),
+        ),
       find: jest.fn().mockResolvedValue([]),
       findOne: jest.fn(),
       remove: jest.fn().mockResolvedValue(undefined),
@@ -123,14 +127,20 @@ describe('SessionsService', () => {
     it('should throw ForbiddenException if user is not a director', async () => {
       const memberUser = { ...directorUser, role: Role.MEMBER };
       await expect(
-        service.create({ title: 'Test', scheduledAt: '2026-06-06T12:00:00Z' }, memberUser),
+        service.create(
+          { title: 'Test', scheduledAt: '2026-06-06T12:00:00Z' },
+          memberUser,
+        ),
       ).rejects.toThrow(ForbiddenException);
     });
 
     it('should throw BadRequestException if director is not assigned to a committee', async () => {
       const unassignedDirector = { ...directorUser, committeeId: null };
       await expect(
-        service.create({ title: 'Test', scheduledAt: '2026-06-06T12:00:00Z' }, unassignedDirector),
+        service.create(
+          { title: 'Test', scheduledAt: '2026-06-06T12:00:00Z' },
+          unassignedDirector,
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -146,7 +156,11 @@ describe('SessionsService', () => {
 
     it('should successfully create session for director same committee', async () => {
       roadmapMock.findOne.mockResolvedValue({ id: 5, committeeId: 2 });
-      const sessionDto = { title: 'Test Session', scheduledAt: '2026-06-06T12:00:00Z', roadmapId: 5 };
+      const sessionDto = {
+        title: 'Test Session',
+        scheduledAt: '2026-06-06T12:00:00Z',
+        roadmapId: 5,
+      };
       const res = await service.create(sessionDto, directorUser);
       expect(res).toBeDefined();
       expect(res.committeeId).toBe(2);
@@ -173,7 +187,9 @@ describe('SessionsService', () => {
         committeeId: 99, // different
         name: 'Member',
       };
-      await expect(service.getJoinToken(1, memberUser)).rejects.toThrow(ForbiddenException);
+      await expect(service.getJoinToken(1, memberUser)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should allow same committee member to join', async () => {
@@ -214,7 +230,9 @@ describe('SessionsService', () => {
 
     it('should throw BadRequestException if user has no committeeId', async () => {
       const userNoCommittee = { ...memberUser, committeeId: null };
-      await expect(service.getMemberExperience(userNoCommittee)).rejects.toThrow(BadRequestException);
+      await expect(
+        service.getMemberExperience(userNoCommittee),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 });

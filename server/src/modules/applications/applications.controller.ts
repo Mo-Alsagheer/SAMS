@@ -10,15 +10,23 @@ export class ApplicationsController {
 
   @Post('evaluate-all/:processId')
   @ApiOperation({
-    summary: 'Evaluate all pending applications for a specified recruitment process using AI without saving to DB',
+    summary:
+      'Evaluate all pending applications for a specified recruitment process using AI without saving to DB',
   })
-  @ApiParam({ name: 'processId', description: 'Numeric Recruitment Process ID' })
+  @ApiParam({
+    name: 'processId',
+    description: 'Numeric Recruitment Process ID',
+  })
   @ApiResponse({
     status: 200,
     description: 'Evaluation results directly from the AI service.',
   })
-  evaluatePendingApplications(@Param('processId', ParseIntIdPipe) processId: number) {
-    return this.applicationsService.evaluatePendingApplicationsForProcess(processId);
+  evaluatePendingApplications(
+    @Param('processId', ParseIntIdPipe) processId: number,
+  ) {
+    return this.applicationsService.evaluatePendingApplicationsForProcess(
+      processId,
+    );
   }
 
   @Post('submit')

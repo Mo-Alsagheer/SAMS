@@ -49,9 +49,9 @@ export class TasksController {
 
   /**
    * Retrieves the tasks for the currently authenticated member.
-   * Tasks are categorized into 'currentTasks' (active, unsubmitted tasks) 
+   * Tasks are categorized into 'currentTasks' (active, unsubmitted tasks)
    * and 'previousTasks' (submitted tasks or tasks past their due date).
-   * 
+   *
    * @param req The incoming request containing the authenticated user's information.
    * @returns An object containing arrays of previous and current tasks with their statuses and scores.
    */

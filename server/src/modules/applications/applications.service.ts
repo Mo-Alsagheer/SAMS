@@ -39,9 +39,7 @@ export class ApplicationsService {
       where: { id: dto.processId },
     });
     if (!process || process.status !== RecruitmentStatus.OPEN) {
-      throw new BadRequestException(
-        'Recruitment process is not OPEN',
-      );
+      throw new BadRequestException('Recruitment process is not OPEN');
     }
 
     // Check if user already applied by email
@@ -165,7 +163,10 @@ export class ApplicationsService {
 
   async evaluatePendingApplicationsForProcess(processId: number) {
     this.audit
-      .log({ action: 'ApplicationsService.evaluatePendingApplicationsForProcess', body: { processId } })
+      .log({
+        action: 'ApplicationsService.evaluatePendingApplicationsForProcess',
+        body: { processId },
+      })
       .catch(() => undefined);
 
     const process = await this.recruitmentProcessRepository.findOne({
@@ -203,7 +204,8 @@ export class ApplicationsService {
 
     if (cvsToEvaluate.length === 0) {
       return {
-        message: 'No applications pending evaluation with a valid CV link for this recruitment process.',
+        message:
+          'No applications pending evaluation with a valid CV link for this recruitment process.',
         results: [],
       };
     }

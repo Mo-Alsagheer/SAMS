@@ -7,7 +7,11 @@ export class SubmitTaskDto {
   @IsString()
   content?: string;
 
-  @ApiPropertyOptional({ type: 'string', format: 'binary', description: 'File submission' })
+  @ApiPropertyOptional({
+    type: 'string',
+    format: 'binary',
+    description: 'File submission',
+  })
   @IsOptional()
   file?: any;
 }

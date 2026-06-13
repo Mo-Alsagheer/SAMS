@@ -119,7 +119,9 @@ export class EmailService {
     const { to, resetToken, resetUrl } = opts;
     const finalUrl = `${resetUrl}?token=${resetToken}`;
 
-    this.logger.log(`\n\n========================================\n[PASSWORD RESET LINK FOR ${to}]: ${finalUrl}\n========================================\n\n`);
+    this.logger.log(
+      `\n\n========================================\n[PASSWORD RESET LINK FOR ${to}]: ${finalUrl}\n========================================\n\n`,
+    );
 
     const html = `
 <!DOCTYPE html>
@@ -203,24 +205,29 @@ export class EmailService {
     switch (status) {
       case 'PHASE1_ACCEPTED':
         statusText = 'Phase 1 Accepted 🎉';
-        descriptionText = 'Congratulations! Your application has successfully passed the initial screening (Phase 1 evaluation).';
+        descriptionText =
+          'Congratulations! Your application has successfully passed the initial screening (Phase 1 evaluation).';
         break;
       case 'PHASE1_REJECTED':
         statusText = 'Application Update - Not Accepted';
-        descriptionText = 'Thank you for your interest in SAMS. Unfortunately, your application did not pass the initial screening phase at this time.';
+        descriptionText =
+          'Thank you for your interest in SAMS. Unfortunately, your application did not pass the initial screening phase at this time.';
         headerColor = 'linear-gradient(135deg, #3c1a1a 0%, #802d2d 100%)';
         break;
       case 'INTERVIEW_SCHEDULED':
         statusText = 'Interview Scheduled 📅';
-        descriptionText = 'Great news! An interview has been scheduled for your application.';
+        descriptionText =
+          'Great news! An interview has been scheduled for your application.';
         break;
       case 'PHASE2_ACCEPTED':
         statusText = 'Welcome to SAMS! 🎉';
-        descriptionText = 'Congratulations! You have been officially accepted as a member.';
+        descriptionText =
+          'Congratulations! You have been officially accepted as a member.';
         break;
       case 'PHASE2_REJECTED':
         statusText = 'Application Update - Not Accepted';
-        descriptionText = 'Thank you for interviewing with us. Unfortunately, we will not be moving forward with your application at this time.';
+        descriptionText =
+          'Thank you for interviewing with us. Unfortunately, we will not be moving forward with your application at this time.';
         headerColor = 'linear-gradient(135deg, #3c1a1a 0%, #802d2d 100%)';
         break;
       default:
@@ -228,7 +235,9 @@ export class EmailService {
         descriptionText = `Your application status has been updated to: ${status}.`;
     }
 
-    this.logger.log(`\n\n========================================\n[APPLICATION STATUS EMAIL FOR ${to}]: Status = ${statusText} | Info = ${additionalInfo || 'None'}\n========================================\n\n`);
+    this.logger.log(
+      `\n\n========================================\n[APPLICATION STATUS EMAIL FOR ${to}]: Status = ${statusText} | Info = ${additionalInfo || 'None'}\n========================================\n\n`,
+    );
 
     const html = `
 <!DOCTYPE html>
@@ -279,9 +288,14 @@ export class EmailService {
         subject: `SAMS: Application Status Update — ${statusText}`,
         html,
       });
-      this.logger.log(`Application status email sent to ${to} for status ${status}`);
+      this.logger.log(
+        `Application status email sent to ${to} for status ${status}`,
+      );
       this.audit
-        .log({ action: 'EmailService.sendApplicationStatusEmail', body: { to, status } })
+        .log({
+          action: 'EmailService.sendApplicationStatusEmail',
+          body: { to, status },
+        })
         .catch(() => undefined);
     } catch (error) {
       this.logger.error(`Failed to send status update email to ${to}`, error);
