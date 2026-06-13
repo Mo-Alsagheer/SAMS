@@ -78,7 +78,7 @@ function ViewCommittee() {
       <Navbar />
 
       <main className="flex-grow pt-16">
-        <section className="relative bg-gradient-to-r from-blue-950 via-blue-900 to-blue-950 py-10 overflow-hidden text-center">
+        <section className="relative bg-gradient-to-r from-slate-950 via-blue-950 to-slate-950 py-10 overflow-hidden text-center">
         
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[180px] bg-blue-500/10 blur-[80px] rounded-full pointer-events-none"></div>
 

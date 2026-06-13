@@ -33,7 +33,7 @@ function ExecutiveSection() {
 
           <div className="flex-shrink-0 w-full md:w-auto text-center">
             <Button className="w-full md:w-auto !bg-white/90 !text-blue-900 hover:!bg-blue-50 shadow-lg shadow-indigo-600/20 px-10 py-6 !text-lg font-bold rounded-xl transition-all hover:scale-105 active:scale-95 group">
-              <Link to="/committees" className="flex items-center justify-center gap-2">
+              <Link to="/executiveRoles" className="flex items-center justify-center gap-2">
                 <span>View Executive Roles</span>
                 <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
               </Link>

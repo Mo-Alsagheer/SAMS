@@ -29,3 +29,13 @@ export async function getCommitteeRecruitmentStatus(committeeId, role = "") {
   });
   return res.data;
 }
+
+export async function getGlobalRecruitment() {
+  const res = await api.get("/executive/recruitment/global");
+  return res.data;
+}
+
+export async function getRecruitmentById(id) {
+  const res = await api.get(`/executive/recruitment/${id}`);
+  return res.data;
+}

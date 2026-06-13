@@ -38,6 +38,8 @@ import MemberDashboard from "./member/pages/DashBoard";
 import SessionDetails from "./member/pages/SessionDetails";
 import Tasks from "./member/pages/Tasks";
 import PracticeInterview from "./member/pages/PracticeInterview";
+import ExecutiveRoles from "./user/homePage/pages/ExecutiveRoles";
+import ExecutiveApplication from "./user/homePage/pages/ExecutiveApplication";
 function App() {
   return (
     <>
@@ -51,6 +53,9 @@ function App() {
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/result" element={<QuizResult />} />
         <Route path="/quiz/:category" element={<Quiz />} />
+        <Route path="/executiveRoles" element={<ExecutiveRoles />} />
+       
+<Route path="/executive/apply/:id" element={<ExecutiveApplication />} />
 
         {/* Committees & Applications */}
         <Route path="/committees" element={<ViewCommittee />} />
@@ -96,7 +101,10 @@ function App() {
               element={<CommitteeRecruitment />}
             />
             <Route path="applications" element={<DirectorApplications />} />
-            <Route path="applications/:id" element={<DirectorApplicationDetails />} />
+            <Route
+              path="applications/:id"
+              element={<DirectorApplicationDetails />}
+            />
             <Route path="committees" element={<Committees />} />
             <Route
               path="committees/:committeeId"
