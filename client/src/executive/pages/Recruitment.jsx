@@ -17,10 +17,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { Building2, Users, CheckCircle, XCircle } from "lucide-react";
 
+const toLocalDatetimeString = (dateObj) => {
+  if (!dateObj) return "";
+  const date = new Date(dateObj);
+  const tzoffset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - tzoffset).toISOString().slice(0, 16);
+};
+
 const recruitmentSchema = z.object({
   role: z.enum(["MEMBER", "DIRECTOR", "EXECUTIVE"]),
   title: z.string().optional(),
   targetMembers: z.number().min(1),
+  openedAt: z.string().nonempty("Opening date is required"),
+  closedAt: z.string().optional().or(z.literal("")),
 });
 
 function Recruitment() {
@@ -134,17 +143,18 @@ function Recruitment() {
     try {
       let res;
 
+      const payload = {
+        role: activeCommittee.selectedRole,
+        title: data.title || activeCommittee.selectedTitle || undefined,
+        targetMembers: Number(data.targetMembers),
+        openedAt: data.openedAt ? new Date(data.openedAt).toISOString() : new Date().toISOString(),
+        closedAt: data.closedAt ? new Date(data.closedAt).toISOString() : null,
+      };
+
       if (activeCommittee.selectedRole === "EXECUTIVE") {
-        res = await openExecutiveRecruitment({
-          role: "EXECUTIVE",
-          title: data.title || activeCommittee.selectedTitle,
-          targetMembers: data.targetMembers,
-        });
+        res = await openExecutiveRecruitment(payload);
       } else {
-        res = await openCommitteeRecruitment(activeCommittee.committeeId, {
-          role: activeCommittee.selectedRole,
-          targetMembers: data.targetMembers,
-        });
+        res = await openCommitteeRecruitment(activeCommittee.committeeId, payload);
       }
 
       toast.success(res?.message || "Recruitment opened successfully");
@@ -231,7 +241,7 @@ function Recruitment() {
             <Button
               size="sm"
               className="bg-blue-500 text-white"
-              onClick={() => openRecruitmentForm(row, row.role)}
+              onClick={() => openRecruitmentForm(row, row.role, row)}
             >
               Open
             </Button>
@@ -251,7 +261,7 @@ function Recruitment() {
             <Button
               size="sm"
               className="bg-gray-500 hover:bg-gray-400 text-white"
-              onClick={() => openRecruitmentForm(row, row.role)}
+              onClick={() => openRecruitmentForm(row, row.role, row)}
             >
               Reopen
             </Button>
@@ -406,6 +416,8 @@ function Recruitment() {
             role: activeCommittee.selectedRole,
             title: activeCommittee.selectedTitle || "Web Master & Technical Director",
             targetMembers: activeCommittee.existing?.targetMembers || 1,
+            openedAt: toLocalDatetimeString(activeCommittee.existing?.openedAt || new Date()),
+            closedAt: toLocalDatetimeString(activeCommittee.existing?.closedAt),
           }}
           fields={[
             ...(activeCommittee.selectedRole === "EXECUTIVE"
@@ -427,6 +439,16 @@ function Recruitment() {
               name: "targetMembers",
               label: "Target Members",
               type: "number",
+            },
+            {
+              name: "openedAt",
+              label: "Opening Date",
+              type: "datetime-local",
+            },
+            {
+              name: "closedAt",
+              label: "Closing Date",
+              type: "datetime-local",
             },
           ]}
           onSubmit={handleSubmitRecruitment}
