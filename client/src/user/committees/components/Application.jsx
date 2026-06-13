@@ -11,6 +11,7 @@ import { PopupForm } from "@/components/shared/PopupForm";
 
 import { getCommittees } from "@/features/committee/committee";
 import { submitApplication } from "@/features/applications/applications";
+import { getCommitteeRecruitmentStatus } from "@/features/recruitment/recruitment";
 
 const formSchema = z.object({
   committeeName: z.string().min(1, "Please select a committee"),
