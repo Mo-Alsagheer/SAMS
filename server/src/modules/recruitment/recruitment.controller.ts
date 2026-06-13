@@ -113,7 +113,7 @@ export class RecruitmentController {
   }
 
   @Get('global')
-  @Roles(Role.EXECUTIVE)
+  @Public()
   @ApiOperation({ summary: 'List all global recruitment processes (where committeeId is null)' })
   @ApiResponse({
     status: 200,
