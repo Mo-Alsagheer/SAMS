@@ -52,13 +52,9 @@ export class RecruitmentService {
     });
 
     if (process) {
-      if (process.status === RecruitmentStatus.OPEN) {
-        throw new BadRequestException(
-          'Recruitment process is already OPEN for this committee and role',
-        );
-      }
       process.status = RecruitmentStatus.OPEN;
       process.openedAt = new Date();
+      process.closedAt = null;
       process.targetMembers = dto.targetMembers;
     } else {
       process = this.recruitmentRepository.create({
@@ -66,6 +62,7 @@ export class RecruitmentService {
         createdBy: executiveId,
         status: RecruitmentStatus.OPEN,
         openedAt: new Date(),
+        closedAt: null,
         targetMembers: dto.targetMembers,
         role: dto.role,
       });
@@ -86,13 +83,9 @@ export class RecruitmentService {
     });
 
     if (process) {
-      if (process.status === RecruitmentStatus.OPEN) {
-        throw new BadRequestException(
-          'Recruitment process is already OPEN globally for this role',
-        );
-      }
       process.status = RecruitmentStatus.OPEN;
       process.openedAt = new Date();
+      process.closedAt = null;
       process.targetMembers = dto.targetMembers;
     } else {
       process = this.recruitmentRepository.create({
@@ -100,6 +93,7 @@ export class RecruitmentService {
         createdBy: executiveId,
         status: RecruitmentStatus.OPEN,
         openedAt: new Date(),
+        closedAt: null,
         targetMembers: dto.targetMembers,
         role: dto.role,
       });
