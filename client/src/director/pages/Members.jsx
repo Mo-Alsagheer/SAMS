@@ -172,9 +172,9 @@ export default function Members() {
   ];
 
   return (
-    <div className="p-4 md:p-8 min-h-screen font-sans bg-[#f8fafc] dark:bg-slate-950 space-y-6">
+    <div className="p-4 md:p-8 min-h-screen font-sans space-y-6">
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+        <h1 className="text-2xl md:text-3xl font-black text-blue-900 dark:text-slate-100 tracking-tight">
           Members Management
         </h1>
         <p className="text-slate-400 dark:text-slate-500 text-xs md:text-sm font-medium mt-1">

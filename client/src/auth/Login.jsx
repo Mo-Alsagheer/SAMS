@@ -59,14 +59,11 @@ export default function Login() {
     <div className="min-h-screen w-full flex flex-col bg-slate-50 pt-20">
       <Navbar />
 
-      {/* الـ Container الأساسي للفورم في منتصف الصفحة تماماً */}
-      <div className="flex-grow flex items-center justify-center p-4">
+       <div className="flex-grow flex items-center justify-center px-4 py-12">
         <div className="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-2 bg-white rounded-[2rem] overflow-hidden shadow-[0_0_50px_-12px_rgba(37,99,235,0.25)] border border-slate-100 min-h-[500px] relative">
           
-          {/* الجانب الأيسر (اللوجو الترحيبي والـ Illustration) */}
           <div className="relative hidden lg:flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 p-8 text-white">
             
-            {/* لوجو الـ IEEE في أعلى الكارت الأيسر */}
             <div className="absolute top-6 left-6 flex items-center gap-2">
               <div className="h-7 w-7 rounded-lg overflow-hidden flex items-center justify-center">
                 <img
@@ -94,7 +91,6 @@ export default function Login() {
             </div>
           </div>
 
-          {/* الجانب الأيمن (فورم تسجيل الدخول) */}
           <div className="flex items-center justify-center p-8 lg:p-12">
             <div className="w-full max-w-[360px] space-y-6">
               <div className="space-y-1">
