@@ -39,3 +39,4 @@ export async function getRecruitmentById(id) {
   const res = await api.get(`/executive/recruitment/${id}`);
   return res.data;
 }
+

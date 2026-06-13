@@ -79,7 +79,11 @@ export class RecruitmentService {
     }
 
     let process = await this.recruitmentRepository.findOne({
-      where: { role: dto.role, committeeId: IsNull() },
+      where: {
+        role: dto.role,
+        committeeId: IsNull(),
+        title: dto.title ? dto.title : IsNull(),
+      },
     });
 
     if (process) {
@@ -87,6 +91,7 @@ export class RecruitmentService {
       process.openedAt = dto.openedAt ? new Date(dto.openedAt) : new Date();
       process.closedAt = dto.closedAt ? new Date(dto.closedAt) : null;
       process.targetMembers = dto.targetMembers;
+      process.title = dto.title || null;
     } else {
       process = this.recruitmentRepository.create({
         committeeId: null,
@@ -96,6 +101,7 @@ export class RecruitmentService {
         closedAt: dto.closedAt ? new Date(dto.closedAt) : null,
         targetMembers: dto.targetMembers,
         role: dto.role,
+        title: dto.title || null,
       });
     }
 

@@ -17,9 +17,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { Building2, Users, CheckCircle, XCircle } from "lucide-react";
 
+const toLocalDatetimeString = (dateObj) => {
+  if (!dateObj) return "";
+  const date = new Date(dateObj);
+  const tzoffset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - tzoffset).toISOString().slice(0, 16);
+};
+
 const recruitmentSchema = z.object({
   role: z.enum(["MEMBER", "DIRECTOR", "EXECUTIVE"]),
+  title: z.string().optional(),
   targetMembers: z.number().min(1),
+  openedAt: z.string().nonempty("Opening date is required"),
+  closedAt: z.string().optional().or(z.literal("")),
 });
 
 function Recruitment() {
@@ -40,23 +50,37 @@ function Recruitment() {
       ]);
 
       // ===== GLOBAL EXECUTIVE =====
-      const executiveRecruitment = recruitments.find(
+      const executiveRoles = [
+        "Web Master & Technical Director",
+        "Treasurer",
+        "Secretary",
+        "Chairman",
+      ];
+
+      const executiveRecruitments = recruitments.filter(
         (r) => r.role === "EXECUTIVE" && !r.committeeId,
       );
+
+      const normalizedExecutiveRecruitments = executiveRoles.map((title) => {
+        const existing = executiveRecruitments.find((r) => r.title === title);
+
+        if (existing) return existing;
+
+        return {
+          id: null,
+          committeeId: null,
+          committeeName: "Executive",
+          role: "EXECUTIVE",
+          title,
+          targetMembers: "-",
+          status: "NOT_EXIST",
+        };
+      });
 
       const executiveSection = {
         committeeId: "EXECUTIVE",
         committeeName: "Executive",
-        recruitments: [
-          executiveRecruitment || {
-            id: null,
-            committeeId: null,
-            committeeName: "Executive",
-            role: "EXECUTIVE",
-            targetMembers: "-",
-            status: "NOT_EXIST",
-          },
-        ],
+        recruitments: normalizedExecutiveRecruitments,
       };
 
       // ===== COMMITTEES =====
@@ -107,6 +131,7 @@ function Recruitment() {
       committeeId: row.committeeId || null,
       committeeName: row.committeeName,
       selectedRole: role,
+      selectedTitle: row.title || null,
       existing,
     });
 
@@ -118,16 +143,18 @@ function Recruitment() {
     try {
       let res;
 
+      const payload = {
+        role: activeCommittee.selectedRole,
+        title: data.title || activeCommittee.selectedTitle || undefined,
+        targetMembers: Number(data.targetMembers),
+        openedAt: data.openedAt ? new Date(data.openedAt).toISOString() : new Date().toISOString(),
+        closedAt: data.closedAt ? new Date(data.closedAt).toISOString() : null,
+      };
+
       if (activeCommittee.selectedRole === "EXECUTIVE") {
-        res = await openExecutiveRecruitment({
-          role: "EXECUTIVE",
-          targetMembers: data.targetMembers,
-        });
+        res = await openExecutiveRecruitment(payload);
       } else {
-        res = await openCommitteeRecruitment(activeCommittee.committeeId, {
-          role: activeCommittee.selectedRole,
-          targetMembers: data.targetMembers,
-        });
+        res = await openCommitteeRecruitment(activeCommittee.committeeId, payload);
       }
 
       toast.success(res?.message || "Recruitment opened successfully");
@@ -175,7 +202,10 @@ function Recruitment() {
 
   // ================= TABLE =================
   const columns = [
-    { header: "Role", accessor: "role" },
+    {
+      header: "Role",
+      render: (row) => row.title || row.role,
+    },
     {
       header: "Target",
       render: (row) => (
@@ -204,6 +234,17 @@ function Recruitment() {
     },
 
     {
+      header: "Opened At",
+      render: (row) =>
+        row.openedAt ? new Date(row.openedAt).toLocaleString() : "-",
+    },
+    {
+      header: "Closed At",
+      render: (row) =>
+        row.closedAt ? new Date(row.closedAt).toLocaleString() : "-",
+    },
+
+    {
       header: "Actions",
       render: (row) => (
         <div className="flex gap-2">
@@ -211,7 +252,7 @@ function Recruitment() {
             <Button
               size="sm"
               className="bg-blue-500 text-white"
-              onClick={() => openRecruitmentForm(row, row.role)}
+              onClick={() => openRecruitmentForm(row, row.role, row)}
             >
               Open
             </Button>
@@ -231,7 +272,7 @@ function Recruitment() {
             <Button
               size="sm"
               className="bg-gray-500 hover:bg-gray-400 text-white"
-              onClick={() => openRecruitmentForm(row, row.role)}
+              onClick={() => openRecruitmentForm(row, row.role, row)}
             >
               Reopen
             </Button>
@@ -384,18 +425,41 @@ function Recruitment() {
           schema={recruitmentSchema}
           defaultValues={{
             role: activeCommittee.selectedRole,
+            title: activeCommittee.selectedTitle || "Web Master & Technical Director",
             targetMembers: activeCommittee.existing?.targetMembers || 1,
+            openedAt: toLocalDatetimeString(activeCommittee.existing?.openedAt || new Date()),
+            closedAt: toLocalDatetimeString(activeCommittee.existing?.closedAt),
           }}
           fields={[
-            {
-              name: "role",
-              label: "Role",
-              type: "readonly",
-            },
+            ...(activeCommittee.selectedRole === "EXECUTIVE"
+              ? [
+                  {
+                    name: "title",
+                    label: "Executive Role Type",
+                    type: "select",
+                    options: [
+                      { value: "Web Master & Technical Director", label: "Web Master & Technical Director" },
+                      { value: "Treasurer", label: "Treasurer" },
+                      { value: "Secretary", label: "Secretary" },
+                      { value: "Chairman", label: "Chairman" },
+                    ],
+                  },
+                ]
+              : []),
             {
               name: "targetMembers",
               label: "Target Members",
               type: "number",
+            },
+            {
+              name: "openedAt",
+              label: "Opening Date",
+              type: "datetime-local",
+            },
+            {
+              name: "closedAt",
+              label: "Closing Date",
+              type: "datetime-local",
             },
           ]}
           onSubmit={handleSubmitRecruitment}

@@ -67,6 +67,7 @@ export class ApplicationsService {
       cvLink: dto.cvLink,
       status: ApplicationStatus.SUBMITTED,
       targetRole: process.role,
+      title: process.title,
     });
 
     return this.applicationRepository.save(application);
