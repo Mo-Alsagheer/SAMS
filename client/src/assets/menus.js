@@ -70,8 +70,6 @@ export const executive = [
   { name: "Committees", path: "/executive/committees", icon: BookOpen },
   { name: "Applications", path: "/executive/applications", icon: BookCopyIcon },
   { name: "Recruitment", path: "/executive/recruitment", icon: ClipboardList },
-  { name: "Events", path: "/executive/events", icon: Calendar },
-  { name: "Settings", path: "/executive/settings", icon: Settings },
 ];
 
 export const membermenu = [
