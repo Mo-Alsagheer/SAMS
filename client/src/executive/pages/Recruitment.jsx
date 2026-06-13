@@ -190,7 +190,7 @@ function Recruitment() {
       accessor: "status",
       render: (row) => (
         <span
-          className={`px-2 py-1 rounded text-sm ${
+          className={`px-2 py-1 rounded-full text-sm lowercase ${
             row.status === "OPEN"
               ? "bg-green-100 text-green-600"
               : row.status === "CLOSED"
@@ -220,7 +220,7 @@ function Recruitment() {
           {row.status === "OPEN" && row.id && (
             <Button
               size="sm"
-              className="bg-red-500 text-white"
+              variant="destructive"
               onClick={() => handleCloseRecruitment(row)}
             >
               Close
@@ -305,14 +305,22 @@ function Recruitment() {
       <h1 className="text-xl font-semibold">Recruitment Management</h1>
       <div className="flex items-center gap-2">
         <button
-          className={`px-4 py-2 rounded ${activeTab === "EXECUTIVE" ? "bg-primary text-white" : "bg-gray-100"}`}
+          className={`px-4 py-2 rounded transition-colors duration-150 ${
+            activeTab === "EXECUTIVE"
+              ? "bg-primary text-white dark:bg-primary-dark dark:text-black"
+              : "bg-gray-100 text-black dark:bg-gray-700 dark:text-white"
+          }`}
           onClick={() => setActiveTab("EXECUTIVE")}
         >
           Executive
         </button>
 
         <button
-          className={`px-4 py-2 rounded ${activeTab === "COMMITTEES" ? "bg-primary text-white" : "bg-gray-100"}`}
+          className={`px-4 py-2 rounded transition-colors duration-150 ${
+            activeTab === "COMMITTEES"
+              ? "bg-primary text-white dark:bg-primary-dark dark:text-black"
+              : "bg-gray-100 text-black dark:bg-gray-700 dark:text-white"
+          }`}
           onClick={() => setActiveTab("COMMITTEES")}
         >
           Committees
@@ -321,7 +329,7 @@ function Recruitment() {
       {activeTab === "EXECUTIVE" && (
         <div className="space-y-4">
           {executiveSection && (
-            <div className="border rounded-lg p-4 bg-white">
+            <div className="border rounded-lg p-4 ">
               <h2 className="text-lg font-semibold mb-3">
                 {executiveSection.committeeName}
               </h2>
@@ -340,9 +348,9 @@ function Recruitment() {
           {committeesOnly.map((committee) => (
             <div
               key={committee.committeeId}
-              className="border rounded-lg p-4 bg-white"
+              className="border rounded-lg p-4 bg-card"
             >
-              <h2 className="text-lg font-semibold mb-2">
+              <h2 className="text-lg font-semibold mb-2 ">
                 {committee.committeeName}
               </h2>
               <p className="text-sm text-muted-foreground mb-4">

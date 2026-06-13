@@ -46,7 +46,7 @@ function DashBoard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 p-4 md:p-8 space-y-8 animate-fadeIn">
+    <div className="min-h-screen p-4 md:p-8 space-y-8 animate-fadeIn">
       
       <div className="flex items-center justify-between">
         <div>

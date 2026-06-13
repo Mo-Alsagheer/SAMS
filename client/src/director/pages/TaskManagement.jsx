@@ -224,7 +224,7 @@ export default function TaskManagement() {
   };
 
   return (
-    <div className="p-4 md:p-10 bg-[#f8f9fa] dark:bg-transparent min-h-screen">
+    <div className="p-4 md:p-10  dark:bg-transparent min-h-screen">
       
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mb-8 md:mb-12">
         <div>

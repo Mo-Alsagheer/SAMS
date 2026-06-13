@@ -56,7 +56,7 @@ function CommitteeRecruitment() {
       accessor: "status",
       render: (row) => (
         <span
-          className={`px-2 py-1 rounded text-sm ${row.status === "OPEN" ? "bg-green-100 text-green-600" : row.status === "CLOSED" ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-500"}`}
+          className={`px-2 py-1 rounded-full text-sm lowercase ${row.status === "OPEN" ? "bg-green-100 text-green-600" : row.status === "CLOSED" ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-500"}`}
         >
           {row.status}
         </span>
@@ -168,7 +168,7 @@ function CommitteeRecruitment() {
               setRole("MEMBER");
               fetchStatus("MEMBER");
             }}
-            className={`px-3 py-2 rounded-md text-sm font-medium ${role === "MEMBER" ? "bg-primary text-white" : "text-foreground"}`}
+            className={`px-3 py-2 rounded-md text-sm font-medium ${role === "MEMBER" ? "bg-primary text-white dark:text-black" : "text-foreground"}`}
           >
             Members
           </button>
@@ -177,7 +177,7 @@ function CommitteeRecruitment() {
               setRole("DIRECTOR");
               fetchStatus("DIRECTOR");
             }}
-            className={`px-3 py-2 rounded-md text-sm font-medium ${role === "DIRECTOR" ? "bg-primary text-white" : "text-foreground"}`}
+            className={`px-3 py-2 rounded-md text-sm font-medium ${role === "DIRECTOR" ? "bg-primary text-white dark:text-black " : "text-foreground"}`}
           >
             Directors
           </button>

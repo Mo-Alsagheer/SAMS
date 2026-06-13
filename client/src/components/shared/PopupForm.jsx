@@ -61,7 +61,7 @@ export function PopupForm({
         return <Textarea {...register(field.name)} placeholder={field.placeholder} />;
       case "select":
         return (
-          <select {...register(field.name)} className="w-full border rounded p-2">
+          <select {...register(field.name)} className="w-full border rounded p-2 bg-card">
             {field.options?.map((opt) => (
               <option key={opt.value || opt} value={opt.value || opt}>
                 {opt.label || opt}
@@ -78,7 +78,7 @@ export function PopupForm({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className={`sm:max-w-lg ${bgColor}`}>
+      <DialogContent className={`sm:max-w-lg bg-card`}>
         <DialogHeader>
           <DialogTitle className={titleColor}>{title}</DialogTitle>
         </DialogHeader>
