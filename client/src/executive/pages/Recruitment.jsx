@@ -408,11 +408,6 @@ function Recruitment() {
             targetMembers: activeCommittee.existing?.targetMembers || 1,
           }}
           fields={[
-            {
-              name: "role",
-              label: "Role",
-              type: "readonly",
-            },
             ...(activeCommittee.selectedRole === "EXECUTIVE"
               ? [
                   {
