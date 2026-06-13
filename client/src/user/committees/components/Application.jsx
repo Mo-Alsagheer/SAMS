@@ -114,8 +114,25 @@ const Application = () => {
         selectedCommitteeData ||
         committees.find((c) => c.name === values.committeeName);
 
+      const committeeIdVal = finalCommittee?._id || finalCommittee?.id || id;
+      if (!committeeIdVal) {
+        toast.error("Invalid committee selection.");
+        return;
+      }
+
+      // Fetch status to get the active process ID
+      const statusRes = await getCommitteeRecruitmentStatus(committeeIdVal);
+      const openProcess = statusRes?.processes?.find(
+        (p) => p.status === "OPEN" && p.role === "MEMBER"
+      ) || statusRes?.processes?.find((p) => p.status === "OPEN");
+
+      if (!openProcess) {
+        toast.error("No active recruitment process found for this committee.");
+        return;
+      }
+
       const apiData = {
-        processId: finalCommittee?._id || finalCommittee?.id || id || "1",
+        processId: openProcess.id,
         name: values.fullName,
         email: values.email,
         phone: values.phone,
