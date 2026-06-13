@@ -53,16 +53,16 @@ export class RecruitmentService {
 
     if (process) {
       process.status = RecruitmentStatus.OPEN;
-      process.openedAt = new Date();
-      process.closedAt = null;
+      process.openedAt = dto.openedAt ? new Date(dto.openedAt) : new Date();
+      process.closedAt = dto.closedAt ? new Date(dto.closedAt) : null;
       process.targetMembers = dto.targetMembers;
     } else {
       process = this.recruitmentRepository.create({
         committeeId,
         createdBy: executiveId,
         status: RecruitmentStatus.OPEN,
-        openedAt: new Date(),
-        closedAt: null,
+        openedAt: dto.openedAt ? new Date(dto.openedAt) : new Date(),
+        closedAt: dto.closedAt ? new Date(dto.closedAt) : null,
         targetMembers: dto.targetMembers,
         role: dto.role,
       });
@@ -84,16 +84,16 @@ export class RecruitmentService {
 
     if (process) {
       process.status = RecruitmentStatus.OPEN;
-      process.openedAt = new Date();
-      process.closedAt = null;
+      process.openedAt = dto.openedAt ? new Date(dto.openedAt) : new Date();
+      process.closedAt = dto.closedAt ? new Date(dto.closedAt) : null;
       process.targetMembers = dto.targetMembers;
     } else {
       process = this.recruitmentRepository.create({
         committeeId: null,
         createdBy: executiveId,
         status: RecruitmentStatus.OPEN,
-        openedAt: new Date(),
-        closedAt: null,
+        openedAt: dto.openedAt ? new Date(dto.openedAt) : new Date(),
+        closedAt: dto.closedAt ? new Date(dto.closedAt) : null,
         targetMembers: dto.targetMembers,
         role: dto.role,
       });
