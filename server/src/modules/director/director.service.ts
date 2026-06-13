@@ -148,7 +148,9 @@ export class DirectorService {
     application.status = ApplicationStatus.INTERVIEW_SCHEDULED;
     await this.applicationRepository.save(application);
 
-    const formattedDate = payload.date ? new Date(payload.date).toLocaleString() : 'N/A';
+    const formattedDate = payload.date
+      ? new Date(payload.date).toLocaleString()
+      : 'N/A';
     const additionalInfo = `<strong>Date/Time:</strong> ${formattedDate}<br/><strong>Meeting Link:</strong> <a href="${payload.link || '#'}">${payload.link || 'TBD'}</a>`;
 
     await this.emailService.sendApplicationStatusEmail({
@@ -223,7 +225,7 @@ export class DirectorService {
 
     const loginUrl =
       this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:5173';
-    
+
     await this.emailService.sendApplicationStatusEmail({
       to: application.email,
       name: application.name,

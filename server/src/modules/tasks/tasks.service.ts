@@ -109,7 +109,9 @@ export class TasksService {
   async deleteTask(taskId: number, directorId: number): Promise<void> {
     const task = await this.findById(taskId);
     if (task.creatorId !== directorId) {
-      throw new ForbiddenException('Only the director who created the task can delete it');
+      throw new ForbiddenException(
+        'Only the director who created the task can delete it',
+      );
     }
 
     await this.taskRepo.remove(task);
@@ -228,11 +230,13 @@ export class TasksService {
   /**
    * Retrieves and categorizes tasks for a specific member based on their committee assignments.
    * Tasks are mapped with additional computed properties like `status` and `score`.
-   * 
+   *
    * @param userId The ID of the member whose tasks are being retrieved.
    * @returns An object with two arrays: `previousTasks` (submitted or past due) and `currentTasks` (pending).
    */
-  async getMemberTasks(userId: number): Promise<{ previousTasks: any[]; currentTasks: any[] }> {
+  async getMemberTasks(
+    userId: number,
+  ): Promise<{ previousTasks: any[]; currentTasks: any[] }> {
     const user = await this.usersService.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -243,7 +247,9 @@ export class TasksService {
     }
 
     // Find all sessions for the user's committee
-    const sessions = await this.sessionsService.findByCommitteeId(user.committeeId);
+    const sessions = await this.sessionsService.findByCommitteeId(
+      user.committeeId,
+    );
     const sessionIds = sessions.map((s) => s.id);
 
     if (sessionIds.length === 0) {

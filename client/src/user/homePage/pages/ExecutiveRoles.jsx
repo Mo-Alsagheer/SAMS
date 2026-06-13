@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { getGlobalRecruitment } from "@/features/recruitment/recruitment";
+import { getGlobalRecruitments } from "@/features/recruitment/recruitment";
 import { toast } from "sonner";
 import { Calendar, ShieldCheck, ChevronDown, ChevronUp, CheckCircle2, Award } from "lucide-react";
 
@@ -76,7 +76,7 @@ function ExecutiveRoles() {
     const fetchGlobalStatus = async () => {
       try {
         setLoading(true);
-        const response = await getGlobalRecruitment();
+        const response = await getGlobalRecruitments();
         const globalRecruitment = Array.isArray(response) ? response[0] : null;
         
         const apiStatus = globalRecruitment?.status?.toLowerCase() || "closed";

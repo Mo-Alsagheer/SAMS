@@ -13,7 +13,14 @@ import { AttendaceModule } from '../attendace/attendace.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Committee, Attendace, Session, Task, TaskSubmission]),
+    TypeOrmModule.forFeature([
+      User,
+      Committee,
+      Attendace,
+      Session,
+      Task,
+      TaskSubmission,
+    ]),
     AuditLogModule,
     AttendaceModule,
   ],

@@ -137,9 +137,10 @@ export class AttendaceService {
       };
     });
 
-    const attendanceRate = totalMembers > 0
-      ? Math.round(((presentCount + lateCount) / totalMembers) * 100)
-      : 0;
+    const attendanceRate =
+      totalMembers > 0
+        ? Math.round(((presentCount + lateCount) / totalMembers) * 100)
+        : 0;
 
     return {
       sessionId,
@@ -158,7 +159,11 @@ export class AttendaceService {
 
   async markAttendance(
     sessionId: number,
-    membersData: { userId: number; score: number; attended: AttendanceStatus }[],
+    membersData: {
+      userId: number;
+      score: number;
+      attended: AttendanceStatus;
+    }[],
     directorId: number,
   ): Promise<{
     sessionId: number;
