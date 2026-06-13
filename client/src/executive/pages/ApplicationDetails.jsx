@@ -22,22 +22,35 @@ import { applicationSessionCache } from "@/utils/applicationSessionCache";
 const statusConfig = {
   SUBMITTED: { label: "Submitted", class: "bg-gray-100 text-gray-700" },
   AI_REVIEWED: { label: "AI Reviewed", class: "bg-blue-100 text-blue-700" },
-  INTERVIEW_SCHEDULED: { label: "Interview Scheduled", class: "bg-purple-100 text-purple-700" },
-  PHASE1_ACCEPTED: { label: "Phase 1 Accepted", class: "bg-green-100 text-green-700" },
-  PHASE1_REJECTED: { label: "Phase 1 Rejected", class: "bg-red-100 text-red-700" },
+  INTERVIEW_SCHEDULED: {
+    label: "Interview Scheduled",
+    class: "bg-purple-100 text-purple-700",
+  },
+  PHASE1_ACCEPTED: {
+    label: "Phase 1 Accepted",
+    class: "bg-green-100 text-green-700",
+  },
+  PHASE1_REJECTED: {
+    label: "Phase 1 Rejected",
+    class: "bg-red-100 text-red-700",
+  },
 };
 
+/* normalize AI score */
 /* normalize AI score */
 const normalizeApp = (app) => ({
   ...app,
   aiScore: app.aiScore?.error
     ? { error: app.aiScore.error }
     : {
-        final_score: app.aiScore?.final_score ?? null,
-        per_criterion_scores: app.aiScore?.per_criterion_scores ?? {},
-        justification: app.aiScore?.justification ?? {},
+        overall: app.aiScore?.overall ?? null,
+        scores: app.aiScore?.scores ?? {},
+        verdict: app.aiScore?.verdict ?? "",
+        profile_summary: app.aiScore?.profile_summary ?? "",
+        key_strengths: app.aiScore?.key_strengths ?? [],
+        gaps: app.aiScore?.gaps ?? [],
         recommendation: app.aiScore?.recommendation ?? "-",
-        overall_summary: app.aiScore?.overall_summary ?? "",
+        backend: app.aiScore?.backend ?? "",
       },
 });
 
@@ -90,7 +103,6 @@ const ApplicationDetails = () => {
 
   return (
     <div className="space-y-5">
-
       {/* header */}
       <div className="flex justify-between items-center">
         <Link to="/executive/applications">
@@ -109,11 +121,8 @@ const ApplicationDetails = () => {
       <Card>
         <CardContent className="pt-5">
           <div className="flex gap-5">
-
             <Avatar className="h-16 w-16">
-              <AvatarFallback>
-                {getInitials(app.name)}
-              </AvatarFallback>
+              <AvatarFallback>{getInitials(app.name)}</AvatarFallback>
             </Avatar>
 
             <div className="flex-1 space-y-2">
@@ -135,7 +144,7 @@ const ApplicationDetails = () => {
               </div>
 
               <p className="text-sm text-muted-foreground">
-                {ai?.overall_summary || "No summary available"}
+                {ai?.profile_summary || "No summary available"}
               </p>
 
               <div className="flex gap-2 mt-2">
@@ -157,11 +166,8 @@ const ApplicationDetails = () => {
 
             <div className="text-center">
               <p className="text-sm text-muted-foreground">AI Score</p>
-              <p className="text-3xl font-bold">
-                {ai?.final_score ?? "-"}
-              </p>
+              <p className="text-3xl font-bold">{ai?.overall ?? "-"}</p>
             </div>
-
           </div>
         </CardContent>
       </Card>
@@ -173,57 +179,77 @@ const ApplicationDetails = () => {
         </CardHeader>
 
         <CardContent>
-
-          {/* error state */}
           {ai?.error ? (
             <p className="text-red-500 text-sm">{ai.error}</p>
           ) : (
             <>
-              {/* summary */}
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm text-muted-foreground">Final Score</p>
-                  <p className="text-2xl font-bold">{ai.final_score}</p>
+
+                  <p className="text-2xl font-bold">{ai.overall}</p>
                 </div>
 
-                <Badge>{ai.recommendation}</Badge>
+                <Badge>{ai.verdict?.replaceAll("_", " ")}</Badge>
               </div>
 
-              {/* breakdown */}
               <div className="mt-4 space-y-3">
-                {Object.entries(ai.per_criterion_scores).map(
-                  ([key, value]) => {
-                    const score =
-                      typeof value === "number"
-                        ? value
-                        : value?.sub_score ?? 0;
+                {Object.entries(ai.scores || {}).map(([key, value]) => (
+                  <div key={key}>
+                    <div className="flex justify-between text-sm">
+                      <span className="capitalize">
+                        {key.replace(/_/g, " ")}
+                      </span>
 
-                    const justification =
-                      typeof value === "object"
-                        ? value?.justification
-                        : ai.justification?.[key];
+                      <span>{value}</span>
+                    </div>
 
-                    return (
-                      <div key={key}>
-                        <div className="flex justify-between text-sm">
-                          <span className="capitalize">
-                            {key.replace(/_/g, " ")}
-                          </span>
-                          <span>{score}</span>
-                        </div>
-
-                        <Progress value={score} className="h-2" />
-
-                        {justification && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {justification}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  }
-                )}
+                    <Progress value={value} className="h-2" />
+                  </div>
+                ))}
               </div>
+
+              <div className="mt-6">
+                <h4 className="font-semibold mb-2">Profile Summary</h4>
+
+                <p className="text-sm text-muted-foreground">
+                  {ai.profile_summary}
+                </p>
+              </div>
+
+              {!!ai.key_strengths?.length && (
+                <div className="mt-6">
+                  <h4 className="font-semibold mb-2">Key Strengths</h4>
+
+                  <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+                    {ai.key_strengths.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {!!ai.gaps?.length && (
+                <div className="mt-6">
+                  <h4 className="font-semibold mb-2">Areas for Improvement</h4>
+
+                  <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+                    {ai.gaps.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className="mt-6">
+                <h4 className="font-semibold mb-2">Recommendation</h4>
+
+                <p className="text-sm text-muted-foreground">
+                  {ai.recommendation}
+                </p>
+              </div>
+
+              
             </>
           )}
         </CardContent>

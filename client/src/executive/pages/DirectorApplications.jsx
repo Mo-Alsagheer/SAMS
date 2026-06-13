@@ -133,7 +133,7 @@ function DirectorApplications() {
         render: (r) => (
           <div>
             <p className="text-xs text-muted-foreground">
-              {r.aiScore?.final_score ?? (r.aiScore?.error ? "Error" : "-")}
+              {r.aiScore?.overall ?? (r.aiScore?.error ? "Error" : "-")}
             </p>
           </div>
         ),
