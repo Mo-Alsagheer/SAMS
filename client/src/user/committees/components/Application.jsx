@@ -11,7 +11,7 @@ import { PopupForm } from "@/components/shared/PopupForm";
 
 import { getCommittees } from "@/features/committee/committee";
 import { submitApplication } from "@/features/applications/applications";
-import { getCommitteeRecruitmentStatus } from "@/features/recruitment/recruitment";
+import { getCommitteeRecruitmentStatus, getGlobalRecruitments } from "@/features/recruitment/recruitment";
 
 const formSchema = z.object({
   committeeName: z.string().min(1, "Please select a committee"),
@@ -38,14 +38,20 @@ const Application = () => {
     cvLink: "",
   });
 
+  const [globalProcesses, setGlobalProcesses] = useState([]);
+
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await getCommittees();
-        setCommittees(data);
+        const [committeesData, globalData] = await Promise.all([
+          getCommittees(),
+          getGlobalRecruitments(),
+        ]);
+        setCommittees(committeesData);
+        setGlobalProcesses(globalData.filter((p) => p.status === "OPEN"));
 
-        if (id && data.length > 0) {
-          const selected = data.find(
+        if (id && committeesData.length > 0) {
+          const selected = committeesData.find(
             (com) => String(com._id || com.id) === String(id)
           );
           if (selected) {
@@ -57,8 +63,8 @@ const Application = () => {
           }
         }
       } catch (error) {
-        console.error("Error loading committees:", error);
-        toast.error("Failed to load committees list.");
+        console.error("Error loading application data:", error);
+        toast.error("Failed to load committees and roles.");
       }
     };
     loadData();
@@ -67,13 +73,17 @@ const Application = () => {
   const fields = [
     {
       name: "committeeName",
-      label: "Committee",
+      label: "Committee / Position",
       type: "select",
       options: [
-        { value: "", label: "Select Committee" },
+        { value: "", label: "Select Position" },
         ...committees.map((com) => ({
           value: com.name,
           label: com.name,
+        })),
+        ...globalProcesses.map((p) => ({
+          value: p.title,
+          label: p.title,
         })),
       ],
     },
@@ -111,6 +121,29 @@ const Application = () => {
 
   const onSubmit = async (values) => {
     try {
+      const globalProc = globalProcesses.find(
+        (p) => p.title === values.committeeName
+      );
+
+      if (globalProc) {
+        const apiData = {
+          processId: globalProc.id,
+          name: values.fullName,
+          email: values.email,
+          phone: values.phone,
+          linkedinLink: values.linkedinLink,
+          cvLink: values.cvLink,
+        };
+
+        await submitApplication(apiData);
+        setIsSubmitted(true);
+        toast.success("Application submitted successfully!");
+        setTimeout(() => {
+          navigate("/");
+        }, 3000);
+        return;
+      }
+
       const finalCommittee =
         selectedCommitteeData ||
         committees.find((c) => c.name === values.committeeName);
@@ -123,9 +156,10 @@ const Application = () => {
 
       // Fetch status to get the active process ID
       const statusRes = await getCommitteeRecruitmentStatus(committeeIdVal);
-      const openProcess = statusRes?.processes?.find(
-        (p) => p.status === "OPEN" && p.role === "MEMBER"
-      ) || statusRes?.processes?.find((p) => p.status === "OPEN");
+      const openProcess =
+        statusRes?.processes?.find(
+          (p) => p.status === "OPEN" && p.role === "MEMBER"
+        ) || statusRes?.processes?.find((p) => p.status === "OPEN");
 
       if (!openProcess) {
         toast.error("No active recruitment process found for this committee.");
