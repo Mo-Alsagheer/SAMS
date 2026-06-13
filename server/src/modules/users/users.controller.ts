@@ -119,6 +119,12 @@ export class UsersController {
     return { message: 'Password changed successfully' };
   }
 
+  /**
+   * Update an existing user's information.
+   * This endpoint can be used by authorized users to manually assign or update a user's role 
+   * (e.g., setting role to DIRECTOR) and link them to a specific committee (using committeeId),
+   * along with updating other personal information.
+   */
   @Patch(':id')
   @ApiOperation({ summary: 'Update user information except password' })
   @ApiResponse({ status: 200, description: 'User updated successfully' })

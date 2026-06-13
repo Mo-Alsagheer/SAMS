@@ -13,6 +13,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
@@ -124,6 +125,11 @@ export class CommitteesController {
     return this.committeesService.create(dto, user.id, imageUrl);
   }
 
+  /**
+   * Update a committee's details.
+   * Executives can use this endpoint to assign or update the directors for the committee
+   * by providing an array of user IDs in the `directorIDs` field.
+   */
   @Patch(':id')
   @Roles(Role.EXECUTIVE, Role.DIRECTOR)
   @UseInterceptors(
@@ -204,6 +210,33 @@ export class CommitteesController {
       ? await this.cloudinaryService.uploadImage(image)
       : undefined;
     return this.committeesService.update(id, dto, imageUrl);
+  }
+
+  @Post(':id/assign-director')
+  @Roles(Role.EXECUTIVE)
+  @ApiOperation({ summary: 'Assign a director to a committee (Executive)' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID of the committee',
+    example: 1,
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['userId'],
+      properties: {
+        userId: { type: 'number', description: 'ID of the user to become director' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Director assigned successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden. Requires Executive role.' })
+  @ApiResponse({ status: 404, description: 'Committee or User not found.' })
+  async assignDirector(
+    @Param('id', ParseIntIdPipe) id: number,
+    @Body('userId', ParseIntPipe) userId: number,
+  ) {
+    return this.committeesService.assignDirector(id, userId);
   }
 
   @Delete(':id')

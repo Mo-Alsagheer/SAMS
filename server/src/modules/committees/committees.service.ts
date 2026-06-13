@@ -14,6 +14,8 @@ import {
   RecruitmentProcess,
   RecruitmentStatus,
 } from '../recruitment/entities/recruitment.entity';
+import { User } from '../users/entities/user.entity';
+import { Role } from '../../common/constants/role.enum';
 
 @Injectable()
 export class CommitteesService {
@@ -22,6 +24,8 @@ export class CommitteesService {
     private readonly committeesRepo: Repository<Committee>,
     @InjectRepository(RecruitmentProcess)
     private readonly recruitmentRepo: Repository<RecruitmentProcess>,
+    @InjectRepository(User)
+    private readonly usersRepo: Repository<User>,
     private readonly audit: AuditLogService,
   ) {}
 
@@ -81,6 +85,44 @@ export class CommitteesService {
       ...(imageUrl !== undefined && { imageUrl }),
     });
     return this.committeesRepo.save(committee);
+  }
+
+  async assignDirector(committeeId: number, userId: number): Promise<Committee> {
+    const committee = await this.getById(committeeId);
+    const user = await this.usersRepo.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // If user is currently assigned to another committee, remove them from it
+    if (user.committeeId && user.committeeId !== committeeId) {
+      const oldCommittee = await this.committeesRepo.findOne({ where: { id: user.committeeId } });
+      if (oldCommittee && oldCommittee.directorIDs) {
+        oldCommittee.directorIDs = oldCommittee.directorIDs.filter(id => id !== userId);
+        await this.committeesRepo.save(oldCommittee);
+      }
+    }
+
+    // Update user role and committee
+    user.role = Role.DIRECTOR;
+    user.committeeId = committeeId;
+    await this.usersRepo.save(user);
+
+    // Add to new committee's directorIDs if not already there
+    if (!committee.directorIDs) {
+      committee.directorIDs = [];
+    }
+    if (!committee.directorIDs.includes(userId)) {
+      committee.directorIDs.push(userId);
+      await this.committeesRepo.save(committee);
+    }
+
+    this.audit
+      .log({ action: 'CommitteesService.assignDirector', body: { committeeId, userId } })
+      .catch(() => undefined);
+
+    return committee;
   }
 
   async updateDescription(id: number, description: string): Promise<Committee> {

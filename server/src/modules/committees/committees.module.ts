@@ -4,12 +4,13 @@ import { CommitteesController } from './committees.controller';
 import { CommitteesService } from './committees.service';
 import { Committee } from './entities/committee.entity';
 import { RecruitmentProcess } from '../recruitment/entities/recruitment.entity';
+import { User } from '../users/entities/user.entity';
 import { CloudinaryModule } from '../../integrations/cloudinary/cloudinary.module';
 import { AuditLogModule } from '../audit-log/audit-log.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Committee, RecruitmentProcess]),
+    TypeOrmModule.forFeature([Committee, RecruitmentProcess, User]),
     CloudinaryModule,
     AuditLogModule,
   ],
