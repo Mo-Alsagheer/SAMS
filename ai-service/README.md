@@ -1,67 +1,106 @@
 # SAMS AI Service
 
-This directory contains the Python-based AI microservice for the SAMS project. It is built using **FastAPI** and provides intelligent endpoints for evaluating applicant CVs and conducting automated interviews using LLMs (e.g., Google Gemini).
+A Python-based AI microservice for the SAMS platform. Built with **FastAPI** and the **Google Gemini SDK**, it handles intelligent resume screening, structured CV scoring, and interactive mock interviews with conversational session persistence.
 
-## Features
+---
 
-- **CV Evaluation**: Automatically parses and extracts text from PDFs, DOCX files, and Google Drive links. It then evaluates the CV against specific committee requirements and outputs a score, justification, and recommendation.
-- **Batch CV Evaluation**: Supports evaluating multiple CVs in a single request with built-in rate limiting (e.g., waiting between requests to respect free-tier limits).
-- **Interactive Interview Agent**: A chatbot endpoint that conducts technical and behavioral interviews for applicants based on the specific club/committee they are applying for.
+## 🏗️ Architecture & Core Components
 
-## Architecture
+This service is designed with a modular, domain-driven structure to clean-room AI operations from the NestJS main application:
 
-The service follows a modular domain-driven structure:
+* **FastAPI Routers**: Exposes lightweight endpoints with Pydantic body validation schemas.
+* **Document Parsers**: Dynamic text extraction supporting PDF and Word (`.docx`) file processing from raw byte buffers.
+* **Rubrics-Driven Prompting**: Automatically retrieves target committee specifications (skills, tech-stack requirements, and negative filters) from a central `committee_requirements.json` configuration file, passing it into the evaluation prompt.
+* **Rate-Limiting Queues**: Handles batch evaluations with intelligent sleep triggers to avoid rate limits (e.g. HTTP 429) on free-tier Gemini API keys.
+* **Gemini LLM Provider**: Interfaces directly with Google's Gemini models using structured JSON schema response formats.
 
-- `app/api/routes/`: Contains the FastAPI router definitions (`cv.py` and `interview.py`).
-- `app/core/`: Contains core configurations, constants, and the essential `committee_requirements.json` which dictates the scoring rubrics, expected skills, and disqualifiers for each committee.
-- `app/domains/`: Houses the core business logic.
-  - `cv/`: Logic for parsing CVs (`cv_parser.py`), handling the LLM prompt (`cv_prompt.py`), schemas, and the CV service logic (`cv_service.py`).
-  - `interview/`: Logic for maintaining interview sessions (`interview_agent.py`), prompts, and schemas.
-- `app/providers/`: Contains integrations with external services, primarily the LLM provider (`llm.py`).
+---
 
-## Endpoints
+## ⚙️ Core Modules & Business Domains
 
-### 1. CV Endpoints
-- `POST /evaluate`: Evaluates a single CV. Accepts base64 encoded data or a Google Drive link, along with the target committee name.
-- `POST /evaluate/batch`: Evaluates a list of CVs sequentially.
+### 1. CV Parser & Evaluator (`/app/domains/cv`)
+* **File Parser**: Parses document buffers (`pdf`, `docx`, and Base64 encoded files) into text.
+* **Structured Scorer**: Prompt engineering structures Gemini responses into a strict JSON schema containing:
+  * `totalScore` (out of 10)
+  * `technicalScore`
+  * `analyticalScore`
+  * `experienceScore`
+  * `justification`
+  * `isDisqualified` flag based on rubrics (e.g., lack of prerequisite languages).
 
-### 2. Interview Endpoints
-- `POST /interview/agent`: Interactive endpoint for conducting an interview. Use `"action": "start"` to initialize the session for a specific club, and then send subsequent messages to continue the conversation.
+### 2. Interactive Mock Interview Agent (`/app/domains/interview`)
+* **Session Initiator**: Sets up conversational system contexts representing technical/behavioral interviewers for specific branches.
+* **Interactive Agent**: Processes conversational messages and outputs appropriate technical follow-up questions or final candidate evaluations.
 
-### 3. Utility
-- `GET /health`: Health check endpoint.
+---
 
-## Prerequisites
+## 📂 Project Directory Structure
 
-- Python 3.9+ installed
-- API Keys for Google Gemini (configured via environment variables, see `.env` if applicable)
+```text
+app/
+├── api/
+│   └── routes/
+│       ├── cv.py              # Single and batch CV evaluation endpoints
+│       └── interview.py       # Conversational chat-agent endpoints
+├── core/
+│   ├── committee_requirements.json # Base criteria, tech stack, and filters per committee
+│   └── config.py          # Environment settings loader
+├── domains/
+│   ├── cv/
+│   │   ├── cv_parser.py   # PDF and Docx binary stream readers
+│   │   ├── cv_prompt.py   # Evaluation prompts generators
+│   │   ├── cv_schema.py   # Pydantic schemas for JSON verification
+│   │   └── cv_service.py  # Single/batch runner logic with rate-limiting
+│   └── interview/
+│       ├── interview_agent.py  # Chat session memory compiler
+│       ├── interview_prompt.py # Interview system role prompts
+│       └── interview_schema.py # Chat query and response validation
+├── providers/
+│   └── llm.py             # Gemini API client & configuration
+└── main.py                # FastAPI bootstrapper, CORS setups, and health checks
+```
 
-## Installation
+---
 
-1. Navigate to the `ai-service` directory.
-2. (Optional but recommended) Create a virtual environment:
+## 🛠️ Installation & Setup
+
+1. **Create Virtual Environment**:
    ```bash
+   # Navigate to the ai-service directory
+   cd ai-service
+
+   # Create virtual environment
    python -m venv venv
-   source venv/bin/activate  # On Windows use: venv\Scripts\activate
+
+   # Activate virtual environment
+   # On Windows:
+   venv\Scripts\activate
+   # On macOS/Linux:
+   source venv/bin/activate
    ```
-3. Install the dependencies:
+
+2. **Install Dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
-   *Note: Ensure `pypdf` and `python-docx` are installed for CV parsing.*
 
-## How to Run
+3. **Configure Environment Variables**:
+   Create a `.env` file inside the `ai-service` directory:
+   ```env
+   GEMINI_API_KEY=your_gemini_api_key
+   PORT=8000
+   ```
 
-You can run the development server using Python directly:
+4. **Run Development Server**:
+   ```bash
+   python -m app.main
+   ```
 
-```bash
-python -m app.main
-```
+---
 
-Alternatively, you can run it via Uvicorn:
+## 📖 API Documentation
 
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-The service will be accessible at `http://localhost:8000`. You can also view the interactive API documentation (Swagger UI) at `http://localhost:8000/docs`.
+Once running, access the interactive OpenAPI/Swagger documentations at:
+* **Swagger UI**: `http://localhost:8000/docs`
+* **Redoc**: `http://localhost:8000/redoc`
+* **Health Check**: `GET http://localhost:8000/health`
