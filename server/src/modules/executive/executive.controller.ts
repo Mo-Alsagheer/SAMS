@@ -7,6 +7,7 @@ import {
   Query,
   UseGuards,
   ParseIntPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
 import {
@@ -77,10 +78,22 @@ export class ExecutiveController {
     description: 'List of applications for the specified committee or role.',
   })
   getApplications(
-    @Query('committeeId', new ParseIntPipe({ optional: true }))
-    committeeId?: number,
+    @Query('committeeId') committeeIdStr?: string,
     @Query('status') status?: string,
   ) {
+    let committeeId: number | undefined = undefined;
+    if (
+      committeeIdStr !== undefined &&
+      committeeIdStr !== null &&
+      committeeIdStr !== ''
+    ) {
+      committeeId = Number.parseInt(committeeIdStr, 10);
+      if (Number.isNaN(committeeId)) {
+        throw new BadRequestException(
+          'Validation failed (numeric string is expected)',
+        );
+      }
+    }
     return this.executiveService.getApplications(committeeId, status);
   }
 
