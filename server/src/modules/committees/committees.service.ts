@@ -87,7 +87,10 @@ export class CommitteesService {
     return this.committeesRepo.save(committee);
   }
 
-  async assignDirector(committeeId: number, userId: number): Promise<Committee> {
+  async assignDirector(
+    committeeId: number,
+    userId: number,
+  ): Promise<Committee> {
     const committee = await this.getById(committeeId);
     const user = await this.usersRepo.findOne({ where: { id: userId } });
 
@@ -97,9 +100,13 @@ export class CommitteesService {
 
     // If user is currently assigned to another committee, remove them from it
     if (user.committeeId && user.committeeId !== committeeId) {
-      const oldCommittee = await this.committeesRepo.findOne({ where: { id: user.committeeId } });
+      const oldCommittee = await this.committeesRepo.findOne({
+        where: { id: user.committeeId },
+      });
       if (oldCommittee && oldCommittee.directorIDs) {
-        oldCommittee.directorIDs = oldCommittee.directorIDs.filter(id => id !== userId);
+        oldCommittee.directorIDs = oldCommittee.directorIDs.filter(
+          (id) => id !== userId,
+        );
         await this.committeesRepo.save(oldCommittee);
       }
     }
@@ -119,7 +126,10 @@ export class CommitteesService {
     }
 
     this.audit
-      .log({ action: 'CommitteesService.assignDirector', body: { committeeId, userId } })
+      .log({
+        action: 'CommitteesService.assignDirector',
+        body: { committeeId, userId },
+      })
       .catch(() => undefined);
 
     return committee;

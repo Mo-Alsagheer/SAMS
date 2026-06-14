@@ -225,12 +225,18 @@ export class CommitteesController {
       type: 'object',
       required: ['userId'],
       properties: {
-        userId: { type: 'number', description: 'ID of the user to become director' },
+        userId: {
+          type: 'number',
+          description: 'ID of the user to become director',
+        },
       },
     },
   })
   @ApiResponse({ status: 200, description: 'Director assigned successfully' })
-  @ApiResponse({ status: 403, description: 'Forbidden. Requires Executive role.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden. Requires Executive role.',
+  })
   @ApiResponse({ status: 404, description: 'Committee or User not found.' })
   async assignDirector(
     @Param('id', ParseIntIdPipe) id: number,

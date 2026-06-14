@@ -167,7 +167,7 @@ export class ExecutiveController {
   /**
    * Accept an applicant at Phase 2.
    * This action finalizes the recruitment process, creates a new user account
-   * for the applicant, and automatically assigns them the appropriate role 
+   * for the applicant, and automatically assigns them the appropriate role
    * (e.g., DIRECTOR) based on their application details.
    */
   @Post('applications/:id/phase2/accept')

@@ -32,6 +32,11 @@ import { MaterialsModule } from './modules/materials/materials.module';
         url: config.get<string>('DATABASE_URL'),
         autoLoadEntities: true,
         synchronize: true, // disable in production
+        extra: {
+          max: 20,
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 10000,
+        },
       }),
     }),
     AuthModule,

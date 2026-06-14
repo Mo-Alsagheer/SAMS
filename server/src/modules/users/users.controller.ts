@@ -121,7 +121,7 @@ export class UsersController {
 
   /**
    * Update an existing user's information.
-   * This endpoint can be used by authorized users to manually assign or update a user's role 
+   * This endpoint can be used by authorized users to manually assign or update a user's role
    * (e.g., setting role to DIRECTOR) and link them to a specific committee (using committeeId),
    * along with updating other personal information.
    */
